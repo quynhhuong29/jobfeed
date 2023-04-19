@@ -323,10 +323,7 @@ const SignUp = ({}: ISignUp) => {
           <div className="mt-4 text-center text-white">
             <p className="mb-0">
               Already a member?{" "}
-              <Link
-                className="fw-medium text-white text-decoration-underline"
-                href="/login"
-              >
+              <Link className="fw-medium text-white underline" href="/login">
                 Sign In
               </Link>
             </p>

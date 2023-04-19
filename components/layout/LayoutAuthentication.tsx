@@ -23,7 +23,7 @@ const LayoutAuthentication = ({ children, image }: ILayoutAuthentication) => {
             <img src={image} alt="sign-in" />
           </div>
         </div>
-        <div className="bg-green-400 p-12 h-auto flex items-center justify-center rounded-r-md">
+        <div className="bg-green-400 lg:min-w-[400px] p-12 h-auto flex items-center justify-center rounded-r-md">
           {children}
         </div>
       </div>

@@ -144,7 +144,7 @@ const Login = ({}: ILogin) => {
             )}
           </div>
           <div className="mb-6 text-white flex">
-            <Link href="" className="text-sm ml-auto">
+            <Link href="/resetpassword" className="text-sm ml-auto">
               Forgot Password?
             </Link>
           </div>
@@ -161,7 +161,7 @@ const Login = ({}: ILogin) => {
           <p className="mb-0">
             Don&lsquo;t have an account?{" "}
             <Link
-              className="fw-medium text-white text-decoration-underline"
+              className="fw-medium text-white underline"
               href="/signup"
             >
               Sign Up
