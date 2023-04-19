@@ -1,14 +1,19 @@
 export const isLocalDevelopment: boolean =
-  window.location.hostname === "localhost";
-export const isProduction = window.location.hostname === "app.jobvia.app";
+  typeof window !== "undefined" && window.location.hostname === "localhost";
+export const isProduction =
+  typeof window !== "undefined" &&
+  window.location.hostname === "app.jobvia.app";
 
 function getApiRootUrl(): string | undefined {
+  if (typeof window === "undefined") {
+    return;
+  }
   const { port, origin } = window.location;
 
   if (isProduction) {
     return "https://app.jobvia.app";
   }
-  if (isLocalDevelopment && port === "3000") {
+  if ((isLocalDevelopment && port === "3000") || port === "3005") {
     return "http://localhost:5000/api";
   }
 

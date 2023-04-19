@@ -7,6 +7,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { User } from "@/types/Authentication";
+import { login } from "@/redux/apis/authAPI";
+import { setLocalStorageContent } from "@/utils/localStorage.util";
+import { useRouter } from "next/router";
+import { toast } from "react-toastify";
+
 interface ILogin {}
 
 const schema = yup
@@ -19,6 +24,7 @@ const schema = yup
   })
   .required();
 type FormData = yup.InferType<typeof schema>;
+
 const Login = ({}: ILogin) => {
   const {
     handleSubmit,
@@ -28,11 +34,30 @@ const Login = ({}: ILogin) => {
     mode: "onChange",
     resolver: yupResolver(schema),
   });
-
+  const router = useRouter();
   const [show, setShow] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleClick = () => setShow(!show);
 
-  const handleLogin = (data: User) => console.log(data);
+  const handleLogin = async (data: User) => {
+    setIsLoading(true);
+    try {
+      if (data.email && data.password) {
+        const response = await login(data.email, data.password);
+
+        if (response) {
+          setLocalStorageContent("token", response.access_token);
+          router.push("/");
+        }
+        setIsLoading(false);
+      }
+    } catch (err: any) {
+      setIsLoading(false);
+      if (err.response.data) toast.error("Your email/password is incorrect");
+      else toast.error("Something went wrong. Please try again.");
+    }
+  };
 
   return (
     <LayoutAuthentication image="/assets/images/sign-in.png">
@@ -123,7 +148,12 @@ const Login = ({}: ILogin) => {
               Forgot Password?
             </Link>
           </div>
-          <Button type="submit" w={"100%"} padding={"10px 20px"}>
+          <Button
+            type="submit"
+            w={"100%"}
+            padding={"10px 20px"}
+            isLoading={isLoading}
+          >
             Sign In
           </Button>
         </form>
