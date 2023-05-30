@@ -1,8 +1,25 @@
 import { LayoutAuthentication } from "@/components/layout";
+import { logoutAsync } from "@/redux/reducers/authReducers";
+import { useAppDispatch } from "@/redux/store";
+import { clearLocalStorageContent } from "@/utils/localStorage.util";
 import { Button } from "@chakra-ui/react";
 import Link from "next/link";
+import { useEffect } from "react";
 
 const Signout = () => {
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    async function logout() {
+      try {
+        await dispatch(logoutAsync()).unwrap();
+        clearLocalStorageContent();
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    logout();
+  }, [dispatch]);
+
   return (
     <LayoutAuthentication image="/assets/images/sign-in.png">
       <div className="w-full flex items-center flex-col justify-center">

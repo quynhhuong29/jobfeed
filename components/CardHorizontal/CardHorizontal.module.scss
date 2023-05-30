@@ -1,0 +1,26 @@
+.card_container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-color: transparent;
+  border-style: solid;
+}
+
+.card_container::after {
+  border-radius: 8px 0;
+  border-width: 2.05em;
+  border-left-color: #02af74;
+  border-top-color: #02af74;
+}
+
+.card_container {
+  transition: all 0.5s ease;
+  border: 1px solid #eff0f2;
+}
+
+.card_container:hover {
+  border: 1px solid #02af74;
+  border-radius: 8px;
+  transform: translateY(-8px);
+}

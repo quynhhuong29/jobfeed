@@ -30,4 +30,8 @@ async function refreshToken(): Promise<any> {
   return (await api.post(`/refresh_token`)).data;
 }
 
-export { login, signup, activeEmail, refreshToken };
+async function logout(): Promise<any> {
+  return (await api.post(`/logout`)).data;
+}
+
+export { login, signup, activeEmail, refreshToken, logout };

@@ -7,10 +7,12 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { User } from "@/types/Authentication";
-import { login } from "@/redux/apis/authAPI";
 import { setLocalStorageContent } from "@/utils/localStorage.util";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
+import { useAppDispatch } from "@/redux/store";
+import { loginAsync, selectAuth } from "@/redux/reducers/authReducers";
+import { useSelector } from "react-redux";
 
 interface ILogin {}
 
@@ -34,27 +36,30 @@ const Login = ({}: ILogin) => {
     mode: "onChange",
     resolver: yupResolver(schema),
   });
+  const dispatch = useAppDispatch();
   const router = useRouter();
+
   const [show, setShow] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const authSelector = useSelector(selectAuth);
 
   const handleClick = () => setShow(!show);
 
   const handleLogin = async (data: User) => {
-    setIsLoading(true);
     try {
       if (data.email && data.password) {
-        const response = await login(data.email, data.password);
+        const response = await dispatch(
+          loginAsync({ email: data.email, password: data.password })
+        ).unwrap();
 
-        if (response) {
-          setLocalStorageContent("token", response.access_token);
-          router.push("/");
-        }
-        setIsLoading(false);
+        setLocalStorageContent("access_token", response.access_token);
+        setLocalStorageContent("isAuthenticated", "true");
+        setLocalStorageContent("username", response.user?.username);
+        router.push("/");
       }
     } catch (err: any) {
-      setIsLoading(false);
-      if (err.response.data) toast.error("Your email/password is incorrect");
+      setLocalStorageContent("isAuthenticated", "false");
+      if (err.message) toast.error("Your email/password is incorrect");
       else toast.error("Something went wrong. Please try again.");
     }
   };
@@ -152,7 +157,7 @@ const Login = ({}: ILogin) => {
             type="submit"
             w={"100%"}
             padding={"10px 20px"}
-            isLoading={isLoading}
+            isLoading={authSelector.isLoading}
           >
             Sign In
           </Button>
@@ -160,10 +165,7 @@ const Login = ({}: ILogin) => {
         <div className="mt-6 text-center text-white">
           <p className="mb-0">
             Don&lsquo;t have an account?{" "}
-            <Link
-              className="fw-medium text-white underline"
-              href="/signup"
-            >
+            <Link className="fw-medium text-white underline" href="/signup">
               Sign Up
             </Link>
           </p>
