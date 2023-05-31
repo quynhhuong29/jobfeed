@@ -17,13 +17,19 @@ import {
   selectUserInfo,
 } from "@/redux/reducers/userReducers";
 import { useAppDispatch } from "@/redux/store";
-import { ChevronRightIcon, DownloadIcon, SearchIcon } from "@chakra-ui/icons";
+import {
+  ChevronRightIcon,
+  DownloadIcon,
+  EditIcon,
+  SearchIcon,
+} from "@chakra-ui/icons";
 import {
   Avatar,
   Button,
   Input,
   InputGroup,
   InputLeftElement,
+  InputRightElement,
   Spinner,
   Tab,
   TabIndicator,
@@ -31,6 +37,7 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
+  Textarea,
   WrapItem,
 } from "@chakra-ui/react";
 import Link from "next/link";
@@ -44,18 +51,57 @@ import React, {
 } from "react";
 import { useSelector } from "react-redux";
 import LayoutMain from "../../../components/layout/LayoutMain";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
+import ErrorMessage from "@/components/ErrorMessage";
+import { checkImage, imageUpload } from "@/utils/imageUpload.util";
+
+const schema = yup
+  .object({
+    firstName: yup.string(),
+    lastName: yup.string(),
+    email: yup.string().email("Email is invalid"),
+    currentPassword: yup
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .required("Password is required"),
+    newPassword: yup.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: yup
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .oneOf([yup.ref("newPassword"), ""], "Passwords must match"),
+    introduce: yup.string(),
+    location: yup.string(),
+    languages: yup.string(),
+  })
+  .required();
+type FormData = yup.InferType<typeof schema>;
 
 function Profile() {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const userAuth = JSON.parse(localStorage.getItem("user")!);
 
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState<any>();
   const [open, setOpen] = useState(false);
+  const [avatar, setAvatar] = useState<Blob | MediaSource>();
+  const [errorAvatar, setErrorAvatar] = useState<string>("");
+  const [userData, setUserData] = useState<any>([]);
 
   const searchUserData = useSelector(selectSearchUser);
   const userInfoData = useSelector(selectUserInfo);
 
   const modalRef = useRef<any>(null);
+
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm<FormData>({
+    mode: "onChange",
+    resolver: yupResolver(schema),
+  });
 
   const handleClickOutside = (event: any) => {
     if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -84,6 +130,23 @@ function Profile() {
     router.push(`/jobfeed/profile/${id}`);
   };
 
+  const handleUpdateUserInfo = async () => {
+    const img = await imageUpload([avatar]);
+    console.log("🚀 ~ file: [id].tsx:135 ~ handleUpdateUserInfo ~ img:", img);
+  };
+
+  const handleChangeAvatar = (e: any) => {
+    const file = e.target.files[0];
+
+    const err = checkImage(file);
+    if (err) {
+      setErrorAvatar(err);
+      return;
+    }
+    setErrorAvatar("");
+    setAvatar(file);
+  };
+
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -95,6 +158,12 @@ function Profile() {
     if (!router.query.id) return;
     dispatch(getUserInfoByIdAsync(router.query.id.toString()));
   }, [dispatch, router.query.id]);
+
+  useEffect(() => {
+    if (!userInfoData) return;
+    setUserData(userInfoData.data);
+  }, [userInfoData]);
+
   return (
     <LayoutMain>
       <section className="w-full bg-white shadow-[0_3px_10px_0_rgba(49,64,71,.08)] relative py-5">
@@ -257,7 +326,9 @@ function Profile() {
             <Tabs position="relative" variant="unstyled">
               <TabList>
                 <Tab>Overview</Tab>
-                <Tab>Settings</Tab>
+                {userAuth && userAuth._id === userInfoData?.data?._id && (
+                  <Tab>Settings</Tab>
+                )}
               </TabList>
               <TabIndicator
                 mt="-1.5px"
@@ -465,7 +536,370 @@ function Profile() {
                   </div>
                 </TabPanel>
                 <TabPanel>
-                  <p>two!</p>
+                  <form
+                    className="mt-4"
+                    onSubmit={handleSubmit(handleUpdateUserInfo)}
+                  >
+                    <div className="mt-4">
+                      <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                        My Account
+                      </h5>
+                      <div className="flex justify-center mb-4">
+                        <div>
+                          <div className="relative">
+                            <div className="border border-gray-300 bg-white rounded-full p-1">
+                              <WrapItem>
+                                <Avatar
+                                  size="2xl"
+                                  name={userData?.fullName}
+                                  src={
+                                    avatar
+                                      ? URL.createObjectURL(avatar)
+                                      : userData?.avatar
+                                  }
+                                />
+                              </WrapItem>
+                            </div>
+                            <div className="absolute cursor-pointer bg-white rounded-full right-1 z-10 bottom-4 flex items-center justify-center">
+                              <Button
+                                variant="unstyled"
+                                size="sm"
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                <EditIcon />
+                                <Input
+                                  type="file"
+                                  height="100%"
+                                  width="100%"
+                                  position="absolute"
+                                  top="0"
+                                  left="0"
+                                  opacity="0"
+                                  aria-hidden="true"
+                                  accept="image/*"
+                                  cursor="pointer"
+                                  onChange={handleChangeAvatar}
+                                />
+                              </Button>
+                            </div>
+                          </div>
+                          {errorAvatar && (
+                            <ErrorMessage message={errorAvatar} />
+                          )}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label
+                            htmlFor="firstName"
+                            className="text-[15px] mb-2 inline-block"
+                          >
+                            First Name
+                          </label>
+                          <Input
+                            type="text"
+                            id="firstName"
+                            value={userData?.fullName || ""}
+                            placeholder="Enter your first name"
+                            autoComplete="off"
+                            sx={{
+                              backgroundColor: "#fff",
+                              border: "1px solid #dbdfe2",
+                              color: "#495057",
+                              padding: "10px",
+                              fontSize: "14px",
+                              fontWeight: "500",
+                              "&:focus-visible": {
+                                outline: "0",
+                                border: "1px solid #dbdfe2",
+                                boxShadow: "none",
+                              },
+                            }}
+                            {...register("firstName")}
+                          />
+                          {errors.firstName && (
+                            <ErrorMessage message={errors.firstName.message} />
+                          )}
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="lastName"
+                            className="text-[15px] mb-2 inline-block"
+                          >
+                            Last Name
+                          </label>
+                          <Input
+                            type="text"
+                            id="lastName"
+                            value={userData?.fullName || ""}
+                            placeholder="Enter your last name"
+                            autoComplete="off"
+                            sx={{
+                              backgroundColor: "#fff",
+                              border: "1px solid #dbdfe2",
+                              color: "#495057",
+                              padding: "10px",
+                              fontSize: "14px",
+                              fontWeight: "500",
+                              "&:focus-visible": {
+                                outline: "0",
+                                border: "1px solid #dbdfe2",
+                                boxShadow: "none",
+                              },
+                            }}
+                            {...register("lastName")}
+                          />
+                          {errors.lastName && (
+                            <ErrorMessage message={errors.lastName.message} />
+                          )}
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="email"
+                            className="text-[15px] mb-2 inline-block"
+                          >
+                            Email
+                          </label>
+                          <Input
+                            type="email"
+                            id="email"
+                            value={userData?.email || ""}
+                            placeholder="Enter your email"
+                            autoComplete="off"
+                            sx={{
+                              backgroundColor: "#fff",
+                              border: "1px solid #dbdfe2",
+                              color: "#495057",
+                              padding: "10px",
+                              fontSize: "14px",
+                              fontWeight: "500",
+                              "&:focus-visible": {
+                                outline: "0",
+                                border: "1px solid #dbdfe2",
+                                boxShadow: "none",
+                              },
+                            }}
+                            {...register("email")}
+                          />
+                          {errors.email && (
+                            <ErrorMessage message={errors.email.message} />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                        Profile
+                      </h5>
+                      <div className="mb-4">
+                        <label
+                          htmlFor="introduce"
+                          className="text-[15px] mb-2 inline-block"
+                        >
+                          Introduce Yourself
+                        </label>
+                        <Textarea
+                          id="introduce"
+                          placeholder="Say something..."
+                          autoComplete="off"
+                          value={userData?.introduction || ""}
+                          sx={{
+                            minHeight: "125px",
+                            backgroundColor: "#fff",
+                            border: "1px solid #dbdfe2",
+                            color: "#495057",
+                            padding: "10px",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            "&:focus-visible": {
+                              outline: "0",
+                              border: "1px solid #dbdfe2",
+                              boxShadow: "none",
+                            },
+                          }}
+                          {...register("introduce")}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label
+                            htmlFor="languages"
+                            className="text-[15px] mb-2 inline-block"
+                          >
+                            Languages
+                          </label>
+                          <Input
+                            type="text"
+                            id="languages"
+                            placeholder="Enter your languages"
+                            autoComplete="off"
+                            sx={{
+                              backgroundColor: "#fff",
+                              border: "1px solid #dbdfe2",
+                              color: "#495057",
+                              padding: "10px",
+                              fontSize: "14px",
+                              fontWeight: "500",
+                              "&:focus-visible": {
+                                outline: "0",
+                                border: "1px solid #dbdfe2",
+                                boxShadow: "none",
+                              },
+                            }}
+                            {...register("languages")}
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="location"
+                            className="text-[15px] mb-2 inline-block"
+                          >
+                            Location
+                          </label>
+                          <Input
+                            type="text"
+                            id="location"
+                            placeholder="Enter your location"
+                            autoComplete="off"
+                            value={userData?.location || ""}
+                            sx={{
+                              backgroundColor: "#fff",
+                              border: "1px solid #dbdfe2",
+                              color: "#495057",
+                              padding: "10px",
+                              fontSize: "14px",
+                              fontWeight: "500",
+                              "&:focus-visible": {
+                                outline: "0",
+                                border: "1px solid #dbdfe2",
+                                boxShadow: "none",
+                              },
+                            }}
+                            {...register("location")}
+                          />
+                          {errors.location && (
+                            <ErrorMessage message={errors.location.message} />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                        Change Password
+                      </h5>
+                      <div className="mb-4">
+                        <label
+                          htmlFor="introduce"
+                          className="text-[15px] mb-2 inline-block"
+                        >
+                          Current password
+                        </label>
+
+                        <Input
+                          type="password"
+                          placeholder="Enter password"
+                          sx={{
+                            backgroundColor: "#fff",
+                            border: "1px solid #dbdfe2",
+                            color: "#495057",
+                            padding: "10px",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            "&:focus-visible": {
+                              outline: "0",
+                              border: "1px solid #dbdfe2",
+                              boxShadow: "none",
+                            },
+                          }}
+                          {...register("currentPassword")}
+                        />
+
+                        {errors.currentPassword && (
+                          <ErrorMessage
+                            message={errors.currentPassword.message}
+                          />
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="mb-4">
+                          <label
+                            htmlFor="introduce"
+                            className="text-[15px] mb-2 inline-block"
+                          >
+                            New password
+                          </label>
+
+                          <Input
+                            type="password"
+                            placeholder="Enter password"
+                            sx={{
+                              backgroundColor: "#fff",
+                              border: "1px solid #dbdfe2",
+                              color: "#495057",
+                              padding: "10px",
+                              fontSize: "14px",
+                              fontWeight: "500",
+                              "&:focus-visible": {
+                                outline: "0",
+                                border: "1px solid #dbdfe2",
+                                boxShadow: "none",
+                              },
+                            }}
+                            {...register("newPassword")}
+                          />
+
+                          {errors.newPassword && (
+                            <ErrorMessage
+                              message={errors.newPassword.message}
+                            />
+                          )}
+                        </div>
+                        <div className="mb-4">
+                          <label
+                            htmlFor="introduce"
+                            className="text-[15px] mb-2 inline-block"
+                          >
+                            Confirm password
+                          </label>
+
+                          <Input
+                            type="password"
+                            placeholder="Enter password"
+                            sx={{
+                              backgroundColor: "#fff",
+                              border: "1px solid #dbdfe2",
+                              color: "#495057",
+                              padding: "10px",
+                              fontSize: "14px",
+                              fontWeight: "500",
+                              "&:focus-visible": {
+                                outline: "0",
+                                border: "1px solid #dbdfe2",
+                                boxShadow: "none",
+                              },
+                            }}
+                            {...register("confirmPassword")}
+                          />
+
+                          {errors.confirmPassword && (
+                            <ErrorMessage
+                              message={errors.confirmPassword.message}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-end mt-4">
+                      <Button type="submit" colorScheme={"green"}>
+                        Update
+                      </Button>
+                    </div>
+                  </form>
                 </TabPanel>
               </TabPanels>
             </Tabs>

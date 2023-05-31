@@ -16,15 +16,15 @@ const withAuth = <P extends object>(
 
     useEffect(() => {
       if (!isAuthenticated) {
-        // refreshToken()
-        //   .then((res) => {
-        //     setLocalStorageContent("access_token", res.access_token);
-        //     setLocalStorageContent("isAuthenticated", "true");
-        //     router.push("/");
-        //   })
-        //   .catch((err) => {
-        //     setLocalStorageContent("isAuthenticated", "false");
-        //   });
+        refreshToken()
+          .then((res) => {
+            setLocalStorageContent("access_token", res.access_token);
+            setLocalStorageContent("isAuthenticated", "true");
+            router.push("/");
+          })
+          .catch((err) => {
+            setLocalStorageContent("isAuthenticated", "false");
+          });
         router.push("/login");
       }
     }, [isAuthenticated, router, access_token]);

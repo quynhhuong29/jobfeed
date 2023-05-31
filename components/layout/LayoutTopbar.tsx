@@ -46,7 +46,7 @@ const Link = dynamic(() => import("next/link").then((Link) => Link), {
 const Topbar = () => {
   const isAuthenticated = useSelector(selectIsLoggedIn);
   const username = getItem("username");
-  const [open, setOpen] = useState(false);
+  const userAuth = JSON.parse(localStorage.getItem("user")!);
 
   console.log(isAuthenticated, username);
   return (
@@ -108,6 +108,11 @@ const Topbar = () => {
                 </MenuButton>
 
                 <MenuList>
+                  <MenuItem>
+                    <Link href={`/jobfeed/profile/${userAuth._id}`}>
+                      Profile
+                    </Link>
+                  </MenuItem>
                   <MenuItem>
                     <Link href={"/signout"}>Logout</Link>
                   </MenuItem>

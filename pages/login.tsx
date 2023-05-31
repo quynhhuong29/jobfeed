@@ -55,6 +55,8 @@ const Login = ({}: ILogin) => {
         setLocalStorageContent("access_token", response.access_token);
         setLocalStorageContent("isAuthenticated", "true");
         setLocalStorageContent("username", response.user?.username);
+        setLocalStorageContent("user", JSON.stringify(response.user));
+
         router.push("/");
       }
     } catch (err: any) {

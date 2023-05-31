@@ -1,4 +1,5 @@
 import { LayoutAuthentication } from "@/components/layout";
+import { logout } from "@/redux/apis/authAPI";
 import { logoutAsync } from "@/redux/reducers/authReducers";
 import { useAppDispatch } from "@/redux/store";
 import { clearLocalStorageContent } from "@/utils/localStorage.util";
@@ -9,15 +10,16 @@ import { useEffect } from "react";
 const Signout = () => {
   const dispatch = useAppDispatch();
   useEffect(() => {
-    async function logout() {
+    async function logoutFunction() {
       try {
-        await dispatch(logoutAsync()).unwrap();
+        const response = await logout();
+        console.log("logout");
         clearLocalStorageContent();
       } catch (err) {
         console.log(err);
       }
     }
-    logout();
+    logoutFunction();
   }, [dispatch]);
 
   return (

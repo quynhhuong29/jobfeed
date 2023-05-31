@@ -8,4 +8,8 @@ async function getUserInfoById(id: string): Promise<any> {
   return (await api.get(`/user/${id}`)).data;
 }
 
-export { searchUser, getUserInfoById };
+async function updateInfoUser(userInfo: any): Promise<any> {
+  return (await api.patch(`/user`, userInfo)).data;
+}
+
+export { searchUser, getUserInfoById, updateInfoUser };
