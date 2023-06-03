@@ -16,12 +16,10 @@ import { SuccessIcon } from "@/components/icons";
 const Verify = () => {
   const router = useRouter();
   const { verifiedToken } = router?.query;
-  console.log(verifiedToken);
 
   useEffect(() => {
     async function verifyEmail(token: string) {
       const response = await activeEmail(token);
-      console.log(response);
     }
     if (verifiedToken) {
       verifyEmail(verifiedToken as string);

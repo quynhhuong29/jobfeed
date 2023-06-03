@@ -1,1 +1,17 @@
 export { default as SuccessIcon } from "./SuccessIcon";
+export { default as BriefcaseIcon } from "./BriefcaseIcon";
+export { default as PopupCategoryIcon } from "./PopupCategoryIcon";
+export { default as TechnologyIcon } from "./TechnologyIcon";
+export { default as ValiIcon } from "./ValiIcon";
+export { default as PersonIcon } from "./PersonIcon";
+export { default as HospitalIcon } from "./HospitalIcon";
+export { default as TeleIcon } from "./TeleIcon";
+export { default as PictureIcon } from "./PictureIcon";
+export { default as RobotIcon } from "./RobotIcon";
+export { default as StarIcon } from "./StarIcon";
+export { default as MapPinIcon } from "./MapPinIcon";
+export { default as FacebookIcon } from "./FacebookIcon";
+export { default as LinkedInIcon } from "./LinkedInIcon";
+export { default as TwitterIcon } from "./TwitterIcon";
+export { default as MessengerIcon } from "./MessengerIcon";
+export { default as FileIcon } from "./FileIcon";

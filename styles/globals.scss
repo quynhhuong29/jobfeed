@@ -51,4 +51,27 @@ body {
   body {
     @apply font-normal;
   }
+  .border-radius-custom {
+    border-radius: 0% 0% 150% 150%/0% 0% 40% 40%;
+  }
+}
+
+.candidate-content::before {
+  content: "";
+  position: absolute;
+  border: 1px dashed rgba(2, 175, 116, 0.4);
+  height: 96px;
+  left: 16px;
+  top: 40px;
+}
+
+.candidate-content:last-child::before {
+  opacity: 0;
+}
+
+.icon_button:hover {
+  background-color: white;
+  & svg {
+    fill: #007aff;
+  }
 }

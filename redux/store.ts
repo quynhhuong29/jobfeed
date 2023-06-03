@@ -1,8 +1,12 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
-// ...
+import authReducers from "./reducers/authReducers";
+import userReducers from "./reducers/userReducers";
 
-const reducer = combineReducers({});
+const reducer = combineReducers({
+  auth: authReducers,
+  user: userReducers,
+});
 
 const store = configureStore({
   reducer,
