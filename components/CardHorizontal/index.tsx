@@ -32,7 +32,7 @@ const CardHorizontal = ({ data }: ICardHorizontal) => {
           <p className="text-sm text-gray-600">{data?.company}</p>
         </div>
         <div className="flex items-center gap-1 w-[25%]">
-          <MapPinIcon height="22px" width="16px" fill="#02af74" />
+          <MapPinIcon height="22px" width="16px" />
           <p className="text-[16px] text-gray-600">{data?.location}</p>
         </div>
         <p className="text-[16px] text-gray-600 w-[16%]">
