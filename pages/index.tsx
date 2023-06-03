@@ -5,8 +5,16 @@ import FooterAlt from "@/components/FooterAlt";
 import {
   BriefcaseIcon,
   FacebookIcon,
+  HospitalIcon,
   LinkedInIcon,
+  PersonIcon,
+  PictureIcon,
+  PopupCategoryIcon,
+  RobotIcon,
+  TechnologyIcon,
+  TeleIcon,
   TwitterIcon,
+  ValiIcon,
 } from "@/components/icons";
 import { LayoutMain } from "@/components/layout";
 import withAuth from "@/hocs/withAuth";
@@ -24,7 +32,50 @@ import {
 } from "@chakra-ui/react";
 import Image from "next/image";
 import Link from "next/link";
-import { dataCards, jobCard } from "./data/homePageData";
+import jobCard from "../data/homePageData";
+
+const dataCards: DataCardProps[] = [
+  {
+    icon: <PopupCategoryIcon />,
+    title: "IT & Software",
+    subtitle: "2024 Jobs",
+  },
+  {
+    icon: <TechnologyIcon />,
+    title: "Technology",
+    subtitle: "1250 Jobs",
+  },
+  {
+    icon: <ValiIcon />,
+    title: "Government",
+    subtitle: "802 Jobs",
+  },
+  {
+    icon: <PersonIcon />,
+    title: "Accounting/Finance",
+    subtitle: "577 Jobs",
+  },
+  {
+    icon: <HospitalIcon />,
+    title: "Construction / Facilities",
+    subtitle: "285 Jobs",
+  },
+  {
+    icon: <TeleIcon />,
+    title: "Tele-communications",
+    subtitle: "492 Jobs",
+  },
+  {
+    icon: <PictureIcon />,
+    title: "Design & Multimedia",
+    subtitle: "1045 Jobs",
+  },
+  {
+    icon: <RobotIcon />,
+    title: "Human Resource",
+    subtitle: "1516 Jobs",
+  },
+];
 
 function Home() {
   return (
