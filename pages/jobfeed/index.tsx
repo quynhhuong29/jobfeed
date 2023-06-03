@@ -119,7 +119,7 @@ function JobFeed() {
                         <p className="text-base text-gray-800">
                           {ele?.username}
                         </p>
-                        <span className="text-xs">{ele?.fullName}</span>
+                        <span className="text-xs">{`${ele?.firstName.trim()} ${ele?.lastName.trim()}`}</span>
                       </div>
                     </div>
                   ))}

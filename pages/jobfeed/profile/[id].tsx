@@ -56,38 +56,51 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import ErrorMessage from "@/components/ErrorMessage";
 import { checkImage, imageUpload } from "@/utils/imageUpload.util";
+import { updateInfoUser } from "@/redux/apis/userAPI";
 
-const schema = yup
-  .object({
-    firstName: yup.string(),
-    lastName: yup.string(),
-    email: yup.string().email("Email is invalid"),
-    currentPassword: yup
-      .string()
-      .min(6, "Password must be at least 6 characters")
-      .required("Password is required"),
-    newPassword: yup.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: yup
-      .string()
-      .min(6, "Password must be at least 6 characters")
-      .oneOf([yup.ref("newPassword"), ""], "Passwords must match"),
-    introduce: yup.string(),
-    location: yup.string(),
-    languages: yup.string(),
-  })
-  .required();
+const schema = yup.object().shape({
+  firstName: yup.string(),
+  lastName: yup.string(),
+  email: yup.string().email("Email is invalid"),
+  currentPassword: yup
+    .string()
+    .test(
+      "empty-check",
+      "Password must be at least 6 characters",
+      (currentPassword) => currentPassword!.length == 0
+    ),
+  newPassword: yup
+    .string()
+    .test(
+      "empty-check",
+      "Password must be at least 6 characters",
+      (newPassword) => newPassword!.length == 0
+    ),
+  confirmPassword: yup
+    .string()
+    .test(
+      "empty-check",
+      "Password must be at least 6 characters",
+      (confirmPassword) => confirmPassword!.length == 0
+    )
+    .oneOf([yup.ref("newPassword"), ""], "Passwords must match"),
+  introduce: yup.string(),
+  location: yup.string(),
+  languages: yup.string(),
+});
 type FormData = yup.InferType<typeof schema>;
 
 function Profile() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const userAuth = JSON.parse(localStorage.getItem("user")!);
 
   const [searchValue, setSearchValue] = useState<any>();
   const [open, setOpen] = useState(false);
   const [avatar, setAvatar] = useState<Blob | MediaSource>();
   const [errorAvatar, setErrorAvatar] = useState<string>("");
   const [userData, setUserData] = useState<any>([]);
+  const [userAuth, setUserAuth] = useState<any>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const searchUserData = useSelector(selectSearchUser);
   const userInfoData = useSelector(selectUserInfo);
@@ -98,10 +111,21 @@ function Profile() {
     handleSubmit,
     register,
     formState: { errors },
+    setValue,
   } = useForm<FormData>({
     mode: "onChange",
     resolver: yupResolver(schema),
   });
+
+  let userLocal: string | null = "";
+  if (typeof window !== "undefined") {
+    userLocal = localStorage.getItem("user");
+  }
+
+  useEffect(() => {
+    if (!userLocal) return;
+    setUserAuth(JSON.parse(userLocal));
+  }, [userLocal]);
 
   const handleClickOutside = (event: any) => {
     if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -130,9 +154,35 @@ function Profile() {
     router.push(`/jobfeed/profile/${id}`);
   };
 
-  const handleUpdateUserInfo = async () => {
-    const img = await imageUpload([avatar]);
-    console.log("🚀 ~ file: [id].tsx:135 ~ handleUpdateUserInfo ~ img:", img);
+  const handleUpdateUserInfo = async (data: any) => {
+    setIsLoading(true);
+    let dataRequest = userData;
+    let img: any = [];
+    if (avatar) {
+      img = await imageUpload([avatar]);
+    }
+
+    if (data) {
+      dataRequest = {
+        ...userData,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        introduction: data.introduce,
+        address: data.location,
+        avatar: img[0]?.url || userData.avatar,
+      };
+    }
+
+    try {
+      await updateInfoUser(dataRequest);
+      if (router.query.id)
+        dispatch(getUserInfoByIdAsync(router.query.id.toString()));
+      setIsLoading(false);
+    } catch (err) {
+      console.log(err);
+      setIsLoading(false);
+    }
   };
 
   const handleChangeAvatar = (e: any) => {
@@ -162,7 +212,14 @@ function Profile() {
   useEffect(() => {
     if (!userInfoData) return;
     setUserData(userInfoData.data);
-  }, [userInfoData]);
+
+    setValue("firstName", userInfoData.data.firstName);
+    setValue("lastName", userInfoData.data.lastName);
+    setValue("email", userInfoData.data.email);
+    setValue("introduce", userInfoData.data.introduction);
+    setValue("location", userInfoData.data.address);
+    setValue("languages", userInfoData.data.languages || "");
+  }, [userInfoData, setValue]);
 
   return (
     <LayoutMain>
@@ -176,7 +233,7 @@ function Profile() {
               <Input
                 type="search"
                 placeholder="Enter to Search..."
-                value={searchValue}
+                value={searchValue || ""}
                 sx={{ backgroundColor: "white" }}
                 onChange={handleChangeSearch}
               />
@@ -205,7 +262,7 @@ function Profile() {
                         <p className="text-base text-gray-800">
                           {ele?.username}
                         </p>
-                        <span className="text-xs">{ele?.fullName}</span>
+                        <span className="text-xs">{`${ele?.firstName} ${ele?.lastName}`}</span>
                       </div>
                     </div>
                   ))}
@@ -260,16 +317,21 @@ function Profile() {
                 <WrapItem>
                   <Avatar
                     size="lg"
-                    name={userInfoData?.data?.fullName}
+                    name={userInfoData?.data?.firstName}
                     src={userInfoData?.data?.avatar}
                   />
                 </WrapItem>
               </div>
 
               <h5 className="mt-6 text-gray-700 font-semibold text-lg capitalize">
-                {userInfoData?.data?.fullName}
+                {`${userInfoData?.data?.firstName} ${userInfoData?.data?.lastName}`}
               </h5>
               <p className="text-gray-600 mb-4">Developer</p>
+              {userAuth && userAuth._id !== userInfoData?.data?._id && (
+                <Button variant={"outline"} colorScheme="green">
+                  Follow
+                </Button>
+              )}
             </div>
             <div className="border-b border-gray-300 pb-4 mt-4">
               <h5 className="mb-4 text-gray-700 font-bold text-base">
@@ -551,7 +613,7 @@ function Profile() {
                               <WrapItem>
                                 <Avatar
                                   size="2xl"
-                                  name={userData?.fullName}
+                                  name={userData?.firstName}
                                   src={
                                     avatar
                                       ? URL.createObjectURL(avatar)
@@ -604,7 +666,7 @@ function Profile() {
                           <Input
                             type="text"
                             id="firstName"
-                            value={userData?.fullName || ""}
+                            defaultValue={"firstName"}
                             placeholder="Enter your first name"
                             autoComplete="off"
                             sx={{
@@ -636,7 +698,7 @@ function Profile() {
                           <Input
                             type="text"
                             id="lastName"
-                            value={userData?.fullName || ""}
+                            defaultValue={"lastName"}
                             placeholder="Enter your last name"
                             autoComplete="off"
                             sx={{
@@ -668,7 +730,7 @@ function Profile() {
                           <Input
                             type="email"
                             id="email"
-                            value={userData?.email || ""}
+                            defaultValue={"email"}
                             placeholder="Enter your email"
                             autoComplete="off"
                             sx={{
@@ -707,7 +769,7 @@ function Profile() {
                           id="introduce"
                           placeholder="Say something..."
                           autoComplete="off"
-                          value={userData?.introduction || ""}
+                          defaultValue={"introduce"}
                           sx={{
                             minHeight: "125px",
                             backgroundColor: "#fff",
@@ -736,6 +798,7 @@ function Profile() {
                           <Input
                             type="text"
                             id="languages"
+                            defaultValue={"languages"}
                             placeholder="Enter your languages"
                             autoComplete="off"
                             sx={{
@@ -766,7 +829,7 @@ function Profile() {
                             id="location"
                             placeholder="Enter your location"
                             autoComplete="off"
-                            value={userData?.location || ""}
+                            defaultValue={"location"}
                             sx={{
                               backgroundColor: "#fff",
                               border: "1px solid #dbdfe2",
@@ -895,7 +958,11 @@ function Profile() {
                       </div>
                     </div>
                     <div className="flex justify-end mt-4">
-                      <Button type="submit" colorScheme={"green"}>
+                      <Button
+                        type="submit"
+                        colorScheme={"green"}
+                        isLoading={isLoading}
+                      >
                         Update
                       </Button>
                     </div>

@@ -16,7 +16,8 @@ async function signup(
       email,
       username,
       password,
-      fullName: `${firstName} ${lastName}`,
+      firstName,
+      lastName,
       role: "candidate",
     })
   ).data;

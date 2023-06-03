@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import MenuBar from "../MenuBar/MenuBar";
 
@@ -46,7 +46,19 @@ const Link = dynamic(() => import("next/link").then((Link) => Link), {
 const Topbar = () => {
   const isAuthenticated = useSelector(selectIsLoggedIn);
   const username = getItem("username");
-  const userAuth = JSON.parse(localStorage.getItem("user")!);
+  const [userAuth, setUserAuth] = useState<any>();
+
+  // const userAuth = JSON.parse(localStorage.getItem("user")!);
+
+  let userLocal: string | null = "";
+  if (typeof window !== "undefined") {
+    userLocal = localStorage.getItem("user");
+  }
+
+  useEffect(() => {
+    if (!userLocal) return;
+    setUserAuth(JSON.parse(userLocal));
+  }, [userLocal]);
 
   console.log(isAuthenticated, username);
   return (
@@ -109,7 +121,7 @@ const Topbar = () => {
 
                 <MenuList>
                   <MenuItem>
-                    <Link href={`/jobfeed/profile/${userAuth._id}`}>
+                    <Link href={`/jobfeed/profile/${userAuth?._id}`}>
                       Profile
                     </Link>
                   </MenuItem>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { getItem, setLocalStorageContent } from "@/utils/localStorage.util";
 import { refreshToken } from "@/redux/apis/authAPI";
+import jwt_decode from "jwt-decode";
 
 const withAuth = <P extends object>(
   WrappedComponent: React.ComponentType<P>
@@ -14,17 +15,31 @@ const withAuth = <P extends object>(
 
     const access_token = getItem("access_token");
 
+    const isTokenExpired = () => {
+      const token = getItem("access_token");
+      if (token) {
+        const decoded: any = jwt_decode(token);
+        if (decoded) {
+          return decoded.exp < Date.now() / 1000;
+        }
+      }
+      return true; // Trả về true nếu không có token
+    };
+    const getRefreshToken = async () => {
+      try {
+        const res = await refreshToken();
+        setLocalStorageContent("access_token", res.access_token);
+        setLocalStorageContent("isAuthenticated", "true");
+      } catch (err) {
+        setLocalStorageContent("isAuthenticated", "false");
+      }
+    };
+
     useEffect(() => {
+      if (isTokenExpired()) {
+        getRefreshToken();
+      }
       if (!isAuthenticated) {
-        refreshToken()
-          .then((res) => {
-            setLocalStorageContent("access_token", res.access_token);
-            setLocalStorageContent("isAuthenticated", "true");
-            router.push("/");
-          })
-          .catch((err) => {
-            setLocalStorageContent("isAuthenticated", "false");
-          });
         router.push("/login");
       }
     }, [isAuthenticated, router, access_token]);
