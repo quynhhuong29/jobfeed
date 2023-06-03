@@ -2,7 +2,7 @@ export const isLocalDevelopment: boolean =
   typeof window !== "undefined" && window.location.hostname === "localhost";
 export const isProduction =
   typeof window !== "undefined" &&
-  window.location.hostname === "app.jobvia.app";
+  window.location.hostname === "jobvia.vercel.app";
 
 function getApiRootUrl(): string | undefined {
   if (typeof window === "undefined") {
@@ -10,6 +10,7 @@ function getApiRootUrl(): string | undefined {
   }
   const { port, origin } = window.location;
 
+  console.log(window.location.hostname);
   if (isProduction) {
     return "http://localhost:5000/api";
   }
