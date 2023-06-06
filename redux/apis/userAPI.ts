@@ -12,4 +12,18 @@ async function updateInfoUser(userInfo: any): Promise<any> {
   return (await api.patch(`/user`, userInfo)).data;
 }
 
-export { searchUser, getUserInfoById, updateInfoUser };
+async function followUser(id: string, userInfo: any): Promise<any> {
+  return (await api.patch(`/user/${id}/follow`, userInfo)).data;
+}
+
+async function unFollowUser(id: string, userInfo: any): Promise<any> {
+  return (await api.patch(`/user/${id}/unFollow`, userInfo)).data;
+}
+
+export {
+  searchUser,
+  getUserInfoById,
+  updateInfoUser,
+  followUser,
+  unFollowUser,
+};

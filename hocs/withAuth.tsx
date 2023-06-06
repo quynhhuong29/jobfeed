@@ -36,11 +36,10 @@ const withAuth = <P extends object>(
     };
 
     useEffect(() => {
-      if (isTokenExpired()) {
-        getRefreshToken();
-      }
       if (!isAuthenticated) {
         router.push("/login");
+      } else if (isTokenExpired()) {
+        getRefreshToken();
       }
     }, [isAuthenticated, router, access_token]);
 

@@ -166,6 +166,7 @@ function JobFeed() {
           </div>
         </div>
       </section>
+
       <footer className="w-full py-[60px] bg-[#2e3538] text-sm">
         <div className="md:max-w-[1140px] mx-auto grid grid-flow-col grid-cols-6">
           <div className="col-span-2 px-[10px]">

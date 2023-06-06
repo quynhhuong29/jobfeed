@@ -62,7 +62,7 @@ const Topbar = () => {
 
   console.log(isAuthenticated, username);
   return (
-    <div className="bg-white z-[999999] sticky top-0 right-0 left-0 shadow-[0_3px_10px_0_rgba(49,64,71,.08)]">
+    <div className="bg-white z-[999] sticky top-0 right-0 left-0 shadow-[0_3px_10px_0_rgba(49,64,71,.08)]">
       <div className="max-w-[90%] mx-auto flex items-center justify-between px-3">
         <Link href="/">
           <Image
