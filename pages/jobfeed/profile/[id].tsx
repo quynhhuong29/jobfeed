@@ -38,6 +38,7 @@ import {
   TabPanels,
   Tabs,
   Textarea,
+  useDisclosure,
   WrapItem,
 } from "@chakra-ui/react";
 import Link from "next/link";
@@ -57,6 +58,11 @@ import { useForm } from "react-hook-form";
 import ErrorMessage from "@/components/ErrorMessage";
 import { checkImage, imageUpload } from "@/utils/imageUpload.util";
 import { updateInfoUser } from "@/redux/apis/userAPI";
+import withAuth from "@/hocs/withAuth";
+import { selectIsLoggedIn } from "@/redux/reducers/authReducers";
+import { User } from "@/types/User";
+import FollowButton from "@/components/FollowButton";
+import ModalFollower from "@/components/ModalFollower";
 
 const schema = yup.object().shape({
   firstName: yup.string(),
@@ -93,20 +99,22 @@ type FormData = yup.InferType<typeof schema>;
 function Profile() {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [searchValue, setSearchValue] = useState<any>();
   const [open, setOpen] = useState(false);
   const [avatar, setAvatar] = useState<Blob | MediaSource>();
   const [errorAvatar, setErrorAvatar] = useState<string>("");
-  const [userData, setUserData] = useState<any>([]);
-  const [userAuth, setUserAuth] = useState<any>();
+  const [userData, setUserData] = useState<User>();
+  const [userAuth, setUserAuth] = useState<User>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [typeModalFollow, setTypeModalFollow] = useState("");
 
+  const isAuthenticated = useSelector(selectIsLoggedIn);
   const searchUserData = useSelector(selectSearchUser);
   const userInfoData = useSelector(selectUserInfo);
 
   const modalRef = useRef<any>(null);
-
   const {
     handleSubmit,
     register,
@@ -156,6 +164,8 @@ function Profile() {
 
   const handleUpdateUserInfo = async (data: any) => {
     setIsLoading(true);
+    if (!userData) return;
+
     let dataRequest = userData;
     let img: any = [];
     if (avatar) {
@@ -197,6 +207,15 @@ function Profile() {
     setAvatar(file);
   };
 
+  const handleModalFollower = (type: "followers" | "following") => {
+    onOpen();
+    if (type === "followers") {
+      setTypeModalFollow("followers");
+    } else {
+      setTypeModalFollow("following");
+    }
+  };
+
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -205,11 +224,12 @@ function Profile() {
   }, []);
 
   useEffect(() => {
-    if (!router.query.id) return;
+    if (!router.query.id || !isAuthenticated) return;
     dispatch(getUserInfoByIdAsync(router.query.id.toString()));
-  }, [dispatch, router.query.id]);
+  }, [dispatch, router.query.id, isAuthenticated]);
 
   useEffect(() => {
+    onClose();
     if (!userInfoData) return;
     setUserData(userInfoData.data);
 
@@ -219,7 +239,7 @@ function Profile() {
     setValue("introduce", userInfoData.data.introduction);
     setValue("location", userInfoData.data.address);
     setValue("languages", userInfoData.data.languages || "");
-  }, [userInfoData, setValue]);
+  }, [userInfoData, setValue, onClose]);
 
   return (
     <LayoutMain>
@@ -324,13 +344,43 @@ function Profile() {
               </div>
 
               <h5 className="mt-6 text-gray-700 font-semibold text-lg capitalize">
-                {`${userInfoData?.data?.firstName} ${userInfoData?.data?.lastName}`}
+                {`${userInfoData?.data?.firstName || ""} ${
+                  userInfoData?.data?.lastName || ""
+                }`}
               </h5>
               <p className="text-gray-600 mb-4">Developer</p>
+              <div className="flex items-center gap-8 text-gray-600 mb-4">
+                <p
+                  onClick={() => handleModalFollower("followers")}
+                  className="cursor-pointer hover:underline"
+                >
+                  {userInfoData?.data?.followers?.length || 0} Followers
+                </p>
+                <p
+                  onClick={() => handleModalFollower("following")}
+                  className="cursor-pointer hover:underline"
+                >
+                  {userInfoData?.data?.following?.length || 0} Following
+                </p>
+                <ModalFollower
+                  isOpen={isOpen}
+                  onClose={onClose}
+                  data={
+                    typeModalFollow === "followers"
+                      ? userInfoData?.data?.followers
+                      : userInfoData?.data?.following
+                  }
+                  userAuth={userAuth}
+                  title={
+                    typeModalFollow === "followers" ? "Followers" : "Following"
+                  }
+                  type={
+                    typeModalFollow === "followers" ? "followers" : "following"
+                  }
+                />
+              </div>
               {userAuth && userAuth._id !== userInfoData?.data?._id && (
-                <Button variant={"outline"} colorScheme="green">
-                  Follow
-                </Button>
+                <FollowButton user={userAuth} id={userInfoData.data._id} />
               )}
             </div>
             <div className="border-b border-gray-300 pb-4 mt-4">
@@ -1092,4 +1142,4 @@ function Profile() {
   );
 }
 
-export default Profile;
+export default withAuth(Profile);
