@@ -21,9 +21,17 @@ interface Props {
   title: string;
   data: string[];
   userAuth?: User;
+  type?: "followers" | "following";
 }
 
-const ModalFollower = ({ isOpen, onClose, title, data, userAuth }: Props) => {
+const ModalFollower = ({
+  isOpen,
+  onClose,
+  title,
+  data,
+  userAuth,
+  type,
+}: Props) => {
   const [listUser, setListUser] = useState<User[]>([]);
 
   useEffect(() => {
@@ -32,7 +40,12 @@ const ModalFollower = ({ isOpen, onClose, title, data, userAuth }: Props) => {
         const response = await getUserInfoById(id);
         setListUser((prevList) => {
           const updatedList = [...prevList, response?.user];
-          return Array.from(new Set(updatedList));
+          const list = Array.from(
+            new Set(updatedList.map((user) => user._id))
+          ).map((_id) => {
+            return updatedList.find((user) => user._id === _id);
+          });
+          return list;
         });
       } catch (err) {}
     };
@@ -59,7 +72,12 @@ const ModalFollower = ({ isOpen, onClose, title, data, userAuth }: Props) => {
         <ModalCloseButton />
         <ModalBody>
           {listUser?.map((item: User) => (
-            <UserCard user={item} key={item._id} userAuth={userAuth} />
+            <UserCard
+              user={item}
+              key={item._id}
+              userAuth={userAuth}
+              type={type}
+            />
           ))}
         </ModalBody>
       </ModalContent>

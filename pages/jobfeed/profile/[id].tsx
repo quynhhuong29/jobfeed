@@ -229,6 +229,7 @@ function Profile() {
   }, [dispatch, router.query.id, isAuthenticated]);
 
   useEffect(() => {
+    onClose();
     if (!userInfoData) return;
     setUserData(userInfoData.data);
 
@@ -238,7 +239,7 @@ function Profile() {
     setValue("introduce", userInfoData.data.introduction);
     setValue("location", userInfoData.data.address);
     setValue("languages", userInfoData.data.languages || "");
-  }, [userInfoData, setValue]);
+  }, [userInfoData, setValue, onClose]);
 
   return (
     <LayoutMain>
@@ -372,6 +373,9 @@ function Profile() {
                   userAuth={userAuth}
                   title={
                     typeModalFollow === "followers" ? "Followers" : "Following"
+                  }
+                  type={
+                    typeModalFollow === "followers" ? "followers" : "following"
                   }
                 />
               </div>

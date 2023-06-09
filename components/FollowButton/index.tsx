@@ -13,9 +13,10 @@ import { useSelector } from "react-redux";
 interface Props {
   user: User;
   id: string;
+  type?: "followers" | "following";
 }
 
-const FollowButton = ({ user, id }: Props) => {
+const FollowButton = ({ user, id, type = "followers" }: Props) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [followed, setFollowed] = useState(false);
@@ -56,15 +57,22 @@ const FollowButton = ({ user, id }: Props) => {
   };
 
   useEffect(() => {
-    if (
-      userInfoData &&
-      id &&
-      userInfoData?.followers?.find((item: string) => item === user._id)
-    ) {
-      setFollowed(true);
+    if (userInfoData && id) {
+      if (
+        type === "followers" &&
+        userInfoData?.followers?.find(
+          (item: string) => item === user._id || item === id
+        )
+      )
+        setFollowed(true);
+      if (
+        type === "following" &&
+        userInfoData?.following?.find((item: string) => item === id)
+      )
+        setFollowed(true);
     }
     return () => setFollowed(false);
-  }, [userInfoData, id, user]);
+  }, [userInfoData, id, user, type]);
 
   return (
     <div>

@@ -1,16 +1,24 @@
 /* eslint-disable @next/next/no-img-element */
 import { User } from "@/types/User";
+import { useRouter } from "next/router";
 import FollowButton from "../FollowButton";
 
 interface Props {
   user: User;
   userAuth?: User;
+  type?: "followers" | "following";
 }
 
-const UserCard = ({ user, userAuth }: Props) => {
+const UserCard = ({ user, userAuth, type }: Props) => {
+  const router = useRouter();
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-4 cursor-pointer py-2">
+      <div
+        className="flex items-center gap-4 cursor-pointer py-2"
+        onClick={() => {
+          router.push(`/jobfeed/profile/${user?._id}`);
+        }}
+      >
         <img
           alt="avatar"
           src={
@@ -24,7 +32,9 @@ const UserCard = ({ user, userAuth }: Props) => {
           <span className="text-xs">{`${user?.firstName} ${user?.lastName}`}</span>
         </div>
       </div>
-      {userAuth && <FollowButton user={userAuth} id={user?._id} />}
+      {userAuth && user?._id !== userAuth._id && (
+        <FollowButton user={userAuth} id={user?._id} type={type} />
+      )}
     </div>
   );
 };
