@@ -81,7 +81,7 @@ function JobFeed() {
 
   return (
     <LayoutMain>
-      <section className="w-full bg-white shadow-[0_3px_10px_0_rgba(49,64,71,.08)] relative py-5">
+      <section className="w-full border-b border-gray-200 bg-white shadow-[0_3px_10px_0_rgba(49,64,71,.08)] py-5 sticky top-[60px] left-0 right-0 z-10">
         <div className="md:max-w-[1140px] mx-auto flex items-center justify-between">
           <div className="relative mx-auto">
             <InputGroup w={"300px"}>
@@ -160,7 +160,7 @@ function JobFeed() {
           </div>
         </div>
       </section>
-      <section className="w-full bg-white shadow-[0_3px_10px_0_rgba(49,64,71,.08)] relative py-5">
+      <section className="w-full bg-white relative py-5 min-h-[100vh]">
         <NewsFeed />
       </section>
 

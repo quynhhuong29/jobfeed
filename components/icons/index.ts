@@ -17,3 +17,5 @@ export { default as MessengerIcon } from "./MessengerIcon";
 export { default as FileIcon } from "./FileIcon";
 export { default as CameraIcon } from "./CameraIcon";
 export { default as ImageIcon } from "./ImageIcon";
+export { default as SavedIcon } from "./SavedIcon";
+export { default as FireIcon } from "./FireIcon";

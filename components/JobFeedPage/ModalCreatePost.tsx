@@ -116,7 +116,7 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data }: Props) => {
     setImages((prev) => [...prev, { camera: URL }]);
   };
 
-  const handleCreatePost = (e: React.FormEvent) => {
+  const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (images.length === 0) {
@@ -125,16 +125,14 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data }: Props) => {
     }
 
     try {
-      dispatch(createPostAsync({ content, images }))
-        .unwrap()
-        .then(() => {
-          toast.success("Create a post success!!!");
-          setImages([]);
-          setContent("");
-          if (stream) {
-            handleStopStream();
-          }
-        });
+      await dispatch(createPostAsync({ content, images }));
+
+      toast.success("Create a post success!!!");
+      setImages([]);
+      setContent("");
+      if (stream) {
+        handleStopStream();
+      }
     } catch (err: any) {
       if (err.message) toast.error(err.message);
       else toast.error("Something went wrong. Please try again.");
