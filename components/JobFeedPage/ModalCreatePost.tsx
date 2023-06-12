@@ -1,5 +1,6 @@
 import {
   createPostAsync,
+  getPostsAsync,
   selectLoadingPost,
 } from "@/redux/reducers/postReducers";
 import { useAppDispatch } from "@/redux/store";
@@ -127,12 +128,14 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data }: Props) => {
     try {
       await dispatch(createPostAsync({ content, images }));
 
+      dispatch(getPostsAsync());
       toast.success("Create a post success!!!");
       setImages([]);
       setContent("");
       if (stream) {
         handleStopStream();
       }
+      onClose();
     } catch (err: any) {
       if (err.message) toast.error(err.message);
       else toast.error("Something went wrong. Please try again.");
@@ -185,22 +188,22 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data }: Props) => {
                   key={index}
                   className="relative rounded-lg border border-gray-500 min-h-[100px]"
                 >
-                  {img.camera ? (
-                    <ImageShow src={img.camera} />
-                  ) : img.url ? (
+                  {img?.camera ? (
+                    <ImageShow src={img?.camera} />
+                  ) : img?.url ? (
                     <>
-                      {img.url.match(/video/i) ? (
-                        <VideoShow src={img.url} />
+                      {img?.url?.match(/video/i) ? (
+                        <VideoShow src={img?.url} />
                       ) : (
-                        <ImageShow src={img.url} />
+                        <ImageShow src={img?.url} />
                       )}
                     </>
                   ) : (
                     <>
-                      {img.type.match(/video/i) ? (
-                        <VideoShow src={URL.createObjectURL(img)} />
+                      {img?.type?.match(/video/i) ? (
+                        <VideoShow src={URL.createObjectURL(img) || img} />
                       ) : (
-                        <ImageShow src={URL.createObjectURL(img)} />
+                        <ImageShow src={URL.createObjectURL(img) || img} />
                       )}
                     </>
                   )}
@@ -266,7 +269,7 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data }: Props) => {
               w="100%"
               mt="8px"
             >
-              Create
+              {isEdit ? "Update" : "Create"}
             </Button>
           </form>
         </ModalBody>

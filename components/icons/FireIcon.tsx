@@ -20,8 +20,8 @@ const FireIcon = (props: IconProps) => {
           x2="94.141"
           y2="0.188"
         >
-          <stop offset="0" stop-color="#ff4c0d" />
-          <stop offset="1" stop-color="#fc9502" />
+          <stop offset="0" stopColor="#ff4c0d" />
+          <stop offset="1" stopColor="#fc9502" />
         </linearGradient>
       </defs>
       <g id="fire">

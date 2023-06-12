@@ -19,7 +19,7 @@ const SideBar = ({ user }: Props) => {
         }}
       >
         <WrapItem>
-          <Avatar size="sm" name="Avatar" src="" />
+          <Avatar size="sm" name="Avatar" src={user?.avatar || ""} />
         </WrapItem>
         <p className="text-base text-black font-semibold">{`${user?.firstName} ${user?.lastName}`}</p>
       </div>

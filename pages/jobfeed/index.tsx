@@ -9,6 +9,8 @@ import {
 import HomeIcon from "@/components/icons/HomeIcon";
 import NewsFeed from "@/components/JobFeedPage/NewsFeed";
 import { useDebounce } from "@/hooks/debounceHook";
+import { getPosts } from "@/redux/apis/postApi";
+import { getPostsAsync } from "@/redux/reducers/postReducers";
 import {
   searchUserAsync,
   selectSearchUser,
@@ -78,6 +80,10 @@ function JobFeed() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    dispatch(getPostsAsync());
+  }, [dispatch]);
 
   return (
     <LayoutMain>

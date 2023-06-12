@@ -1,6 +1,6 @@
 import { imageUpload } from "@/utils/imageUpload.util";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { createPost } from "../apis/postApi";
+import { createPost, getPosts } from "../apis/postApi";
 import { RootState } from "../store";
 
 const initialState = {
@@ -27,6 +27,15 @@ export const createPostAsync = createAsyncThunk(
   }
 );
 
+export const getPostsAsync = createAsyncThunk("posts/getAllPosts", async () => {
+  try {
+    const response = await getPosts();
+    return response;
+  } catch (err: any) {
+    console.log(err);
+  }
+});
+
 const postSlice = createSlice({
   name: "posts",
   initialState,
@@ -43,6 +52,21 @@ const postSlice = createSlice({
         state.error = "";
       })
       .addCase(createPostAsync.rejected, (state, action: any) => {
+        state.isLoading = false;
+
+        state.error = action.payload?.message ?? "";
+      })
+      .addCase(getPostsAsync.pending, (state) => {
+        state.error = "";
+        state.isLoading = true;
+      })
+      .addCase(getPostsAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+
+        state.error = "";
+        state.posts = action.payload;
+      })
+      .addCase(getPostsAsync.rejected, (state, action: any) => {
         state.isLoading = false;
 
         state.error = action.payload?.message ?? "";

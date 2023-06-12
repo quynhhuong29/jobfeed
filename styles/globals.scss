@@ -75,3 +75,17 @@ body {
     fill: #007aff;
   }
 }
+
+.slick-prev {
+  left: 16px !important;
+  z-index: 1;
+}
+
+.slick-next {
+  right: 16px !important;
+  z-index: 1;
+}
+.slick-next::before,
+.slick-prev::before {
+  color: black !important;
+}

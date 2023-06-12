@@ -19,3 +19,8 @@ export { default as CameraIcon } from "./CameraIcon";
 export { default as ImageIcon } from "./ImageIcon";
 export { default as SavedIcon } from "./SavedIcon";
 export { default as FireIcon } from "./FireIcon";
+export { default as MenuVerticalIcon } from "./MenuVerticalIcon";
+export { default as HeartIcon } from "./HeartIcon";
+export { default as BookMarkIcon } from "./BookMarkIcon";
+export { default as CommentIcon } from "./CommentIcon";
+export { default as PaperPlaneIcon } from "./PaperPlaneIcon";
