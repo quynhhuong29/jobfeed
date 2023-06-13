@@ -1,6 +1,8 @@
+import { Image } from "@/types/Posts";
+import { User } from "@/types/User";
 import { imageUpload } from "@/utils/imageUpload.util";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { createPost, getPosts } from "../apis/postApi";
+import { createPost, getPosts, likePost, updatePost } from "../apis/postApi";
 import { RootState } from "../store";
 
 const initialState = {
@@ -36,6 +38,38 @@ export const getPostsAsync = createAsyncThunk("posts/getAllPosts", async () => {
   }
 });
 
+export const updatePostAsync = createAsyncThunk(
+  "posts/updatePost",
+  async ({ _id, content, media, data }: any, { rejectWithValue }) => {
+    let images = [];
+    const imgNewUrl = media.filter((img: Image) => !img.url);
+    const imgOldUrl = media.filter((img: Image) => img.url);
+
+    if (
+      data.content === content &&
+      imgNewUrl.length === 0 &&
+      imgOldUrl.length === data.images.length
+    )
+      return;
+
+    try {
+      if (imgNewUrl.length > 0) images = await imageUpload(imgNewUrl);
+
+      const response = await updatePost(_id, content, [
+        ...imgOldUrl,
+        ...images,
+      ]);
+      return response;
+    } catch (err: any) {
+      if (!err.response) {
+        throw err;
+      }
+      return rejectWithValue(err.response.data);
+    }
+  }
+);
+
+
 const postSlice = createSlice({
   name: "posts",
   initialState,
@@ -52,6 +86,20 @@ const postSlice = createSlice({
         state.error = "";
       })
       .addCase(createPostAsync.rejected, (state, action: any) => {
+        state.isLoading = false;
+
+        state.error = action.payload?.message ?? "";
+      })
+      .addCase(updatePostAsync.pending, (state) => {
+        state.error = "";
+        state.isLoading = true;
+      })
+      .addCase(updatePostAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+
+        state.error = "";
+      })
+      .addCase(updatePostAsync.rejected, (state, action: any) => {
         state.isLoading = false;
 
         state.error = action.payload?.message ?? "";

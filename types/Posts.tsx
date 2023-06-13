@@ -2,7 +2,7 @@ import { User } from "./User";
 export interface Post {
   _id: string;
   content: string;
-  images: Image[];
+  images: any[];
 }
 
 export interface PostData {

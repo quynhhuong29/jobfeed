@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { getItem, setLocalStorageContent } from "@/utils/localStorage.util";
 import { refreshToken } from "@/redux/apis/authAPI";
 import jwt_decode from "jwt-decode";
+import { getUserInfoById } from "@/redux/apis/userAPI";
 
 export default function App({ Component, pageProps }: AppProps) {
   const isTokenExpired = () => {
@@ -26,17 +27,30 @@ export default function App({ Component, pageProps }: AppProps) {
       const res = await refreshToken();
       setLocalStorageContent("access_token", res.access_token);
       setLocalStorageContent("isAuthenticated", "true");
+
+      updateUserAuth();
     } catch (err) {
       setLocalStorageContent("isAuthenticated", "false");
     }
   };
-
+  const updateUserAuth = async () => {
+    let userLocal: string | null = "";
+    if (typeof window !== "undefined") {
+      userLocal = localStorage.getItem("user");
+    }
+    if (!userLocal) return;
+    try {
+      const response = await getUserInfoById(JSON.parse(userLocal)._id);
+      setLocalStorageContent("user", JSON.stringify(response.user));
+    } catch (err) {}
+  };
   useEffect(() => {
     if (isTokenExpired()) {
       getRefreshToken();
+    } else {
+      updateUserAuth();
     }
   }, []);
-
   return (
     <Provider store={store}>
       <ChakraProvider>

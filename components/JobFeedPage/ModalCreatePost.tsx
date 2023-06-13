@@ -2,9 +2,10 @@ import {
   createPostAsync,
   getPostsAsync,
   selectLoadingPost,
+  updatePostAsync,
 } from "@/redux/reducers/postReducers";
 import { useAppDispatch } from "@/redux/store";
-import { Post } from "@/types/Posts";
+import { Image, Post } from "@/types/Posts";
 import {
   Button,
   IconButton,
@@ -117,7 +118,7 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data }: Props) => {
     setImages((prev) => [...prev, { camera: URL }]);
   };
 
-  const handleCreatePost = async (e: React.FormEvent) => {
+  const handleSubmitPost = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (images.length === 0) {
@@ -126,10 +127,19 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data }: Props) => {
     }
 
     try {
-      await dispatch(createPostAsync({ content, images }));
+      if (isEdit && data) {
+        const { _id } = data;
+
+        await dispatch(
+          updatePostAsync({ _id, content, media: images, data })
+        ).unwrap();
+        toast.success("Update a post success!!!");
+      } else {
+        await dispatch(createPostAsync({ content, images }));
+        toast.success("Create a post success!!!");
+      }
 
       dispatch(getPostsAsync());
-      toast.success("Create a post success!!!");
       setImages([]);
       setContent("");
       if (stream) {
@@ -143,11 +153,11 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data }: Props) => {
   };
 
   useEffect(() => {
-    if (isEdit && data) {
+    if (data) {
       setContent(data.content);
       setImages(data.images);
     }
-  }, [isEdit, data]);
+  }, [data]);
 
   return (
     <Modal
@@ -167,7 +177,7 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data }: Props) => {
         <ModalHeader paddingBottom="10px">Create Post</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <form onSubmit={handleCreatePost}>
+          <form onSubmit={handleSubmitPost}>
             <Textarea
               placeholder="What' your job?"
               size="sm"
@@ -201,9 +211,9 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data }: Props) => {
                   ) : (
                     <>
                       {img?.type?.match(/video/i) ? (
-                        <VideoShow src={URL.createObjectURL(img) || img} />
+                        <VideoShow src={URL.createObjectURL(img)} />
                       ) : (
-                        <ImageShow src={URL.createObjectURL(img) || img} />
+                        <ImageShow src={URL.createObjectURL(img)} />
                       )}
                     </>
                   )}

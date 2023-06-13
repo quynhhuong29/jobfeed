@@ -1,3 +1,4 @@
+import withAuth from "@/hocs/withAuth";
 import {
   getPostsAsync,
   selectLoadingPost,
@@ -13,7 +14,7 @@ import {
   useDisclosure,
   WrapItem,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import JobCard from "../JobCard";
 import ModalCreatePost from "./ModalCreatePost";
@@ -112,4 +113,4 @@ const NewsFeed = () => {
   );
 };
 
-export default NewsFeed;
+export default memo(withAuth(NewsFeed));
