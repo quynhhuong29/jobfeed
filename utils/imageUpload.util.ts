@@ -16,7 +16,12 @@ export const imageUpload = async (images: any) => {
   let imgArr: any = [];
   for (const item of images) {
     const formData = new FormData();
-    formData.append("file", item);
+
+    if (item.camera) {
+      formData.append("file", item.camera);
+    } else {
+      formData.append("file", item);
+    }
 
     formData.append("upload_preset", "szjad0sd");
     formData.append("cloud_name", "dkdmapwfv");

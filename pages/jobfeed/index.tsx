@@ -7,7 +7,10 @@ import {
   TwitterIcon,
 } from "@/components/icons";
 import HomeIcon from "@/components/icons/HomeIcon";
+import NewsFeed from "@/components/JobFeedPage/NewsFeed";
 import { useDebounce } from "@/hooks/debounceHook";
+import { getPosts } from "@/redux/apis/postApi";
+import { getPostsAsync } from "@/redux/reducers/postReducers";
 import {
   searchUserAsync,
   selectSearchUser,
@@ -78,9 +81,13 @@ function JobFeed() {
     };
   }, []);
 
+  useEffect(() => {
+    dispatch(getPostsAsync());
+  }, [dispatch]);
+
   return (
     <LayoutMain>
-      <section className="w-full bg-white shadow-[0_3px_10px_0_rgba(49,64,71,.08)] relative py-5">
+      <section className="w-full border-b border-gray-200 bg-white shadow-[0_3px_10px_0_rgba(49,64,71,.08)] py-5 sticky top-[60px] left-0 right-0 z-10">
         <div className="md:max-w-[1140px] mx-auto flex items-center justify-between">
           <div className="relative mx-auto">
             <InputGroup w={"300px"}>
@@ -159,12 +166,8 @@ function JobFeed() {
           </div>
         </div>
       </section>
-      <section className="w-full bg-[url('/assets/images/page-title.png')] bg-cover bg-[#029663] bg-center border-radius-custom relative pt-14 pb-16">
-        <div className="md:max-w-[1140px] mx-auto flex items-center justify-between text-white">
-          <div className="mx-auto pr-20">
-            <h3 className="text-2xl font-medium">Job Feed</h3>
-          </div>
-        </div>
+      <section className="w-full bg-white relative py-5 min-h-[100vh]">
+        <NewsFeed />
       </section>
 
       <footer className="w-full py-[60px] bg-[#2e3538] text-sm">

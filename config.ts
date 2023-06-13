@@ -13,8 +13,11 @@ function getApiRootUrl(): string | undefined {
   if (isProduction) {
     return "http://localhost:5000/api";
   }
-  if ((isLocalDevelopment && port === "3000") || port === "3005") {
+  if (isLocalDevelopment && port === "3000") {
     return "http://localhost:5000/api";
+  }
+  if (isLocalDevelopment && port === "3005") {
+    return "http://localhost:5001/api";
   }
 
   return origin;
