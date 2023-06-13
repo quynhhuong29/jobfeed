@@ -30,6 +30,10 @@ export const menu: MenuProps[] = [
     name: "Job Feed",
     link: "/jobfeed",
   },
+  {
+    name: "Job List",
+    link: "/jobList",
+  },
 ];
 
 const Menu = dynamic(

@@ -1,0 +1,10 @@
+.card_container {
+  transition: all 0.5s ease;
+  border: 1px solid #eff0f2;
+}
+
+.card_container:hover {
+  border: 1px solid #02af74;
+  border-radius: 8px;
+  transform: translateY(-8px);
+}

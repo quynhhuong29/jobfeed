@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { memo, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import JobCard from "../JobCard";
+import PostCard from "../PostCard";
 import ModalCreatePost from "./ModalCreatePost";
 import SideBar from "./SideBar";
 import Suggestions from "./Suggestions";
@@ -92,7 +92,7 @@ const NewsFeed = () => {
             </div>
           )}
           {posts?.map((post: PostData) => (
-            <JobCard
+            <PostCard
               key={post?._id}
               content={post?.content}
               user={post?.user}
