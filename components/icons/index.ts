@@ -24,3 +24,7 @@ export { default as HeartIcon } from "./HeartIcon";
 export { default as BookMarkIcon } from "./BookMarkIcon";
 export { default as CommentIcon } from "./CommentIcon";
 export { default as PaperPlaneIcon } from "./PaperPlaneIcon";
+
+// Direction
+export { default as ArrowDoubleLeftIcon } from "./ArrowDoubleLeftIcon";
+export { default as ArrowDoubleRightIcon } from "./ArrowDoubleRightIcon";

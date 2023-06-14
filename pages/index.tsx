@@ -32,7 +32,8 @@ import {
 } from "@chakra-ui/react";
 import Image from "next/image";
 import Link from "next/link";
-import jobCard from "../data/homePageData";
+import { useRouter } from "next/router";
+import { jobCard } from "../data/homePageData";
 
 const dataCards: DataCardProps[] = [
   {
@@ -78,6 +79,7 @@ const dataCards: DataCardProps[] = [
 ];
 
 function Home() {
+  const router = useRouter();
   return (
     <LayoutMain>
       <section className="w-full bg-green-100 relative pt-[160px] pb-[140px]">
@@ -225,7 +227,7 @@ function Home() {
                 match you with the right freelancers.
               </p>
             </div>
-            {jobCard.map((ele: any, index: number) => (
+            {jobCard?.map((ele: any, index: number) => (
               <CardHorizontal data={ele} key={index} />
             ))}
             <Button
@@ -243,6 +245,7 @@ function Home() {
               _hover={{
                 backgroundColor: "#028c5d",
               }}
+              onClick={() => router.push("/jobList")}
             >
               View More
             </Button>

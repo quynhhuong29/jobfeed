@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import FooterAlt from "@/components/FooterAlt";
 import {
   BriefcaseIcon,
@@ -7,7 +8,9 @@ import {
 } from "@/components/icons";
 import JobCard from "@/components/JobCard";
 import { LayoutMain } from "@/components/layout";
-import jobCard from "@/data/homePageData";
+import Pagination from "@/components/Pagination";
+import { jobCard, jobListData } from "@/data/homePageData";
+import { useDataFetching } from "@/hooks/dataFetchingHook";
 import { ChevronRightIcon, SearchIcon } from "@chakra-ui/icons";
 import {
   Button,
@@ -15,10 +18,13 @@ import {
   InputGroup,
   InputLeftElement,
   Select,
+  Spinner,
 } from "@chakra-ui/react";
 import Link from "next/link";
 
 const jobList = () => {
+  const { loading, pages, currentPage, setCurrentPage, totalPages } =
+    useDataFetching("/getAllJob");
   return (
     <LayoutMain>
       <section className="w-full bg-[url('/assets/images/page-title.png')] bg-cover bg-[#029663] bg-center border-radius-custom relative pt-14 pb-16">
@@ -85,11 +91,31 @@ const jobList = () => {
             <h6 className="text-base mb-2 text-gray-700 font-medium">
               Showing all results
             </h6>
-            <div className="grid grid-cols-2 grid-flow-row gap-5 mt-6">
-              {jobCard.map((ele: any, index: number) => (
-                <JobCard data={ele} key={index} />
-              ))}
-            </div>
+
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <Spinner
+                  thickness="4px"
+                  speed="0.65s"
+                  emptyColor="gray.200"
+                  color="green"
+                  size="xl"
+                />
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 grid-flow-row gap-5 mt-6">
+                  {jobListData?.map((ele: any, index: number) => (
+                    <JobCard data={ele} key={ele?._id || index} />
+                  ))}
+                </div>
+                <Pagination
+                  totalPages={totalPages}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                />
+              </>
+            )}
           </div>
         </div>
       </section>

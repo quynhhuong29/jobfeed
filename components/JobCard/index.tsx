@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { ArrowRightIcon } from "@chakra-ui/icons";
 import { Button, IconButton } from "@chakra-ui/react";
 import Image from "next/image";
@@ -16,31 +17,38 @@ function JobCard({ data }: Props) {
     >
       <div className="flex flex-1 p-3 pt-4 items-start gap-3 relative">
         <div className="rounded-lg w-[16%]">
-          <Image
-            src={data?.logo}
-            width="55"
-            height="55"
+          <img
+            src={data?.company_info?.logo}
             alt="logo"
-            className="mx-auto"
+            className="mx-auto w-14 h-14"
           />
         </div>
         <div>
           <div>
             <Link href={"/"} className="inline-block mr-2">
               <h5 className="text-gray-800 font-semibold text-[17px]">
-                {data?.positionApply}
+                {data?.job_title}
               </h5>
             </Link>
-            <span className="text-sm text-gray-600">(0-2 Yrs Exp.)</span>
+            {data?.working_experience?.isRequired && (
+              <span className="text-sm text-gray-600">
+                ({data?.working_experience?.from || 0}-
+                {data?.working_experience?.to || 0} Yrs Exp.)
+              </span>
+            )}
           </div>
-          <p className="text-sm text-gray-600">Jobvia Technology Pvt.Ltd</p>
+          <p className="text-sm text-gray-600">
+            {data?.company_info?.companyName || ""}
+          </p>
           <div className="flex items-center gap-1 my-1">
             <MapPinIcon height="20px" width="10px" fill="#74788d" />
-            <p className="text-sm text-gray-600">{data?.location}</p>
+            <p className="text-sm text-gray-600">
+              {data?.working_location || ""}
+            </p>
           </div>
           <p className="text-sm text-gray-600 mb-2">
-            <span className="text-gray-600">$</span>
-            {data?.salary}
+            <span className="text-gray-600">{data?.salary?.money_type}</span>{" "}
+            {data?.salary?.min}-{data?.salary?.max} / month
           </p>
           <div className="">
             {data?.keys?.map((key: string, index: number) => {
