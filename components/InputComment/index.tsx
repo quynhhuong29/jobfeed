@@ -1,17 +1,27 @@
+import {
+  createCommentAsync,
+  selectLoadingNewComment,
+} from "@/redux/reducers/commentReducers";
+import { updatePostAction } from "@/redux/reducers/postReducers";
+import { useAppDispatch } from "@/redux/store";
+import { PostData } from "@/types/Posts";
 import { User } from "@/types/User";
 import { Button, Input } from "@chakra-ui/react";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
 interface Props {
-  postId: string;
-  postUserId: string;
   userAuth: User;
+  post: PostData;
 }
 
-const InputComment = ({ postId, postUserId, userAuth }: Props) => {
+const InputComment = ({ post, userAuth }: Props) => {
+  const dispatch = useAppDispatch();
   const [content, setContent] = useState("");
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const isLoading = useSelector(selectLoadingNewComment);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!content.trim()) return;
 
@@ -22,7 +32,24 @@ const InputComment = ({ postId, postUserId, userAuth }: Props) => {
       createdAt: new Date().toISOString(),
     };
 
-    console.log(newComment);
+    try {
+      const response = await dispatch(
+        createCommentAsync({ newComment, post, socket: null })
+      ).unwrap();
+
+      const updatedPost = {
+        ...post,
+        comments: [
+          ...post.comments,
+          { ...response?.newComment, user: userAuth },
+        ],
+      };
+      dispatch(updatePostAction(updatedPost));
+      // await dispatch(getPostsAsync());
+      setContent("");
+    } catch (err) {
+      console.log(err);
+    }
   };
   return (
     <form
@@ -47,7 +74,12 @@ const InputComment = ({ postId, postUserId, userAuth }: Props) => {
         value={content}
         onChange={(e) => setContent(e.target.value)}
       />
-      <Button variant={"unstyled"} color="blue" type="submit">
+      <Button
+        variant={"unstyled"}
+        color="blue"
+        type="submit"
+        isLoading={isLoading}
+      >
         Post
       </Button>
     </form>

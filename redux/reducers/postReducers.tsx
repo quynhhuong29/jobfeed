@@ -1,11 +1,11 @@
-import { Image } from "@/types/Posts";
-import { User } from "@/types/User";
+import { Image, PostData } from "@/types/Posts";
 import { imageUpload } from "@/utils/imageUpload.util";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { createPost, getPosts, likePost, updatePost } from "../apis/postApi";
 import { RootState } from "../store";
+import { PostState } from "../types/post.type";
 
-const initialState = {
+const initialState: PostState = {
   posts: [],
   isLoading: false,
   error: "",
@@ -32,7 +32,7 @@ export const createPostAsync = createAsyncThunk(
 export const getPostsAsync = createAsyncThunk("posts/getAllPosts", async () => {
   try {
     const response = await getPosts();
-    return response;
+    return response.posts;
   } catch (err: any) {
     console.log(err);
   }
@@ -69,11 +69,17 @@ export const updatePostAsync = createAsyncThunk(
   }
 );
 
-
 const postSlice = createSlice({
   name: "posts",
   initialState,
-  reducers: {},
+  reducers: {
+    updatePostAction(state, action) {
+      const updatedPosts: PostData[] = state.posts.map((post: PostData) =>
+        post._id === action.payload._id ? action.payload : post
+      );
+      state.posts = updatedPosts;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(createPostAsync.pending, (state) => {
@@ -124,4 +130,5 @@ const postSlice = createSlice({
 export const selectLoadingPost = (state: RootState) => state.post.isLoading;
 export const selectPosts = (state: RootState) => state.post.posts;
 
+export const { updatePostAction } = postSlice.actions;
 export default postSlice.reducer;

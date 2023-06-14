@@ -41,7 +41,7 @@ const NewsFeed = () => {
   }, [userLocal]);
 
   useEffect(() => {
-    if ((postsData as any)?.posts) setPosts((postsData as any).posts);
+    if (postsData) setPosts(postsData);
   }, [postsData]);
 
   return (
@@ -92,17 +92,7 @@ const NewsFeed = () => {
             </div>
           )}
           {posts?.map((post: PostData) => (
-            <PostCard
-              key={post?._id}
-              content={post?.content}
-              user={post?.user}
-              images={post?.images}
-              likes={post?.likes}
-              comments={post?.comments}
-              _id={post?._id}
-              createdAt={post?.createdAt}
-              userAuth={userAuth!}
-            />
+            <PostCard key={post?._id} post={post} userAuth={userAuth!} />
           ))}
         </div>
       </div>
