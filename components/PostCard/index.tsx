@@ -37,6 +37,7 @@ import { getPostsAsync } from "@/redux/reducers/postReducers";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import InputComment from "../InputComment";
+import Comments from "../Comments";
 
 interface Props {
   post: PostData;
@@ -269,6 +270,9 @@ const PostCard = ({ post, userAuth }: Props) => {
         <p className="text-gray-800 font-semibold">
           {post?.comments?.length || 0} Comments
         </p>
+      </div>
+      <div>
+        <Comments post={post} />
       </div>
       <div className="border-t border-gray-400 bg-gray-300 py-3 px-5">
         <InputComment

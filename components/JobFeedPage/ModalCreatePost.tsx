@@ -139,7 +139,7 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data }: Props) => {
         toast.success("Create a post success!!!");
       }
 
-      dispatch(getPostsAsync());
+      await dispatch(getPostsAsync());
       setImages([]);
       setContent("");
       if (stream) {

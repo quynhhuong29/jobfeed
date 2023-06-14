@@ -75,7 +75,7 @@ const NewsFeed = () => {
           <ModalCreatePost isOpen={isOpen} onClose={onClose} />
         </div>
         <div className="flex flex-col gap-6">
-          {isLoading && (
+          {isLoading ? (
             <div className="flex items-center justify-center">
               <Spinner
                 thickness="4px"
@@ -85,15 +85,16 @@ const NewsFeed = () => {
                 size="xl"
               />
             </div>
+          ) : (
+            posts?.map((post: PostData) => (
+              <PostCard key={post?._id} post={post} userAuth={userAuth!} />
+            ))
           )}
           {posts?.length === 0 && !isLoading && (
             <div className="flex items-center justify-center">
               <p className="text-center text-gray-800">No posts yet.</p>
             </div>
           )}
-          {posts?.map((post: PostData) => (
-            <PostCard key={post?._id} post={post} userAuth={userAuth!} />
-          ))}
         </div>
       </div>
       <div className="col-span-2 p-3">
