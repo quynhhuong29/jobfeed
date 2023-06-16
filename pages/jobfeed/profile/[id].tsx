@@ -59,10 +59,15 @@ import ErrorMessage from "@/components/ErrorMessage";
 import { checkImage, imageUpload } from "@/utils/imageUpload.util";
 import { updateInfoUser } from "@/redux/apis/userAPI";
 import withAuth from "@/hocs/withAuth";
-import { selectIsLoggedIn } from "@/redux/reducers/authReducers";
+import {
+  changePasswordAsync,
+  selectAuth,
+  selectIsLoggedIn,
+} from "@/redux/reducers/authReducers";
 import { User } from "@/types/User";
 import FollowButton from "@/components/FollowButton";
 import ModalFollower from "@/components/ModalFollower";
+import { toast } from "react-toastify";
 
 const schema = yup.object().shape({
   firstName: yup.string(),
@@ -73,21 +78,21 @@ const schema = yup.object().shape({
     .test(
       "empty-check",
       "Password must be at least 6 characters",
-      (currentPassword) => currentPassword!.length == 0
+      (currentPassword) => currentPassword!.length >= 6
     ),
   newPassword: yup
     .string()
     .test(
       "empty-check",
       "Password must be at least 6 characters",
-      (newPassword) => newPassword!.length == 0
+      (newPassword) => newPassword!.length >= 6
     ),
   confirmPassword: yup
     .string()
     .test(
       "empty-check",
       "Password must be at least 6 characters",
-      (confirmPassword) => confirmPassword!.length == 0
+      (confirmPassword) => confirmPassword!.length >= 6
     )
     .oneOf([yup.ref("newPassword"), ""], "Passwords must match"),
   introduce: yup.string(),
@@ -113,6 +118,7 @@ function Profile() {
   const isAuthenticated = useSelector(selectIsLoggedIn);
   const searchUserData = useSelector(selectSearchUser);
   const userInfoData = useSelector(selectUserInfo);
+  const loadingAuth = useSelector(selectAuth)?.isLoading;
 
   const modalRef = useRef<any>(null);
   const {
@@ -192,6 +198,27 @@ function Profile() {
     } catch (err) {
       console.log(err);
       setIsLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (data: any) => {
+    if (data) {
+      try {
+        let dataRequest = {
+          current_password: data.currentPassword,
+          new_password: data.newPassword,
+          cf_password: data.confirmPassword,
+        };
+        await dispatch(changePasswordAsync(dataRequest)).unwrap();
+
+        setValue("currentPassword", "");
+        setValue("newPassword", "");
+        setValue("confirmPassword", "");
+        toast.success("Change password successfully");
+      } catch (err: any) {
+        if (err.message) toast.error(err.message);
+        else toast.error("Something went wrong. Please try again.");
+      }
     }
   };
 
@@ -439,7 +466,10 @@ function Profile() {
               <TabList>
                 <Tab>Overview</Tab>
                 {userAuth && userAuth._id === userInfoData?.data?._id && (
-                  <Tab>Settings</Tab>
+                  <>
+                    <Tab>Settings</Tab>
+                    <Tab>Change Password</Tab>
+                  </>
                 )}
               </TabList>
               <TabIndicator
@@ -901,6 +931,22 @@ function Profile() {
                         </div>
                       </div>
                     </div>
+                    <div className="flex justify-end mt-4">
+                      <Button
+                        type="submit"
+                        colorScheme={"green"}
+                        isLoading={isLoading}
+                      >
+                        Update
+                      </Button>
+                    </div>
+                  </form>
+                </TabPanel>
+                <TabPanel>
+                  <form
+                    className="mt-4"
+                    onSubmit={handleSubmit(handleChangePassword)}
+                  >
                     <div className="mt-4">
                       <h5 className="text-lg text-gray-700 mb-2 font-bold">
                         Change Password
@@ -1011,7 +1057,7 @@ function Profile() {
                       <Button
                         type="submit"
                         colorScheme={"green"}
-                        isLoading={isLoading}
+                        isLoading={loadingAuth}
                       >
                         Update
                       </Button>

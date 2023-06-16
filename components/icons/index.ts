@@ -28,3 +28,5 @@ export { default as PaperPlaneIcon } from "./PaperPlaneIcon";
 // Direction
 export { default as ArrowDoubleLeftIcon } from "./ArrowDoubleLeftIcon";
 export { default as ArrowDoubleRightIcon } from "./ArrowDoubleRightIcon";
+
+export { default as HamburgerDotIcon } from "./HamburgerDotIcon";

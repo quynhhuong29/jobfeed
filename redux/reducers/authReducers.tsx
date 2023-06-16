@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { login, logout } from "../apis/authAPI";
+import { changePassword, login, logout } from "../apis/authAPI";
 import { AuthState } from "../types/auth.type";
 import { RootState } from "../store";
 import { getItem } from "@/utils/localStorage.util";
@@ -44,6 +44,28 @@ export const logoutAsync = createAsyncThunk(
   }
 );
 
+export const changePasswordAsync = createAsyncThunk(
+  "auth/changePassword",
+  async (
+    { current_password, new_password, cf_password }: any,
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await changePassword({
+        current_password,
+        new_password,
+        cf_password,
+      });
+      return response;
+    } catch (err: any) {
+      if (!err.response) {
+        throw err;
+      }
+      return rejectWithValue(err.response.data);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -76,6 +98,19 @@ const authSlice = createSlice({
         state = initialState;
       })
       .addCase(logoutAsync.rejected, (state) => {
+        state.isLoading = false;
+
+        state.err = "Something went wrong. Please try again.";
+      })
+      .addCase(changePasswordAsync.pending, (state) => {
+        state.err = "";
+        state.isLoading = true;
+      })
+      .addCase(changePasswordAsync.fulfilled, (state) => {
+        state.isLoading = false;
+        state.err = "";
+      })
+      .addCase(changePasswordAsync.rejected, (state) => {
         state.isLoading = false;
 
         state.err = "Something went wrong. Please try again.";

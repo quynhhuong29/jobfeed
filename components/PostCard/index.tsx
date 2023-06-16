@@ -52,8 +52,10 @@ const PostCard = ({ post, userAuth }: Props) => {
 
   const [expanded, setExpanded] = useState(false);
   const [isLike, setIsLike] = useState(false);
+  const [loadingLike, setLoadingLike] = useState(false);
   const [numberLikes, setNumberLikes] = useState(0);
   const [saved, setSaved] = useState(false);
+  const [loadingSaved, setLoadingSaved] = useState(false);
 
   const { content, images, _id } = post;
 
@@ -89,39 +91,56 @@ const PostCard = ({ post, userAuth }: Props) => {
   };
 
   const handleLikePost = async () => {
+    if (loadingLike) return;
+
+    setLoadingLike(true);
     if (isLike && post) {
       try {
+        setIsLike(false);
+        setNumberLikes(numberLikes - 1);
         await unLikePost(post._id);
+        setLoadingLike(false);
       } catch (err) {
-        console.log(err);
+        setIsLike(true);
+        setNumberLikes(numberLikes + 1);
+        setLoadingLike(false);
       }
     } else {
       try {
+        setIsLike(true);
+        setNumberLikes(numberLikes + 1);
         await likePost(post._id);
+        setLoadingLike(false);
       } catch (err) {
-        console.log(err);
+        setLoadingLike(false);
+        setIsLike(false);
+        setNumberLikes(numberLikes - 1);
       }
     }
-    setIsLike(!isLike);
-    setNumberLikes(numberLikes + (isLike ? -1 : 1));
   };
 
   const handleSavePost = async () => {
+    if (loadingSaved) return;
+
+    setSaved(!saved);
+    setLoadingSaved(true);
     if (saved && post) {
       try {
         await unSavePost(post._id);
+        setLoadingSaved(false);
       } catch (err) {
-        console.log(err);
+        setSaved(!saved);
+        setLoadingSaved(false);
       }
     } else {
       try {
         await savePost(post._id);
+        setLoadingSaved(false);
       } catch (err) {
-        console.log(err);
+        setSaved(!saved);
+        setLoadingSaved(false);
       }
     }
-
-    setSaved(!saved);
   };
 
   useEffect(() => {
@@ -133,11 +152,8 @@ const PostCard = ({ post, userAuth }: Props) => {
     } else {
       setIsLike(false);
     }
-  }, [post?.likes, userAuth._id]);
-
-  useEffect(() => {
     setNumberLikes(post?.likes?.length);
-  }, [post?.likes]);
+  }, [post?.likes, userAuth._id]);
 
   useEffect(() => {
     if (userAuth.saved.find((id) => id === post?._id)) {
@@ -216,6 +232,9 @@ const PostCard = ({ post, userAuth }: Props) => {
               />
             }
             variant="unstyled"
+            sx={{
+              opacity: loadingLike ? 0.5 : 1,
+            }}
           />
           <IconButton
             aria-label="Like post"
@@ -263,16 +282,19 @@ const PostCard = ({ post, userAuth }: Props) => {
             />
           }
           variant="unstyled"
+          sx={{
+            opacity: loadingSaved ? 0.5 : 1,
+          }}
         />
       </div>
-      <div className="flex items-center justify-between px-8 my-1">
+      <div className="flex items-center justify-between px-8 my-1 border-y border-gray-400 py-2">
         <p className="text-gray-800 font-semibold">{numberLikes} Likes</p>
         <p className="text-gray-800 font-semibold">
           {post?.comments?.length || 0} Comments
         </p>
       </div>
       <div>
-        <Comments post={post} />
+        <Comments post={post} userAuth={userAuth} />
       </div>
       <div className="border-t border-gray-400 bg-gray-300 py-3 px-5">
         <InputComment

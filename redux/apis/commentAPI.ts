@@ -18,4 +18,26 @@ async function createComment({
   ).data;
 }
 
-export { createComment };
+async function deleteComment({ _id }: any): Promise<any> {
+  return (await api.delete(`/comment/${_id}`)).data;
+}
+
+async function updateComment({ _id, content }: any): Promise<any> {
+  return (await api.patch(`/comment/${_id}`, { content })).data;
+}
+
+async function likeComment(_id: string): Promise<any> {
+  return (await api.patch(`/comment/${_id}/like`)).data;
+}
+
+async function unLikeComment(_id: string): Promise<any> {
+  return (await api.patch(`/comment/${_id}/unlike`)).data;
+}
+
+export {
+  createComment,
+  deleteComment,
+  updateComment,
+  likeComment,
+  unLikeComment,
+};

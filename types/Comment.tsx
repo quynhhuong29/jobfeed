@@ -9,4 +9,5 @@ export interface Comment {
   updatedAt: string;
   user: User;
   _id: string;
+  reply: any;
 }
