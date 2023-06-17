@@ -38,6 +38,9 @@ interface Props {
   userPost: User;
   post: PostData;
   commentId: string;
+  replyComments?: Comment[];
+  amountComments?: number;
+  setAmountComments?: any;
 }
 const MAX_CONTENT_LENGTH = 150;
 
@@ -47,6 +50,7 @@ const CommentCard = ({
   userAuth,
   post,
   commentId,
+  replyComments,
 }: Props) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const dispatch = useAppDispatch();
@@ -151,7 +155,14 @@ const CommentCard = ({
               ) : (
                 <>
                   <p className="text-xs font-semibold mb-1">{`${comment?.user?.firstName} ${comment?.user?.lastName}`}</p>
-
+                  {comment.tag && comment?.tag?._id !== comment?.user?._id && (
+                    <Link
+                      href={`/jobfeed/profile/${comment.tag._id}`}
+                      className="text-blue w-[30%] mr-1"
+                    >
+                      @{comment.tag.firstName} {comment.tag.lastName}
+                    </Link>
+                  )}
                   {expanded || comment?.content?.length <= MAX_CONTENT_LENGTH
                     ? comment?.content
                     : comment?.content?.slice(0, MAX_CONTENT_LENGTH) + "..."}
@@ -274,6 +285,25 @@ const CommentCard = ({
               </InputComment>
             </div>
           )}
+          {replyComments?.map((commentReply) => {
+            if (commentId === commentReply.reply) {
+              return (
+                <div key={commentReply._id}>
+                  <CommentCard
+                    key={commentReply._id}
+                    comment={commentReply}
+                    commentId={commentReply._id}
+                    userPost={post.user}
+                    userAuth={userAuth}
+                    post={post}
+                    replyComments={replyComments.filter(
+                      (comment) => comment.reply === commentReply._id
+                    )}
+                  />
+                </div>
+              );
+            }
+          })}
         </div>
 
         <Modal isOpen={isOpen} onClose={onClose} isCentered>

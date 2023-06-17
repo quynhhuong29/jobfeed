@@ -1,6 +1,7 @@
 import {
   createPostAsync,
   getPostsAsync,
+  getUserPostsAsync,
   selectLoadingPost,
   updatePostAsync,
 } from "@/redux/reducers/postReducers";
@@ -29,9 +30,10 @@ interface Props {
   onClose: () => void;
   isEdit?: boolean;
   data?: Post;
+  userId?: string;
 }
 
-const ModalCreatePost = ({ isOpen, onClose, isEdit, data }: Props) => {
+const ModalCreatePost = ({ isOpen, onClose, isEdit, data, userId }: Props) => {
   const dispatch = useAppDispatch();
 
   const [content, setContent] = useState("");
@@ -139,7 +141,11 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data }: Props) => {
         toast.success("Create a post success!!!");
       }
 
-      await dispatch(getPostsAsync());
+      if (userId) {
+        await dispatch(getUserPostsAsync(userId));
+      } else {
+        await dispatch(getPostsAsync());
+      }
       setImages([]);
       setContent("");
       if (stream) {

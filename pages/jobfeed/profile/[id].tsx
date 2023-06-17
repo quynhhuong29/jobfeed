@@ -68,6 +68,7 @@ import { User } from "@/types/User";
 import FollowButton from "@/components/FollowButton";
 import ModalFollower from "@/components/ModalFollower";
 import { toast } from "react-toastify";
+import NewsFeed from "@/components/JobFeedPage/NewsFeed";
 
 const schema = yup.object().shape({
   firstName: yup.string(),
@@ -465,6 +466,7 @@ function Profile() {
             <Tabs position="relative" variant="unstyled">
               <TabList>
                 <Tab>Overview</Tab>
+                <Tab>Feeds</Tab>
                 {userAuth && userAuth._id === userInfoData?.data?._id && (
                   <>
                     <Tab>Settings</Tab>
@@ -676,6 +678,9 @@ function Profile() {
                       </CustomBadge>
                     </div>
                   </div>
+                </TabPanel>
+                <TabPanel>
+                  <NewsFeed isPostDetails userId={userData?._id || ""} />
                 </TabPanel>
                 <TabPanel>
                   <form

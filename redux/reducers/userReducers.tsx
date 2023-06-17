@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getUserInfoById, searchUser } from "../apis/userAPI";
+import { getUserInfoById, searchUser, suggestionUsers } from "../apis/userAPI";
 import { RootState } from "../store";
 
 const initialState: any = {
@@ -9,6 +9,11 @@ const initialState: any = {
     err: "",
   },
   userInfo: {
+    data: [],
+    isLoading: false,
+    err: "",
+  },
+  suggestionUsers: {
     data: [],
     isLoading: false,
     err: "",
@@ -36,6 +41,21 @@ export const getUserInfoByIdAsync = createAsyncThunk(
     try {
       const response = await getUserInfoById(id);
       return response?.user;
+    } catch (err: any) {
+      if (!err.response) {
+        throw err;
+      }
+      return rejectWithValue(err.response.data);
+    }
+  }
+);
+
+export const getUsersSuggestionAsync = createAsyncThunk(
+  "user/suggestionUsers",
+  async ({}, { rejectWithValue }: any) => {
+    try {
+      const response = await suggestionUsers();
+      return response;
     } catch (err: any) {
       if (!err.response) {
         throw err;
@@ -82,11 +102,28 @@ const userSlice = createSlice({
         state.userInfo.data = initialState.userInfo.data;
 
         state.userInfo.err = action.payload?.message ?? "";
+      })
+      .addCase(getUsersSuggestionAsync.pending, (state) => {
+        state.suggestionUsers.err = "";
+        state.suggestionUsers.isLoading = true;
+      })
+      .addCase(getUsersSuggestionAsync.fulfilled, (state, action) => {
+        state.suggestionUsers.isLoading = false;
+
+        state.suggestionUsers.data = action.payload;
+        state.suggestionUsers.err = "";
+      })
+      .addCase(getUsersSuggestionAsync.rejected, (state, action: any) => {
+        state.suggestionUsers.isLoading = false;
+
+        state.suggestionUsers.err = action.payload?.message ?? "";
       });
   },
 });
 
 export const selectSearchUser = (state: RootState) => state.user.search;
 export const selectUserInfo = (state: RootState) => state.user.userInfo;
+export const selectSuggestionUsers = (state: RootState) =>
+  state.user.suggestionUsers;
 
 export default userSlice.reducer;

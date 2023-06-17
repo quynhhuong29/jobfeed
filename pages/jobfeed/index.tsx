@@ -12,6 +12,7 @@ import { useDebounce } from "@/hooks/debounceHook";
 import { getPosts } from "@/redux/apis/postApi";
 import { getPostsAsync } from "@/redux/reducers/postReducers";
 import {
+  getUsersSuggestionAsync,
   searchUserAsync,
   selectSearchUser,
 } from "@/redux/reducers/userReducers";

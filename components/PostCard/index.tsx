@@ -8,6 +8,13 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   useDisclosure,
 } from "@chakra-ui/react";
 import {
@@ -33,11 +40,17 @@ import {
   unSavePost,
 } from "@/redux/apis/postApi";
 import { useAppDispatch } from "@/redux/store";
-import { getPostsAsync } from "@/redux/reducers/postReducers";
+import {
+  deletePostAction,
+  getPostsAsync,
+  selectPosts,
+  updatePostAsync,
+} from "@/redux/reducers/postReducers";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import InputComment from "../InputComment";
 import Comments from "../Comments";
+import Link from "next/link";
 
 interface Props {
   post: PostData;
@@ -48,6 +61,11 @@ const MAX_CONTENT_LENGTH = 150;
 
 const PostCard = ({ post, userAuth }: Props) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
+  const {
+    isOpen: isOpenDelete,
+    onClose: onCloseDelete,
+    onOpen: onOpenDelete,
+  } = useDisclosure();
   const dispatch = useAppDispatch();
 
   const [expanded, setExpanded] = useState(false);
@@ -56,6 +74,7 @@ const PostCard = ({ post, userAuth }: Props) => {
   const [numberLikes, setNumberLikes] = useState(0);
   const [saved, setSaved] = useState(false);
   const [loadingSaved, setLoadingSaved] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
 
   const { content, images, _id } = post;
 
@@ -79,9 +98,13 @@ const PostCard = ({ post, userAuth }: Props) => {
   };
   const handleRemovePost = async () => {
     try {
+      setLoadingDelete(true);
       await deletePost(post._id);
-      dispatch(getPostsAsync());
+      dispatch(deletePostAction({ _id: post._id }));
+      toast.success("Post deleted successfully");
+      setLoadingDelete(false);
     } catch (err: any) {
+      setLoadingDelete(false);
       toast.error(err);
     }
   };
@@ -168,7 +191,10 @@ const PostCard = ({ post, userAuth }: Props) => {
         <div className="flex items-center gap-2">
           <Avatar size="md" name="Avatar" src={post?.user?.avatar || ""} />
           <div className="flex flex-col">
-            <p className="text-base text-gray-800 font-semibold">{`${post?.user?.firstName} ${post?.user?.lastName}`}</p>
+            <Link
+              className="text-base text-gray-800 font-semibold cursor-pointer hover:underline"
+              href={`/jobfeed/profile/${post?.user?._id}`}
+            >{`${post?.user?.firstName} ${post?.user?.lastName}`}</Link>
             <span className="text-[15px] text-gray-600 font-normal">
               {moment(post?.createdAt).fromNow()}
             </span>
@@ -185,7 +211,7 @@ const PostCard = ({ post, userAuth }: Props) => {
             {userAuth._id === post?.user?._id && (
               <>
                 <MenuItem onClick={handleEditPost}>Edit</MenuItem>
-                <MenuItem onClick={handleRemovePost}>Remove</MenuItem>
+                <MenuItem onClick={onOpenDelete}>Remove</MenuItem>
               </>
             )}
             <MenuItem onClick={() => {}}>Copy link</MenuItem>
@@ -287,7 +313,7 @@ const PostCard = ({ post, userAuth }: Props) => {
           }}
         />
       </div>
-      <div className="flex items-center justify-between px-8 my-1 border-y border-gray-400 py-2">
+      <div className="flex items-center justify-between px-8 mt-1 border-y border-gray-400 py-2">
         <p className="text-gray-800 font-semibold">{numberLikes} Likes</p>
         <p className="text-gray-800 font-semibold">
           {post?.comments?.length || 0} Comments
@@ -297,12 +323,7 @@ const PostCard = ({ post, userAuth }: Props) => {
         <Comments post={post} userAuth={userAuth} />
       </div>
       <div className="border-t border-gray-400 bg-gray-300 py-3 px-5">
-        <InputComment
-          // postId={post?._id}
-          // postUserId={post?.user._id}
-          userAuth={userAuth}
-          post={post}
-        />
+        <InputComment userAuth={userAuth} post={post} />
       </div>
       {isOpen && (
         <ModalCreatePost
@@ -312,6 +333,28 @@ const PostCard = ({ post, userAuth }: Props) => {
           data={{ content, images, _id }}
         />
       )}
+      <Modal isOpen={isOpenDelete} onClose={onCloseDelete} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Delete Post?</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>Are you sure you want to delete this post?</ModalBody>
+
+          <ModalFooter sx={{ gap: "4px" }}>
+            <Button variant="ghost" onClick={onCloseDelete}>
+              No
+            </Button>
+            <Button
+              colorScheme="green"
+              mr={3}
+              onClick={handleRemovePost}
+              isLoading={loadingDelete}
+            >
+              Delete
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 };

@@ -39,6 +39,7 @@ const InputComment = ({
   const dispatch = useAppDispatch();
   const [content, setContent] = useState("");
   const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
+  const [isLoadingReply, setIsLoadingReply] = useState(false);
 
   const isLoading = useSelector(selectLoadingNewComment);
 
@@ -60,6 +61,7 @@ const InputComment = ({
 
     try {
       if (!isEdit) {
+        if (onReply?.commentId) setIsLoadingReply(true);
         const response = await dispatch(
           createCommentAsync({ newComment, post, socket: null })
         ).unwrap();
@@ -73,6 +75,7 @@ const InputComment = ({
         };
         dispatch(updatePostAction(updatedPost));
         if (setOnReply) return setOnReply(false);
+        if (onReply?.commentId) setIsLoadingReply(false);
         setContent("");
       } else {
         setIsLoadingUpdate(true);
@@ -106,6 +109,7 @@ const InputComment = ({
     } catch (err: any) {
       if (err.message) toast.error(err.message);
       else toast.error("Something went wrong. Please try again.");
+      if (onReply?.commentId) setIsLoadingReply(false);
     }
   };
 
@@ -164,14 +168,25 @@ const InputComment = ({
         />
       )}
       <Icons setContent={setContent} content={content} />
-      <Button
-        variant={"unstyled"}
-        color="blue"
-        type="submit"
-        isLoading={(isEdit ? isLoadingUpdate : isLoading) as boolean}
-      >
-        Post
-      </Button>
+      {onReply?.commentId ? (
+        <Button
+          variant={"unstyled"}
+          color="blue"
+          type="submit"
+          isLoading={isLoadingReply}
+        >
+          Post
+        </Button>
+      ) : (
+        <Button
+          variant={"unstyled"}
+          color="blue"
+          type="submit"
+          isLoading={(isEdit ? isLoadingUpdate : isLoading) as boolean}
+        >
+          Post
+        </Button>
+      )}
     </form>
   );
 };

@@ -1,7 +1,13 @@
 import { Image, PostData } from "@/types/Posts";
 import { imageUpload } from "@/utils/imageUpload.util";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { createPost, getPosts, likePost, updatePost } from "../apis/postApi";
+import {
+  createPost,
+  getPosts,
+  getUserPosts,
+  likePost,
+  updatePost,
+} from "../apis/postApi";
 import { RootState } from "../store";
 import { PostState } from "../types/post.type";
 
@@ -69,6 +75,18 @@ export const updatePostAsync = createAsyncThunk(
   }
 );
 
+export const getUserPostsAsync = createAsyncThunk(
+  "posts/userPosts",
+  async (_id: string, { rejectWithValue }) => {
+    try {
+      const response = await getUserPosts(_id);
+      return response.posts;
+    } catch (err: any) {
+      console.log(err);
+    }
+  }
+);
+
 const postSlice = createSlice({
   name: "posts",
   initialState,
@@ -76,6 +94,12 @@ const postSlice = createSlice({
     updatePostAction(state, action) {
       const updatedPosts: PostData[] = state.posts.map((post: PostData) =>
         post._id === action.payload._id ? action.payload : post
+      );
+      state.posts = updatedPosts;
+    },
+    deletePostAction(state, action) {
+      const updatedPosts: PostData[] = state.posts.filter(
+        (post: PostData) => post._id !== action.payload._id
       );
       state.posts = updatedPosts;
     },
@@ -124,11 +148,26 @@ const postSlice = createSlice({
         state.isLoading = false;
 
         state.error = action.payload?.message ?? "";
+      })
+      .addCase(getUserPostsAsync.pending, (state) => {
+        state.error = "";
+        state.isLoading = true;
+      })
+      .addCase(getUserPostsAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+
+        state.error = "";
+        state.posts = action.payload;
+      })
+      .addCase(getUserPostsAsync.rejected, (state, action: any) => {
+        state.isLoading = false;
+
+        state.error = action.payload?.message ?? "";
       });
   },
 });
 export const selectLoadingPost = (state: RootState) => state.post.isLoading;
 export const selectPosts = (state: RootState) => state.post.posts;
 
-export const { updatePostAction } = postSlice.actions;
+export const { updatePostAction, deletePostAction } = postSlice.actions;
 export default postSlice.reducer;
