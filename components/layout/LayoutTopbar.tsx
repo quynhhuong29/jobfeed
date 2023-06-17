@@ -43,6 +43,24 @@ export const menu: MenuProps[] = [
     name: "Job List",
     link: "/jobList",
   },
+  {
+    name: "HR Center",
+    isCompany: true,
+    submenu: [
+      {
+        name: "Dashboard",
+        link: "/dashboard",
+      },
+      {
+        name: "Job Post",
+        link: "/jobPost",
+      },
+      {
+        name: "Manage Job",
+        link: "/manageJob",
+      },
+    ],
+  },
 ];
 
 const Menu = dynamic(
@@ -60,6 +78,7 @@ const Topbar = () => {
   const isAuthenticated = useSelector(selectIsLoggedIn);
   const username = getItem("username");
   const [userAuth, setUserAuth] = useState<any>();
+  const [listMenu, setListMenu] = useState<MenuProps[]>(menu);
 
   // const userAuth = JSON.parse(localStorage.getItem("user")!);
 
@@ -72,6 +91,14 @@ const Topbar = () => {
     if (!userLocal) return;
     setUserAuth(JSON.parse(userLocal));
   }, [userLocal]);
+
+  useEffect(() => {
+    if (userAuth?.role === "candidate") {
+      setListMenu(menu.filter((item) => item.isCompany !== true));
+    } else {
+      setListMenu(menu);
+    }
+  }, [userAuth]);
   return (
     <div className="bg-white z-[999] sticky top-0 right-0 left-0 shadow-[0_3px_10px_0_rgba(49,64,71,.08)]">
       <div className="max-w-[90%] mx-auto flex items-center justify-between px-3">
@@ -83,7 +110,7 @@ const Topbar = () => {
             alt="logo"
           />
         </Link>
-        <MenuBar data={menu} className="mx-auto" />
+        <MenuBar data={listMenu} className="mx-auto" />
         <div className="flex items-center">
           <Menu>
             <div className="relative">
@@ -192,15 +219,9 @@ const Topbar = () => {
                 </MenuList>
               </Menu>
             ) : (
-              <div className="flex items-center gap-2">
-                <Link href="/login" className="hover:underline">
-                  Login
-                </Link>
-                <p>/</p>
-                <Link href="/signup" className="hover:underline">
-                  Register
-                </Link>
-              </div>
+              <Link href="/login" className="hover:underline">
+                Login
+              </Link>
             )}
           </div>
         </div>

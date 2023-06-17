@@ -18,6 +18,7 @@ import {
 } from "@/components/icons";
 import { LayoutMain } from "@/components/layout";
 import withAuth from "@/hocs/withAuth";
+import { selectAuth } from "@/redux/reducers/authReducers";
 import {
   ArrowForwardIcon,
   ChevronRightIcon,
@@ -33,6 +34,8 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { jobCard } from "../data/homePageData";
 
 const dataCards: DataCardProps[] = [
@@ -80,6 +83,14 @@ const dataCards: DataCardProps[] = [
 
 function Home() {
   const router = useRouter();
+  const auth = useSelector(selectAuth);
+  const [content, setContent] = useState("");
+  useEffect(() => {
+    auth?.role === "company"
+      ? setContent("candidates")
+      : setContent("dream jobs");
+  }, [auth?.role]);
+
   return (
     <LayoutMain>
       <section className="w-full bg-green-100 relative pt-[160px] pb-[140px]">
@@ -91,7 +102,7 @@ function Home() {
                   We have 150,000+ live jobs
                 </p>
                 <h1 className="mb-4 text-5xl text-gray-700 font-semibold leading-tight">
-                  Find your dream jobs with{" "}
+                  Find your {content || ""} with{" "}
                   <span className="text-green-200">Jobvia</span>
                 </h1>
                 <p className="text-base text-gray-600 font-light">

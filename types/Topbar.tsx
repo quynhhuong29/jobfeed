@@ -6,5 +6,6 @@ export interface NavLink {
 export interface MenuProps {
   link?: string;
   name: string;
+  isCompany?: boolean;
   submenu?: NavLink[];
 }

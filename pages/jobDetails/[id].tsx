@@ -1,126 +1,88 @@
-/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @next/next/no-img-element */
 import FooterAlt from "@/components/FooterAlt";
 import {
-  BriefcaseIcon,
   FacebookIcon,
+  HeartIcon,
   LinkedInIcon,
   TwitterIcon,
 } from "@/components/icons";
-import JobCard from "@/components/JobCard";
 import { LayoutMain } from "@/components/layout";
-import Pagination from "@/components/Pagination";
-import { jobCard, jobListData } from "@/data/homePageData";
-import { useDataFetching } from "@/hooks/dataFetchingHook";
-import { ChevronRightIcon, SearchIcon } from "@chakra-ui/icons";
-import {
-  Button,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Select,
-  Spinner,
-} from "@chakra-ui/react";
+import { getInfoJobAsync, selectJob } from "@/redux/reducers/jobReducers";
+import { useAppDispatch } from "@/redux/store";
+import { ChevronRightIcon } from "@chakra-ui/icons";
+import { Avatar, IconButton, WrapItem } from "@chakra-ui/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
 
-const jobList = () => {
-  const { loading, pages, currentPage, setCurrentPage, totalPages } =
-    useDataFetching("/jobPost/getAllJob");
-  console.log("🚀 ~ file: index.tsx:27 ~ jobList ~ pages:", pages);
+function jobDetails() {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const job = useSelector(selectJob);
+
+  useEffect(() => {
+    if (!router.query.id) return;
+    dispatch(getInfoJobAsync(router.query.id.toString()));
+  }, [dispatch, router.query.id]);
+
+  console.log(job?.infoJob);
+
   return (
     <LayoutMain>
       <section className="w-full bg-[url('/assets/images/page-title.png')] bg-cover bg-[#029663] bg-center border-radius-custom relative pt-14 pb-16">
         <div className="md:max-w-[1140px] mx-auto flex items-center justify-between text-white">
           <div className="mx-auto pr-20">
-            <h3 className="text-2xl font-medium">Job List</h3>
+            <h3 className="text-2xl font-medium">Job details</h3>
           </div>
         </div>
       </section>
       <section className="w-full min-h-[100vh]  bg-white py-20">
-        <div className="md:max-w-[1164px] mx-auto ">
-          <div className="grid grid-cols-4 gap-2">
-            <InputGroup size="md">
-              <InputLeftElement
-                color={"#02af74"}
-                // eslint-disable-next-line react/no-children-prop
-                children={<BriefcaseIcon />}
-              />
-              <Input
-                placeholder="Job, Company name..."
-                size={"md"}
-                sx={{
-                  backgroundColor: "#fff",
-                  fontSize: "14px",
-                }}
-              />
-            </InputGroup>
-            <Select
-              variant="outline"
-              placeholder="Outline"
-              sx={{
-                backgroundColor: "#fff",
-                fontSize: "14px",
-              }}
-              size={"md"}
-            />
-            <Select
-              variant="outline"
-              placeholder="Outline"
-              sx={{
-                backgroundColor: "#fff",
-                fontSize: "14px",
-              }}
-              size={"md"}
-            />
-            <Button
-              leftIcon={<SearchIcon />}
-              colorScheme="teal"
-              variant="solid"
-              w={"100%"}
-              size={"md"}
-              sx={{
-                backgroundColor: "#02af74",
-                fontSize: "14px",
-              }}
-              _hover={{
-                backgroundColor: "#028c5d",
-              }}
-            >
-              Find Job
-            </Button>
-          </div>
-          <div className="mt-5">
-            <h6 className="text-base mb-2 text-gray-700 font-medium">
-              Showing all results
-            </h6>
-
-            {loading ? (
-              <div className="flex items-center justify-center">
-                <Spinner
-                  thickness="4px"
-                  speed="0.65s"
-                  emptyColor="gray.200"
-                  color="green"
-                  size="xl"
+        <div className="md:max-w-[1140px] mx-auto grid grid-cols-3 gap-5">
+          <div className="col-span-2 border border-gray-300 rounded-lg p-6 h-fit">
+            <div className="flex flex-col items-start justify-start border-b border-gray-300 pb-4">
+              <div className="rounded-lg w-[16%]">
+                <img
+                  src={job?.infoJob?.company_info?.logo}
+                  alt="logo"
+                  className="w-14 h-14 rounded-lg"
                 />
               </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-2 grid-flow-row gap-5 mt-6">
-                  {pages?.map((ele: any, index: number) => (
-                    <JobCard data={ele} key={ele?._id || index} />
-                  ))}
-                </div>
-                <Pagination
-                  totalPages={totalPages}
-                  currentPage={currentPage}
-                  setCurrentPage={setCurrentPage}
+              <div className="flex justify-between items-center w-full">
+                <h5 className="mt-6 text-gray-700 font-semibold text-lg capitalize">
+                  {job?.infoJob?.job_title}
+                </h5>
+                <IconButton
+                  aria-label="Like job"
+                  icon={
+                    <HeartIcon
+                      width="20px"
+                      height="20px"
+                      sx={{
+                        "& path": {
+                          stroke: "rgba(173,181,189,.55)",
+                        },
+                      }}
+                    />
+                  }
+                  size="sm"
+                  sx={{
+                    backgroundColor: "transparent",
+                    border: "1px solid #eff0f2",
+                    _hover: {
+                      backgroundColor: "#da3746",
+                      "& svg path": {
+                        stroke: "#fff",
+                      },
+                    },
+                  }}
                 />
-              </>
-            )}
+              </div>
+            </div>
           </div>
+          <div className="border border-gray-300 rounded-lg p-6 h-fit"></div>
         </div>
       </section>
-
       <footer className="w-full py-[60px] bg-[#2e3538] text-sm">
         <div className="md:max-w-[1140px] mx-auto grid grid-flow-col grid-cols-6">
           <div className="col-span-2 px-[10px]">
@@ -238,6 +200,6 @@ const jobList = () => {
       <FooterAlt />
     </LayoutMain>
   );
-};
+}
 
-export default jobList;
+export default jobDetails;

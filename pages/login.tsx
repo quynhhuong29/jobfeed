@@ -11,7 +11,7 @@ import { setLocalStorageContent } from "@/utils/localStorage.util";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { useAppDispatch } from "@/redux/store";
-import { loginAsync, selectAuth } from "@/redux/reducers/authReducers";
+import { loginAsync, selectAuth, setRole } from "@/redux/reducers/authReducers";
 import { useSelector } from "react-redux";
 
 interface ILogin {}
@@ -57,6 +57,7 @@ const Login = ({}: ILogin) => {
         setLocalStorageContent("username", response.user?.username);
         setLocalStorageContent("user", JSON.stringify(response.user));
 
+        dispatch(setRole(response.user?.role || "candidate"));
         router.push("/");
       }
     } catch (err: any) {

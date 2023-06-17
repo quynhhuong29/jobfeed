@@ -25,7 +25,10 @@ function JobCard({ data }: Props) {
         </div>
         <div>
           <div>
-            <Link href={"/"} className="inline-block mr-2">
+            <Link
+              href={`/jobDetails/${data?._id}`}
+              className="inline-block mr-2"
+            >
               <h5 className="text-gray-800 font-semibold text-[17px]">
                 {data?.job_title}
               </h5>

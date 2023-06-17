@@ -10,6 +10,7 @@ import { getItem, setLocalStorageContent } from "@/utils/localStorage.util";
 import { refreshToken } from "@/redux/apis/authAPI";
 import jwt_decode from "jwt-decode";
 import { getUserInfoById } from "@/redux/apis/userAPI";
+import { setRole } from "@/redux/reducers/authReducers";
 
 export default function App({ Component, pageProps }: AppProps) {
   const isTokenExpired = () => {

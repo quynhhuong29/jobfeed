@@ -81,6 +81,12 @@ const schema = yup.object().shape({
   firstName: yup.string(),
   lastName: yup.string(),
   email: yup.string().email("Email is invalid"),
+  introduce: yup.string(),
+  location: yup.string(),
+  languages: yup.string(),
+});
+
+const schemaPassword = yup.object().shape({
   currentPassword: yup
     .string()
     .test(
@@ -103,11 +109,10 @@ const schema = yup.object().shape({
       (confirmPassword) => confirmPassword!.length >= 6
     )
     .oneOf([yup.ref("newPassword"), ""], "Passwords must match"),
-  introduce: yup.string(),
-  location: yup.string(),
-  languages: yup.string(),
 });
+
 type FormData = yup.InferType<typeof schema>;
+type FormDataPassword = yup.InferType<typeof schemaPassword>;
 
 function Profile() {
   const dispatch = useAppDispatch();
@@ -139,6 +144,16 @@ function Profile() {
   } = useForm<FormData>({
     mode: "onChange",
     resolver: yupResolver(schema),
+  });
+
+  const {
+    handleSubmit: handleSubmitPassword,
+    register: registerPassword,
+    formState: { errors: errorsPassword },
+    setValue: setValuePassword
+  } = useForm<FormDataPassword>({
+    mode: "onChange",
+    resolver: yupResolver(schemaPassword),
   });
 
   let userLocal: string | null = "";
@@ -221,9 +236,9 @@ function Profile() {
         };
         await dispatch(changePasswordAsync(dataRequest)).unwrap();
 
-        setValue("currentPassword", "");
-        setValue("newPassword", "");
-        setValue("confirmPassword", "");
+        setValuePassword("currentPassword", "");
+        setValuePassword("newPassword", "");
+        setValuePassword("confirmPassword", "");
         toast.success("Change password successfully");
       } catch (err: any) {
         if (err.message) toast.error(err.message);
@@ -994,7 +1009,7 @@ function Profile() {
                 <TabPanel>
                   <form
                     className="mt-4"
-                    onSubmit={handleSubmit(handleChangePassword)}
+                    onSubmit={handleSubmitPassword(handleChangePassword)}
                   >
                     <div className="mt-4">
                       <h5 className="text-lg text-gray-700 mb-2 font-bold">
@@ -1024,12 +1039,12 @@ function Profile() {
                               boxShadow: "none",
                             },
                           }}
-                          {...register("currentPassword")}
+                          {...registerPassword("currentPassword")}
                         />
 
-                        {errors.currentPassword && (
+                        {errorsPassword.currentPassword && (
                           <ErrorMessage
-                            message={errors.currentPassword.message}
+                            message={errorsPassword.currentPassword.message}
                           />
                         )}
                       </div>
@@ -1058,12 +1073,12 @@ function Profile() {
                                 boxShadow: "none",
                               },
                             }}
-                            {...register("newPassword")}
+                            {...registerPassword("newPassword")}
                           />
 
-                          {errors.newPassword && (
+                          {errorsPassword.newPassword && (
                             <ErrorMessage
-                              message={errors.newPassword.message}
+                              message={errorsPassword.newPassword.message}
                             />
                           )}
                         </div>
@@ -1091,12 +1106,12 @@ function Profile() {
                                 boxShadow: "none",
                               },
                             }}
-                            {...register("confirmPassword")}
+                            {...registerPassword("confirmPassword")}
                           />
 
-                          {errors.confirmPassword && (
+                          {errorsPassword.confirmPassword && (
                             <ErrorMessage
-                              message={errors.confirmPassword.message}
+                              message={errorsPassword.confirmPassword.message}
                             />
                           )}
                         </div>

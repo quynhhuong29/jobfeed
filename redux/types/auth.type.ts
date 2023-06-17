@@ -6,6 +6,7 @@ export interface AuthState {
   };
   isLoading: boolean;
   err: string;
+  role: string;
 }
 
 export interface ApiErrorResponse {
