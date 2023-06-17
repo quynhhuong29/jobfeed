@@ -192,7 +192,15 @@ const Topbar = () => {
                 </MenuList>
               </Menu>
             ) : (
-              <Link href="/login">Login</Link>
+              <div className="flex items-center gap-2">
+                <Link href="/login" className="hover:underline">
+                  Login
+                </Link>
+                <p>/</p>
+                <Link href="/signup" className="hover:underline">
+                  Register
+                </Link>
+              </div>
             )}
           </div>
         </div>

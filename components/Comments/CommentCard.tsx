@@ -71,7 +71,7 @@ const CommentCard = ({
   };
 
   const handleRemoveComment = async () => {
-    if (userPost._id === userAuth._id || comment.user._id === userAuth._id) {
+    if (userPost._id === userAuth?._id || comment.user._id === userAuth?._id) {
       setIsLoading(true);
       try {
         await deleteComment({ _id: comment._id });
@@ -131,11 +131,11 @@ const CommentCard = ({
   };
 
   useEffect(() => {
-    if (comment.likes.find((like) => like._id === userAuth._id)) {
+    if (comment.likes.find((like) => like._id === userAuth?._id)) {
       setIsLike(true);
     }
     setNumberLikes(comment.likes.length);
-  }, [comment.likes, userAuth._id]);
+  }, [comment.likes, userAuth?._id]);
 
   return (
     <>
@@ -275,7 +275,7 @@ const CommentCard = ({
                 setOnReply={setOnReply}
               >
                 <Link
-                  href={`${!userAuth.isCompany ? "" : "/company"}/profile/${
+                  href={`${!userAuth?.isCompany ? "" : "/company"}/profile/${
                     onReply.user._id
                   }`}
                   className="text-blue w-[30%]"
