@@ -1,3 +1,4 @@
+import { Comment } from "./Comment";
 import { User } from "./User";
 export interface Post {
   _id: string;
@@ -8,7 +9,7 @@ export interface Post {
 export interface PostData {
   content: string;
   images: Image[];
-  comments: string[];
+  comments: Comment[];
   _id: string;
   createdAt: string;
   updatedAt: string;

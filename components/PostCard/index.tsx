@@ -8,6 +8,13 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   useDisclosure,
 } from "@chakra-ui/react";
 import {
@@ -21,7 +28,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { User } from "@/types/User";
-import { Image } from "@/types/Posts";
+import { Image, PostData } from "@/types/Posts";
 import ModalCreatePost from "../JobFeedPage/ModalCreatePost";
 import moment from "moment";
 import { toast } from "react-toastify";
@@ -33,41 +40,43 @@ import {
   unSavePost,
 } from "@/redux/apis/postApi";
 import { useAppDispatch } from "@/redux/store";
-import { getPostsAsync } from "@/redux/reducers/postReducers";
+import {
+  deletePostAction,
+  getPostsAsync,
+  selectPosts,
+  updatePostAsync,
+} from "@/redux/reducers/postReducers";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import InputComment from "../InputComment";
+import Comments from "../Comments";
+import Link from "next/link";
 
 interface Props {
-  content: string;
-  likes: string[];
-  comments: string[];
-  images: Image[];
-  _id: string;
-  user: User;
-  createdAt: string;
+  post: PostData;
   userAuth: User;
 }
 
 const MAX_CONTENT_LENGTH = 150;
 
-const PostCard = ({
-  content,
-  likes,
-  comments,
-  images,
-  _id,
-  user,
-  createdAt,
-  userAuth,
-}: Props) => {
+const PostCard = ({ post, userAuth }: Props) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
+  const {
+    isOpen: isOpenDelete,
+    onClose: onCloseDelete,
+    onOpen: onOpenDelete,
+  } = useDisclosure();
   const dispatch = useAppDispatch();
 
   const [expanded, setExpanded] = useState(false);
   const [isLike, setIsLike] = useState(false);
+  const [loadingLike, setLoadingLike] = useState(false);
   const [numberLikes, setNumberLikes] = useState(0);
   const [saved, setSaved] = useState(false);
+  const [loadingSaved, setLoadingSaved] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
+  const { content, images, _id } = post;
 
   const settings = {
     dots: true,
@@ -89,9 +98,13 @@ const PostCard = ({
   };
   const handleRemovePost = async () => {
     try {
-      await deletePost(_id);
-      dispatch(getPostsAsync());
+      setLoadingDelete(true);
+      await deletePost(post._id);
+      dispatch(deletePostAction({ _id: post._id }));
+      toast.success("Post deleted successfully");
+      setLoadingDelete(false);
     } catch (err: any) {
+      setLoadingDelete(false);
       toast.error(err);
     }
   };
@@ -101,69 +114,89 @@ const PostCard = ({
   };
 
   const handleLikePost = async () => {
-    if (isLike) {
+    if (loadingLike) return;
+
+    setLoadingLike(true);
+    if (isLike && post) {
       try {
-        await unLikePost(_id);
+        setIsLike(false);
+        setNumberLikes(numberLikes - 1);
+        await unLikePost(post._id);
+        setLoadingLike(false);
       } catch (err) {
-        console.log(err);
+        setIsLike(true);
+        setNumberLikes(numberLikes + 1);
+        setLoadingLike(false);
       }
     } else {
       try {
-        await likePost(_id);
+        setIsLike(true);
+        setNumberLikes(numberLikes + 1);
+        await likePost(post._id);
+        setLoadingLike(false);
       } catch (err) {
-        console.log(err);
+        setLoadingLike(false);
+        setIsLike(false);
+        setNumberLikes(numberLikes - 1);
       }
     }
-    setIsLike(!isLike);
-    setNumberLikes(numberLikes + (isLike ? -1 : 1));
   };
 
   const handleSavePost = async () => {
-    if (saved) {
+    if (loadingSaved) return;
+
+    setSaved(!saved);
+    setLoadingSaved(true);
+    if (saved && post) {
       try {
-        await unSavePost(_id);
+        await unSavePost(post._id);
+        setLoadingSaved(false);
       } catch (err) {
-        console.log(err);
+        setSaved(!saved);
+        setLoadingSaved(false);
       }
     } else {
       try {
-        await savePost(_id);
+        await savePost(post._id);
+        setLoadingSaved(false);
       } catch (err) {
-        console.log(err);
+        setSaved(!saved);
+        setLoadingSaved(false);
       }
     }
-
-    setSaved(!saved);
   };
 
   useEffect(() => {
-    if (likes.find((like: any) => like._id === userAuth._id)) {
+    if (
+      post.likes &&
+      post.likes.find((like: any) => like._id === userAuth?._id)
+    ) {
       setIsLike(true);
     } else {
       setIsLike(false);
     }
-  }, [likes, userAuth._id]);
+    setNumberLikes(post?.likes?.length);
+  }, [post?.likes, userAuth?._id]);
 
   useEffect(() => {
-    setNumberLikes(likes.length);
-  }, [likes]);
-
-  useEffect(() => {
-    if (userAuth.saved.find((id) => id === _id)) {
+    if (userAuth?.saved?.find((id) => id === post?._id)) {
       setSaved(true);
     } else {
       setSaved(false);
     }
-  }, [userAuth.saved, _id]);
+  }, [userAuth?.saved, post?._id]);
   return (
     <div className="border border-gray-300 rounded-lg shadow-lg">
       <div className="flex px-6 py-4 items-center justify-between">
         <div className="flex items-center gap-2">
-          <Avatar size="md" name="Avatar" src={user?.avatar || ""} />
+          <Avatar size="md" name="Avatar" src={post?.user?.avatar || ""} />
           <div className="flex flex-col">
-            <p className="text-base text-gray-800 font-semibold">{`${user?.firstName} ${user?.lastName}`}</p>
+            <Link
+              className="text-base text-gray-800 font-semibold cursor-pointer hover:underline"
+              href={`/profile/${post?.user?._id}`}
+            >{`${post?.user?.firstName} ${post?.user?.lastName}`}</Link>
             <span className="text-[15px] text-gray-600 font-normal">
-              {moment(createdAt).fromNow()}
+              {moment(post?.createdAt).fromNow()}
             </span>
           </div>
         </div>
@@ -175,10 +208,10 @@ const PostCard = ({
             variant="unstyled"
           />
           <MenuList>
-            {userAuth._id === user._id && (
+            {userAuth?._id === post?.user?._id && (
               <>
                 <MenuItem onClick={handleEditPost}>Edit</MenuItem>
-                <MenuItem onClick={handleRemovePost}>Remove</MenuItem>
+                <MenuItem onClick={onOpenDelete}>Remove</MenuItem>
               </>
             )}
             <MenuItem onClick={() => {}}>Copy link</MenuItem>
@@ -186,10 +219,10 @@ const PostCard = ({
         </Menu>
       </div>
       <div className="px-6 mb-3 text-base text-gray-800">
-        {expanded || content.length <= MAX_CONTENT_LENGTH
-          ? content
-          : content.slice(0, MAX_CONTENT_LENGTH) + "..."}
-        {content.length > MAX_CONTENT_LENGTH && (
+        {expanded || post?.content.length <= MAX_CONTENT_LENGTH
+          ? post?.content
+          : post?.content.slice(0, MAX_CONTENT_LENGTH) + "..."}
+        {post?.content.length > MAX_CONTENT_LENGTH && (
           <button className="text-green-400 ml-1" onClick={handleToggleExpand}>
             {expanded ? "Hide" : "Read More"}
           </button>
@@ -197,7 +230,7 @@ const PostCard = ({
       </div>
       <div className="mb-2">
         <Slider {...settings}>
-          {images?.map((image, index) => (
+          {post?.images?.map((image, index) => (
             <div className="w-full h-auto" key={index}>
               <img src={image?.url} alt={""} />
             </div>
@@ -225,6 +258,9 @@ const PostCard = ({
               />
             }
             variant="unstyled"
+            sx={{
+              opacity: loadingLike ? 0.5 : 1,
+            }}
           />
           <IconButton
             aria-label="Like post"
@@ -272,16 +308,22 @@ const PostCard = ({
             />
           }
           variant="unstyled"
+          sx={{
+            opacity: loadingSaved ? 0.5 : 1,
+          }}
         />
       </div>
-      <div className="flex items-center justify-between px-8 my-1">
+      <div className="flex items-center justify-between px-8 mt-1 border-y border-gray-400 py-2">
         <p className="text-gray-800 font-semibold">{numberLikes} Likes</p>
         <p className="text-gray-800 font-semibold">
-          {comments?.length || 0} Comments
+          {post?.comments?.length || 0} Comments
         </p>
       </div>
+      <div>
+        <Comments post={post} userAuth={userAuth} />
+      </div>
       <div className="border-t border-gray-400 bg-gray-300 py-3 px-5">
-        <InputComment postId={_id} postUserId={user._id} userAuth={userAuth} />
+        <InputComment userAuth={userAuth} post={post} />
       </div>
       {isOpen && (
         <ModalCreatePost
@@ -291,6 +333,28 @@ const PostCard = ({
           data={{ content, images, _id }}
         />
       )}
+      <Modal isOpen={isOpenDelete} onClose={onCloseDelete} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Delete Post?</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>Are you sure you want to delete this post?</ModalBody>
+
+          <ModalFooter sx={{ gap: "4px" }}>
+            <Button variant="ghost" onClick={onCloseDelete}>
+              No
+            </Button>
+            <Button
+              colorScheme="green"
+              mr={3}
+              onClick={handleRemovePost}
+              isLoading={loadingDelete}
+            >
+              Delete
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 };

@@ -35,4 +35,18 @@ async function logout(): Promise<any> {
   return (await api.post(`/logout`)).data;
 }
 
-export { login, signup, activeEmail, refreshToken, logout };
+async function changePassword({
+  current_password,
+  new_password,
+  cf_password,
+}: any): Promise<any> {
+  return (
+    await api.post("/change-password", {
+      current_password,
+      new_password,
+      cf_password,
+    })
+  ).data;
+}
+
+export { login, signup, activeEmail, refreshToken, logout, changePassword };

@@ -9,14 +9,14 @@ interface Props {
   type?: "followers" | "following";
 }
 
-const UserCard = ({ user, userAuth, type }: Props) => {
+const UserCard = ({ user, userAuth, type = "followers" }: Props) => {
   const router = useRouter();
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-8">
       <div
         className="flex items-center gap-4 cursor-pointer py-2"
         onClick={() => {
-          router.push(`/jobfeed/profile/${user?._id}`);
+          router.push(`/profile/${user?._id}`);
         }}
       >
         <img

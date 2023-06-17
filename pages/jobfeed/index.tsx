@@ -12,6 +12,7 @@ import { useDebounce } from "@/hooks/debounceHook";
 import { getPosts } from "@/redux/apis/postApi";
 import { getPostsAsync } from "@/redux/reducers/postReducers";
 import {
+  getUsersSuggestionAsync,
   searchUserAsync,
   selectSearchUser,
 } from "@/redux/reducers/userReducers";
@@ -71,7 +72,7 @@ function JobFeed() {
     setOpen(false);
     setSearchValue("");
 
-    router.push(`/jobfeed/profile/${id}`);
+    router.push(`/profile/${id}`);
   };
 
   useEffect(() => {

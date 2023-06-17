@@ -19,6 +19,15 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { memo, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import {
+  BriefcaseIcon,
+  HeartIcon,
+  LogoutIcon,
+  ManageIcon,
+  PersonIcon,
+  UserIcon,
+  ValiIcon,
+} from "../icons";
 import MenuBar from "../MenuBar/MenuBar";
 
 export const menu: MenuProps[] = [
@@ -63,8 +72,6 @@ const Topbar = () => {
     if (!userLocal) return;
     setUserAuth(JSON.parse(userLocal));
   }, [userLocal]);
-
-  console.log(isAuthenticated, username);
   return (
     <div className="bg-white z-[999] sticky top-0 right-0 left-0 shadow-[0_3px_10px_0_rgba(49,64,71,.08)]">
       <div className="max-w-[90%] mx-auto flex items-center justify-between px-3">
@@ -124,18 +131,76 @@ const Topbar = () => {
                 </MenuButton>
 
                 <MenuList>
-                  <MenuItem>
-                    <Link href={`/jobfeed/profile/${userAuth?._id}`}>
+                  <MenuItem sx={{ padding: "10px 12px" }}>
+                    <Link
+                      href={`/profile/${userAuth?._id}`}
+                      className="flex items-center gap-2 text-gray-700 text-base font-medium"
+                    >
+                      <UserIcon />
                       Profile
                     </Link>
                   </MenuItem>
-                  <MenuItem>
-                    <Link href={"/signout"}>Logout</Link>
+                  <MenuItem sx={{ padding: "10px 12px" }}>
+                    <Link
+                      href={`/savedJobs/${userAuth?._id}`}
+                      className="flex items-center gap-2 text-gray-700 text-base font-medium"
+                    >
+                      <HeartIcon width="20px" height="20px" fill="#323232" />
+                      Saved Jobs
+                    </Link>
+                  </MenuItem>
+                  <MenuItem sx={{ padding: "10px 12px" }}>
+                    <Link
+                      href={`/appliedJobs/${userAuth?._id}`}
+                      className="flex items-center gap-2 text-gray-700 text-base font-medium"
+                    >
+                      <BriefcaseIcon
+                        width="20px"
+                        height="20px"
+                        fill="#323232"
+                      />
+                      Applied Jobs
+                    </Link>
+                  </MenuItem>
+                  <MenuItem sx={{ padding: "10px 12px" }}>
+                    <Link
+                      href={`/manageCV/${userAuth?._id}`}
+                      className="flex items-center gap-2 text-gray-700 text-base font-medium"
+                    >
+                      <ManageIcon width="20px" height="20px" fill="#323232" />
+                      Manage CV
+                    </Link>
+                  </MenuItem>
+                  <MenuItem
+                    sx={{ padding: "10px 12px" }}
+                    className="flex items-center gap-2 text-base font-medium"
+                  >
+                    <LogoutIcon
+                      width="20px"
+                      height="20px"
+                      sx={{
+                        fontWeight: "bold",
+                        "& path": {
+                          stroke: "#e74c3c",
+                        },
+                      }}
+                    />
+                    <Link href={"/signout"} className="text-[#e74c3c]">
+                      Logout
+                    </Link>
                   </MenuItem>
                 </MenuList>
               </Menu>
             ) : (
-              <Link href="/login">Login</Link>
+              <div className="flex items-center gap-2">
+                <Link href="/login" className="hover:underline">
+                  Login
+                </Link>
+                <p>/</p>
+                <Link href="/signup" className="hover:underline">
+                  Register
+                </Link>
+              </div>
             )}
           </div>
         </div>

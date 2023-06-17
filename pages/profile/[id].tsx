@@ -51,7 +51,7 @@ import React, {
   useState,
 } from "react";
 import { useSelector } from "react-redux";
-import LayoutMain from "../../../components/layout/LayoutMain";
+import LayoutMain from "../../components/layout/LayoutMain";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
@@ -59,10 +59,23 @@ import ErrorMessage from "@/components/ErrorMessage";
 import { checkImage, imageUpload } from "@/utils/imageUpload.util";
 import { updateInfoUser } from "@/redux/apis/userAPI";
 import withAuth from "@/hocs/withAuth";
-import { selectIsLoggedIn } from "@/redux/reducers/authReducers";
+import {
+  changePasswordAsync,
+  selectAuth,
+  selectIsLoggedIn,
+} from "@/redux/reducers/authReducers";
 import { User } from "@/types/User";
 import FollowButton from "@/components/FollowButton";
 import ModalFollower from "@/components/ModalFollower";
+import { toast } from "react-toastify";
+import NewsFeed from "@/components/JobFeedPage/NewsFeed";
+import {
+  getSavedPostsAsync,
+  selectLoadingPost,
+  selectSavedPosts,
+} from "@/redux/reducers/postReducers";
+import PostCard from "@/components/PostCard";
+import { PostData } from "@/types/Posts";
 
 const schema = yup.object().shape({
   firstName: yup.string(),
@@ -73,21 +86,21 @@ const schema = yup.object().shape({
     .test(
       "empty-check",
       "Password must be at least 6 characters",
-      (currentPassword) => currentPassword!.length == 0
+      (currentPassword) => currentPassword!.length >= 6
     ),
   newPassword: yup
     .string()
     .test(
       "empty-check",
       "Password must be at least 6 characters",
-      (newPassword) => newPassword!.length == 0
+      (newPassword) => newPassword!.length >= 6
     ),
   confirmPassword: yup
     .string()
     .test(
       "empty-check",
       "Password must be at least 6 characters",
-      (confirmPassword) => confirmPassword!.length == 0
+      (confirmPassword) => confirmPassword!.length >= 6
     )
     .oneOf([yup.ref("newPassword"), ""], "Passwords must match"),
   introduce: yup.string(),
@@ -113,6 +126,9 @@ function Profile() {
   const isAuthenticated = useSelector(selectIsLoggedIn);
   const searchUserData = useSelector(selectSearchUser);
   const userInfoData = useSelector(selectUserInfo);
+  const loadingAuth = useSelector(selectAuth)?.isLoading;
+  const savedPosts = useSelector(selectSavedPosts);
+  const loadingSavedPosts = useSelector(selectLoadingPost);
 
   const modalRef = useRef<any>(null);
   const {
@@ -159,7 +175,7 @@ function Profile() {
     setOpen(false);
     setSearchValue("");
 
-    router.push(`/jobfeed/profile/${id}`);
+    router.push(`/profile/${id}`);
   };
 
   const handleUpdateUserInfo = async (data: any) => {
@@ -192,6 +208,27 @@ function Profile() {
     } catch (err) {
       console.log(err);
       setIsLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (data: any) => {
+    if (data) {
+      try {
+        let dataRequest = {
+          current_password: data.currentPassword,
+          new_password: data.newPassword,
+          cf_password: data.confirmPassword,
+        };
+        await dispatch(changePasswordAsync(dataRequest)).unwrap();
+
+        setValue("currentPassword", "");
+        setValue("newPassword", "");
+        setValue("confirmPassword", "");
+        toast.success("Change password successfully");
+      } catch (err: any) {
+        if (err.message) toast.error(err.message);
+        else toast.error("Something went wrong. Please try again.");
+      }
     }
   };
 
@@ -240,6 +277,10 @@ function Profile() {
     setValue("location", userInfoData.data.address);
     setValue("languages", userInfoData.data.languages || "");
   }, [userInfoData, setValue, onClose]);
+
+  useEffect(() => {
+    dispatch(getSavedPostsAsync());
+  }, [dispatch]);
 
   return (
     <LayoutMain>
@@ -379,7 +420,7 @@ function Profile() {
                   }
                 />
               </div>
-              {userAuth && userAuth._id !== userInfoData?.data?._id && (
+              {userAuth && userAuth?._id !== userInfoData?.data?._id && (
                 <FollowButton user={userAuth} id={userInfoData.data._id} />
               )}
             </div>
@@ -435,11 +476,16 @@ function Profile() {
             </div>
           </div>
           <div className="col-span-2 border border-gray-300 rounded-lg p-6 h-fit">
-            <Tabs position="relative" variant="unstyled">
+            <Tabs position="relative" variant="unstyled" defaultIndex={0}>
               <TabList>
                 <Tab>Overview</Tab>
+                <Tab>Feeds</Tab>
                 {userAuth && userAuth._id === userInfoData?.data?._id && (
-                  <Tab>Settings</Tab>
+                  <>
+                    <Tab>Saved Posts</Tab>
+                    <Tab>Settings</Tab>
+                    <Tab>Change Password</Tab>
+                  </>
                 )}
               </TabList>
               <TabIndicator
@@ -645,6 +691,39 @@ function Profile() {
                         French
                       </CustomBadge>
                     </div>
+                  </div>
+                </TabPanel>
+                <TabPanel>
+                  <NewsFeed isPostDetails userId={userData?._id || ""} />
+                </TabPanel>
+                <TabPanel>
+                  <div className="flex flex-col gap-6">
+                    {loadingSavedPosts ? (
+                      <div className="flex items-center justify-center">
+                        <Spinner
+                          thickness="4px"
+                          speed="0.65s"
+                          emptyColor="gray.200"
+                          color="green"
+                          size="xl"
+                        />
+                      </div>
+                    ) : (
+                      savedPosts?.map((post: PostData) => (
+                        <PostCard
+                          key={post?._id}
+                          post={post}
+                          userAuth={userAuth!}
+                        />
+                      ))
+                    )}
+                    {savedPosts?.length === 0 && !loadingSavedPosts && (
+                      <div className="flex items-center justify-center">
+                        <p className="text-center text-gray-800">
+                          No posts yet.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </TabPanel>
                 <TabPanel>
@@ -901,6 +980,22 @@ function Profile() {
                         </div>
                       </div>
                     </div>
+                    <div className="flex justify-end mt-4">
+                      <Button
+                        type="submit"
+                        colorScheme={"green"}
+                        isLoading={isLoading}
+                      >
+                        Update
+                      </Button>
+                    </div>
+                  </form>
+                </TabPanel>
+                <TabPanel>
+                  <form
+                    className="mt-4"
+                    onSubmit={handleSubmit(handleChangePassword)}
+                  >
                     <div className="mt-4">
                       <h5 className="text-lg text-gray-700 mb-2 font-bold">
                         Change Password
@@ -1011,7 +1106,7 @@ function Profile() {
                       <Button
                         type="submit"
                         colorScheme={"green"}
-                        isLoading={isLoading}
+                        isLoading={loadingAuth}
                       >
                         Update
                       </Button>

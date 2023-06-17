@@ -36,6 +36,14 @@ async function unSavePost(_id: string): Promise<any> {
   return (await api.patch(`/unSavePost/${_id}`)).data;
 }
 
+async function getUserPosts(_id: string): Promise<any> {
+  return (await api.get(`/user_posts/${_id}`)).data;
+}
+
+async function getSavedPosts(): Promise<any> {
+  return (await api.get(`/getSavePosts`)).data;
+}
+
 export {
   createPost,
   getPosts,
@@ -45,4 +53,6 @@ export {
   unLikePost,
   savePost,
   unSavePost,
+  getUserPosts,
+  getSavedPosts,
 };

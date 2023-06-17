@@ -42,7 +42,9 @@ export default function App({ Component, pageProps }: AppProps) {
     try {
       const response = await getUserInfoById(JSON.parse(userLocal)._id);
       setLocalStorageContent("user", JSON.stringify(response.user));
-    } catch (err) {}
+    } catch (err) {
+      console.log(err);
+    }
   };
   useEffect(() => {
     if (isTokenExpired()) {
