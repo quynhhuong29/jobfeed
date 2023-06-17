@@ -51,7 +51,7 @@ import React, {
   useState,
 } from "react";
 import { useSelector } from "react-redux";
-import LayoutMain from "../../../components/layout/LayoutMain";
+import LayoutMain from "../../components/layout/LayoutMain";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
@@ -69,6 +69,13 @@ import FollowButton from "@/components/FollowButton";
 import ModalFollower from "@/components/ModalFollower";
 import { toast } from "react-toastify";
 import NewsFeed from "@/components/JobFeedPage/NewsFeed";
+import {
+  getSavedPostsAsync,
+  selectLoadingPost,
+  selectSavedPosts,
+} from "@/redux/reducers/postReducers";
+import PostCard from "@/components/PostCard";
+import { PostData } from "@/types/Posts";
 
 const schema = yup.object().shape({
   firstName: yup.string(),
@@ -120,6 +127,8 @@ function Profile() {
   const searchUserData = useSelector(selectSearchUser);
   const userInfoData = useSelector(selectUserInfo);
   const loadingAuth = useSelector(selectAuth)?.isLoading;
+  const savedPosts = useSelector(selectSavedPosts);
+  const loadingSavedPosts = useSelector(selectLoadingPost);
 
   const modalRef = useRef<any>(null);
   const {
@@ -166,7 +175,7 @@ function Profile() {
     setOpen(false);
     setSearchValue("");
 
-    router.push(`/jobfeed/profile/${id}`);
+    router.push(`/profile/${id}`);
   };
 
   const handleUpdateUserInfo = async (data: any) => {
@@ -268,6 +277,10 @@ function Profile() {
     setValue("location", userInfoData.data.address);
     setValue("languages", userInfoData.data.languages || "");
   }, [userInfoData, setValue, onClose]);
+
+  useEffect(() => {
+    dispatch(getSavedPostsAsync());
+  }, [dispatch]);
 
   return (
     <LayoutMain>
@@ -407,7 +420,7 @@ function Profile() {
                   }
                 />
               </div>
-              {userAuth && userAuth._id !== userInfoData?.data?._id && (
+              {userAuth && userAuth?._id !== userInfoData?.data?._id && (
                 <FollowButton user={userAuth} id={userInfoData.data._id} />
               )}
             </div>
@@ -463,12 +476,13 @@ function Profile() {
             </div>
           </div>
           <div className="col-span-2 border border-gray-300 rounded-lg p-6 h-fit">
-            <Tabs position="relative" variant="unstyled">
+            <Tabs position="relative" variant="unstyled" defaultIndex={0}>
               <TabList>
                 <Tab>Overview</Tab>
                 <Tab>Feeds</Tab>
                 {userAuth && userAuth._id === userInfoData?.data?._id && (
                   <>
+                    <Tab>Saved Posts</Tab>
                     <Tab>Settings</Tab>
                     <Tab>Change Password</Tab>
                   </>
@@ -681,6 +695,36 @@ function Profile() {
                 </TabPanel>
                 <TabPanel>
                   <NewsFeed isPostDetails userId={userData?._id || ""} />
+                </TabPanel>
+                <TabPanel>
+                  <div className="flex flex-col gap-6">
+                    {loadingSavedPosts ? (
+                      <div className="flex items-center justify-center">
+                        <Spinner
+                          thickness="4px"
+                          speed="0.65s"
+                          emptyColor="gray.200"
+                          color="green"
+                          size="xl"
+                        />
+                      </div>
+                    ) : (
+                      savedPosts?.map((post: PostData) => (
+                        <PostCard
+                          key={post?._id}
+                          post={post}
+                          userAuth={userAuth!}
+                        />
+                      ))
+                    )}
+                    {savedPosts?.length === 0 && !loadingSavedPosts && (
+                      <div className="flex items-center justify-center">
+                        <p className="text-center text-gray-800">
+                          No posts yet.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </TabPanel>
                 <TabPanel>
                   <form

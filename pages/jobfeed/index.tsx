@@ -72,7 +72,7 @@ function JobFeed() {
     setOpen(false);
     setSearchValue("");
 
-    router.push(`/jobfeed/profile/${id}`);
+    router.push(`/profile/${id}`);
   };
 
   useEffect(() => {

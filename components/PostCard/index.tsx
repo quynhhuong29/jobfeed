@@ -169,22 +169,22 @@ const PostCard = ({ post, userAuth }: Props) => {
   useEffect(() => {
     if (
       post.likes &&
-      post.likes.find((like: any) => like._id === userAuth._id)
+      post.likes.find((like: any) => like._id === userAuth?._id)
     ) {
       setIsLike(true);
     } else {
       setIsLike(false);
     }
     setNumberLikes(post?.likes?.length);
-  }, [post?.likes, userAuth._id]);
+  }, [post?.likes, userAuth?._id]);
 
   useEffect(() => {
-    if (userAuth.saved.find((id) => id === post?._id)) {
+    if (userAuth?.saved?.find((id) => id === post?._id)) {
       setSaved(true);
     } else {
       setSaved(false);
     }
-  }, [userAuth.saved, post?._id]);
+  }, [userAuth?.saved, post?._id]);
   return (
     <div className="border border-gray-300 rounded-lg shadow-lg">
       <div className="flex px-6 py-4 items-center justify-between">
@@ -193,7 +193,7 @@ const PostCard = ({ post, userAuth }: Props) => {
           <div className="flex flex-col">
             <Link
               className="text-base text-gray-800 font-semibold cursor-pointer hover:underline"
-              href={`/jobfeed/profile/${post?.user?._id}`}
+              href={`/profile/${post?.user?._id}`}
             >{`${post?.user?.firstName} ${post?.user?.lastName}`}</Link>
             <span className="text-[15px] text-gray-600 font-normal">
               {moment(post?.createdAt).fromNow()}
@@ -208,7 +208,7 @@ const PostCard = ({ post, userAuth }: Props) => {
             variant="unstyled"
           />
           <MenuList>
-            {userAuth._id === post?.user?._id && (
+            {userAuth?._id === post?.user?._id && (
               <>
                 <MenuItem onClick={handleEditPost}>Edit</MenuItem>
                 <MenuItem onClick={onOpenDelete}>Remove</MenuItem>

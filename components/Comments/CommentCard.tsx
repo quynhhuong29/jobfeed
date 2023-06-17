@@ -157,7 +157,7 @@ const CommentCard = ({
                   <p className="text-xs font-semibold mb-1">{`${comment?.user?.firstName} ${comment?.user?.lastName}`}</p>
                   {comment.tag && comment?.tag?._id !== comment?.user?._id && (
                     <Link
-                      href={`/jobfeed/profile/${comment.tag._id}`}
+                      href={`/profile/${comment.tag._id}`}
                       className="text-blue w-[30%] mr-1"
                     >
                       @{comment.tag.firstName} {comment.tag.lastName}
@@ -275,9 +275,9 @@ const CommentCard = ({
                 setOnReply={setOnReply}
               >
                 <Link
-                  href={`${
-                    !userAuth.isCompany ? "" : "/company"
-                  }/jobfeed/profile/${onReply.user._id}`}
+                  href={`${!userAuth.isCompany ? "" : "/company"}/profile/${
+                    onReply.user._id
+                  }`}
                   className="text-blue w-[30%]"
                 >
                   @{onReply.user.firstName} {onReply.user.lastName}:

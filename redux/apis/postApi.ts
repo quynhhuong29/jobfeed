@@ -40,6 +40,10 @@ async function getUserPosts(_id: string): Promise<any> {
   return (await api.get(`/user_posts/${_id}`)).data;
 }
 
+async function getSavedPosts(): Promise<any> {
+  return (await api.get(`/getSavePosts`)).data;
+}
+
 export {
   createPost,
   getPosts,
@@ -50,4 +54,5 @@ export {
   savePost,
   unSavePost,
   getUserPosts,
+  getSavedPosts,
 };

@@ -1,4 +1,5 @@
 import { followUser, unFollowUser } from "@/redux/apis/userAPI";
+import { getPostsAsync } from "@/redux/reducers/postReducers";
 import {
   getUserInfoByIdAsync,
   selectUserInfo,
@@ -36,6 +37,19 @@ const FollowButton = ({ user, id, type = "followers" }: Props) => {
         setLoading(false);
       } catch (err) {
         setLoading(false);
+      }
+    } else {
+      if (user && id) {
+        setLoading(true);
+        try {
+          await followUser(id, user);
+          setFollowed(true);
+
+          setLoading(false);
+          await dispatch(getPostsAsync());
+        } catch (err) {
+          setLoading(false);
+        }
       }
     }
   };

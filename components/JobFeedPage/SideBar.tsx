@@ -15,7 +15,7 @@ const SideBar = ({ user }: Props) => {
       <div
         className="flex items-center gap-3 hover:bg-gray-300 cursor-pointer rounded-lg p-2 pl-3"
         onClick={() => {
-          if (user?._id) router.push(`/jobfeed/profile/${user?._id}`);
+          if (user?._id) router.push(`/profile/${user?._id}`);
         }}
       >
         <WrapItem>

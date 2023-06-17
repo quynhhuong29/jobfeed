@@ -30,3 +30,6 @@ export { default as ArrowDoubleLeftIcon } from "./ArrowDoubleLeftIcon";
 export { default as ArrowDoubleRightIcon } from "./ArrowDoubleRightIcon";
 
 export { default as HamburgerDotIcon } from "./HamburgerDotIcon";
+export { default as UserIcon } from "./UserIcon";
+export { default as ManageIcon } from "./ManageIcon";
+export { default as LogoutIcon } from "./LogoutIcon";

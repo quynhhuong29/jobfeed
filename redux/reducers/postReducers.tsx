@@ -4,6 +4,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
   createPost,
   getPosts,
+  getSavedPosts,
   getUserPosts,
   likePost,
   updatePost,
@@ -15,6 +16,7 @@ const initialState: PostState = {
   posts: [],
   isLoading: false,
   error: "",
+  savedPosts: [],
 };
 
 export const createPostAsync = createAsyncThunk(
@@ -43,6 +45,18 @@ export const getPostsAsync = createAsyncThunk("posts/getAllPosts", async () => {
     console.log(err);
   }
 });
+
+export const getSavedPostsAsync = createAsyncThunk(
+  "posts/getAllSavedPosts",
+  async () => {
+    try {
+      const response = await getSavedPosts();
+      return response.savePosts;
+    } catch (err: any) {
+      console.log(err);
+    }
+  }
+);
 
 export const updatePostAsync = createAsyncThunk(
   "posts/updatePost",
@@ -149,6 +163,21 @@ const postSlice = createSlice({
 
         state.error = action.payload?.message ?? "";
       })
+      .addCase(getSavedPostsAsync.pending, (state) => {
+        state.error = "";
+        state.isLoading = true;
+      })
+      .addCase(getSavedPostsAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+
+        state.error = "";
+        state.savedPosts = action.payload;
+      })
+      .addCase(getSavedPostsAsync.rejected, (state, action: any) => {
+        state.isLoading = false;
+
+        state.error = action.payload?.message ?? "";
+      })
       .addCase(getUserPostsAsync.pending, (state) => {
         state.error = "";
         state.isLoading = true;
@@ -168,6 +197,7 @@ const postSlice = createSlice({
 });
 export const selectLoadingPost = (state: RootState) => state.post.isLoading;
 export const selectPosts = (state: RootState) => state.post.posts;
+export const selectSavedPosts = (state: RootState) => state.post?.savedPosts;
 
 export const { updatePostAction, deletePostAction } = postSlice.actions;
 export default postSlice.reducer;
