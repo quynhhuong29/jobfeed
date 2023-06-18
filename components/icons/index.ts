@@ -33,3 +33,4 @@ export { default as HamburgerDotIcon } from "./HamburgerDotIcon";
 export { default as UserIcon } from "./UserIcon";
 export { default as ManageIcon } from "./ManageIcon";
 export { default as LogoutIcon } from "./LogoutIcon";
+export { default as USDCircleIcon } from "./USDCircleIcon";

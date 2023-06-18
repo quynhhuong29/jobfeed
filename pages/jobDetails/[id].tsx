@@ -1,16 +1,21 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @next/next/no-img-element */
 import FooterAlt from "@/components/FooterAlt";
 import {
   FacebookIcon,
   HeartIcon,
   LinkedInIcon,
+  MapPinIcon,
   TwitterIcon,
+  USDCircleIcon,
+  UserIcon,
 } from "@/components/icons";
 import { LayoutMain } from "@/components/layout";
 import { getInfoJobAsync, selectJob } from "@/redux/reducers/jobReducers";
 import { useAppDispatch } from "@/redux/store";
 import { ChevronRightIcon } from "@chakra-ui/icons";
 import { Avatar, IconButton, WrapItem } from "@chakra-ui/react";
+import dateFormat from "dateformat";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -27,7 +32,6 @@ function jobDetails() {
   }, [dispatch, router.query.id]);
 
   console.log(job?.infoJob);
-
   return (
     <LayoutMain>
       <section className="w-full bg-[url('/assets/images/page-title.png')] bg-cover bg-[#029663] bg-center border-radius-custom relative pt-14 pb-16">
@@ -40,7 +44,7 @@ function jobDetails() {
       <section className="w-full min-h-[100vh]  bg-white py-20">
         <div className="md:max-w-[1140px] mx-auto grid grid-cols-3 gap-5">
           <div className="col-span-2 border border-gray-300 rounded-lg p-6 h-fit">
-            <div className="flex flex-col items-start justify-start border-b border-gray-300 pb-4">
+            <div className="flex flex-col items-start justify-start pb-4">
               <div className="rounded-lg w-[16%]">
                 <img
                   src={job?.infoJob?.company_info?.logo}
@@ -79,8 +83,146 @@ function jobDetails() {
                 />
               </div>
             </div>
+            <div className="grid grid-cols-4 gap-2">
+              {job?.infoJob?.working_experience?.isRequired && (
+                <div className="border border-gray-300 p-4">
+                  <p className="text-xs text-gray-600">Experience</p>
+                  <p className="text-sm text-gray-700 font-medium">
+                    {job?.infoJob?.working_experience?.from} -{" "}
+                    {job?.infoJob?.working_experience?.to} Years
+                  </p>
+                </div>
+              )}
+              <div className="border border-gray-300 p-4">
+                <p className="text-xs text-gray-600">Employee type</p>
+                <p className="text-sm text-gray-700 font-medium">
+                  {job?.infoJob?.employment_type}
+                </p>
+              </div>
+              <div className="border border-gray-300 p-4">
+                <p className="text-xs text-gray-600">Position</p>
+                <p className="text-sm text-gray-700 font-medium">
+                  {job?.infoJob?.level}
+                </p>
+              </div>
+              <div className="border border-gray-300 p-4">
+                <p className="text-sm text-gray-600">
+                  Offer Salary ({job?.infoJob?.salary?.money_type})
+                </p>
+                <p className="text-base text-gray-700 font-medium">
+                  {job?.infoJob?.salary?.min}-{job?.infoJob?.salary?.max}/month
+                </p>
+              </div>
+            </div>
+            <div className="mt-6">
+              <h5 className="mb-4 text-gray-700 font-bold text-lg">
+                Job Description
+              </h5>
+              <p className="mt-6 mb-4 text-gray-600 text-base">
+                {job?.infoJob?.job_description}
+              </p>
+            </div>
+            <div className="mt-6">
+              <h5 className="mb-4 text-gray-700 font-bold text-lg">
+                Job Description
+              </h5>
+              <p className="mt-6 mb-4 text-gray-600 text-base">
+                {job?.infoJob?.job_requirement}
+              </p>
+            </div>
+            <div className="mt-6">
+              <h5 className="mb-4 text-gray-700 font-bold text-lg">
+                Job Requirements
+              </h5>
+              <p className="mt-6 mb-4 text-gray-600 text-base">
+                {job?.infoJob?.job_requirement}
+              </p>
+            </div>
+            <div className="mt-6">
+              <h5 className="mb-4 text-gray-700 font-bold text-lg">Benefit</h5>
+              <p className="mt-6 mb-4 text-gray-600 text-base">
+                {job?.infoJob?.benefit}
+              </p>
+            </div>
           </div>
-          <div className="border border-gray-300 rounded-lg p-6 h-fit"></div>
+          <div className="border border-gray-300 rounded-lg p-6 h-fit">
+            <h5 className="mb-4 text-gray-700 font-bold text-lg">
+              Job Overview
+            </h5>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center w-[46px] h-[46px] justify-center rounded-full p-2 bg-[rgba(2,175,116,.15)]">
+                <UserIcon fill="#02af74" width="20px" height="20px" />
+              </div>
+              <div>
+                <h6 className="text-sm text-gray-700 font-semibold">
+                  Job Title
+                </h6>
+                <p className="text-base text-gray-800">
+                  {job?.infoJob?.job_title}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 mt-6">
+              <div className="flex items-center w-[46px] h-[46px] justify-center rounded-full p-2 bg-[rgba(2,175,116,.15)]">
+                <USDCircleIcon fill="#02af74" width="20px" height="20px" />
+              </div>
+              <div>
+                <h6 className="text-sm text-gray-700 font-semibold">
+                  Experience
+                </h6>
+                <p className="text-base text-gray-800">
+                  {job?.infoJob?.working_experience?.isRequired ? (
+                    <>
+                      {job?.infoJob?.working_experience?.from} -{" "}
+                      {job?.infoJob?.working_experience?.to} Years{" "}
+                    </>
+                  ) : (
+                    <>Not required</>
+                  )}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 mt-6">
+              <div className="flex items-center w-[46px] h-[46px] justify-center rounded-full p-2 bg-[rgba(2,175,116,.15)]">
+                <MapPinIcon fill="#02af74" width="20px" height="20px" />
+              </div>
+              <div>
+                <h6 className="text-sm text-gray-700 font-semibold">
+                  Location
+                </h6>
+                <p className="text-base text-gray-800">
+                  {job?.infoJob?.address}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 mt-6">
+              <div className="flex items-center w-[46px] h-[46px] justify-center rounded-full p-2 bg-[rgba(2,175,116,.15)]">
+                <USDCircleIcon fill="#02af74" width="20px" height="20px" />
+              </div>
+              <div>
+                <h6 className="text-sm text-gray-700 font-semibold">
+                  Offered Salary
+                </h6>
+                <p className="text-base text-gray-800">
+                  {job?.infoJob?.salary?.min}-{job?.infoJob?.salary?.max} (
+                  {job?.infoJob?.salary?.money_type})
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 mt-6">
+              <div className="flex items-center w-[46px] h-[46px] justify-center rounded-full p-2 bg-[rgba(2,175,116,.15)]">
+                <USDCircleIcon fill="#02af74" width="20px" height="20px" />
+              </div>
+              <div>
+                <h6 className="text-sm text-gray-700 font-semibold">
+                  Date Posted
+                </h6>
+                <p className="text-base text-gray-800">
+                  {dateFormat(job?.infoJob?.updatedAt, "dd/mm/yyyy")}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
       <footer className="w-full py-[60px] bg-[#2e3538] text-sm">

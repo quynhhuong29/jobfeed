@@ -133,6 +133,10 @@ const CurrencyOption = [
     locale: "en-IN",
     currency: "INR",
   },
+  {
+    locale: "vi-VN",
+    currency: "VND",
+  },
 ];
 
 type FormData = {
