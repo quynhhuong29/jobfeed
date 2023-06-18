@@ -33,3 +33,8 @@ export { default as HamburgerDotIcon } from "./HamburgerDotIcon";
 export { default as UserIcon } from "./UserIcon";
 export { default as ManageIcon } from "./ManageIcon";
 export { default as LogoutIcon } from "./LogoutIcon";
+export { default as USDCircleIcon } from "./USDCircleIcon";
+export { default as HistoryIcon } from "./HistoryIcon";
+export { default as PhoneIcon } from "./PhoneIcon";
+export { default as MailIcon } from "./MailIcon";
+export { default as GlobalIcon } from "./GlobalIcon";

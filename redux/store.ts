@@ -2,6 +2,9 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
 import authReducers from "./reducers/authReducers";
 import commentReducers from "./reducers/commentReducers";
+import companyReducers from "./reducers/companyReducers";
+import industryReducers from "./reducers/industryReducers";
+import jobReducers from "./reducers/jobReducers";
 import postReducers from "./reducers/postReducers";
 import userReducers from "./reducers/userReducers";
 
@@ -10,6 +13,9 @@ const reducer = combineReducers({
   user: userReducers,
   post: postReducers,
   comment: commentReducers,
+  industry: industryReducers,
+  job: jobReducers,
+  company: companyReducers,
 });
 
 const store = configureStore({

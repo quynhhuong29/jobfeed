@@ -1,3 +1,4 @@
+import { selectAuth } from "@/redux/reducers/authReducers";
 import { MenuProps } from "@/types/Topbar";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import {
@@ -12,6 +13,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 
 interface IMenu {
   data: MenuProps[];

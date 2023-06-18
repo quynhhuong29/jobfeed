@@ -4,12 +4,15 @@ import { AuthState } from "../types/auth.type";
 import { RootState } from "../store";
 import { getItem } from "@/utils/localStorage.util";
 
+const role = getItem("user") && JSON.parse(getItem("user")!)?.role;
+
 const initialState: AuthState = {
   isLoggedIn: getItem("isAuthenticated") === "true",
   data: {
     access_token: "",
     user: null,
   },
+  role: role || "candidate",
   isLoading: false,
   err: "",
 };
@@ -69,7 +72,11 @@ export const changePasswordAsync = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    setRole(state, action) {
+      state.role = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(loginAsync.pending, (state) => {
@@ -123,4 +130,5 @@ export const selectIsLoggedIn = (state: RootState) => state.auth.isLoggedIn;
 export const selectUsername = (state: RootState) =>
   state.auth.data.user?.username;
 
+export const { setRole } = authSlice.actions;
 export default authSlice.reducer;
