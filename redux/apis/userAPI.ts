@@ -24,6 +24,10 @@ async function suggestionUsers(): Promise<any> {
   return (await api.get("/suggestionsUser")).data;
 }
 
+async function savedJob(id: string): Promise<any> {
+  return (await api.get(`/user/${id}/followJob`)).data;
+}
+
 export {
   searchUser,
   getUserInfoById,
@@ -31,4 +35,5 @@ export {
   followUser,
   unFollowUser,
   suggestionUsers,
+  savedJob,
 };

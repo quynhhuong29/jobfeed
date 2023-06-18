@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { formatMoney } from "@/utils/number.util";
 import { ArrowRightIcon } from "@chakra-ui/icons";
 import { Button, IconButton } from "@chakra-ui/react";
 import Image from "next/image";
@@ -50,8 +51,9 @@ function JobCard({ data }: Props) {
             </p>
           </div>
           <p className="text-sm text-gray-600 mb-2">
-            <span className="text-gray-600">{data?.salary?.money_type}</span>{" "}
-            {data?.salary?.min}-{data?.salary?.max} / month
+            {formatMoney(Number(data?.salary?.min), data?.salary?.money_type)} -{" "}
+            {formatMoney(Number(data?.salary?.max), data?.salary?.money_type)} /
+            month
           </p>
           <div className="">
             {data?.keys?.map((key: string, index: number) => {
