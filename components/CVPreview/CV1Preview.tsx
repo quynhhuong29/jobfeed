@@ -280,17 +280,14 @@ function CV1Preview({ dataResume }: { dataResume?: any }) {
           &nbsp;
         </div>
       </div>
-      <Button
-        type="submit"
-        colorScheme={"green"}
-        isLoading={cv?.isLoading}
-        ml="auto"
-      >
-        Submit
-      </Button>
-      <Button colorScheme={"purple"} ml="auto" onClick={downloadPDF}>
-        Download PDF
-      </Button>
+      <div className="flex ml-auto items-center gap-3 ">
+        <Button type="submit" colorScheme={"green"} isLoading={cv?.isLoading}>
+          Submit
+        </Button>
+        <Button colorScheme={"purple"} onClick={downloadPDF}>
+          Download PDF
+        </Button>
+      </div>
     </form>
   );
 }
