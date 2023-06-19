@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import authReducers from "./reducers/authReducers";
 import commentReducers from "./reducers/commentReducers";
 import companyReducers from "./reducers/companyReducers";
+import cvReducers from "./reducers/cvReducers";
 import industryReducers from "./reducers/industryReducers";
 import jobReducers from "./reducers/jobReducers";
 import postReducers from "./reducers/postReducers";
@@ -16,6 +17,7 @@ const reducer = combineReducers({
   industry: industryReducers,
   job: jobReducers,
   company: companyReducers,
+  cv: cvReducers,
 });
 
 const store = configureStore({

@@ -76,7 +76,6 @@ import {
 } from "@/redux/reducers/postReducers";
 import PostCard from "@/components/PostCard";
 import { PostData } from "@/types/Posts";
-import { downloadFile, uploadResumeFile } from "@/redux/apis/resumeAPI";
 
 const schema = yup.object().shape({
   firstName: yup.string(),
@@ -116,6 +115,8 @@ const schemaPassword = yup.object().shape({
 type FormData = yup.InferType<typeof schema>;
 type FormDataPassword = yup.InferType<typeof schemaPassword>;
 
+const url = "https://api.cloudinary.com/v1_1/davidchoi15052000/image/upload";
+
 function Profile() {
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -130,7 +131,6 @@ function Profile() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [typeModalFollow, setTypeModalFollow] = useState("");
   const [fileUpload, setFileUpload] = useState<any>();
-  console.log("🚀 ~ file: [id].tsx:132 ~ Profile ~ fileUpload:", fileUpload);
 
   const isAuthenticated = useSelector(selectIsLoggedIn);
   const searchUserData = useSelector(selectSearchUser);
@@ -271,6 +271,30 @@ function Profile() {
     } else {
       setTypeModalFollow("following");
     }
+  };
+
+  const handleFileUpload = async (event: any) => {
+    // const file = event.target?.files[0];
+    const { files } = event.target as HTMLInputElement;
+
+    const file = files?.length ? files[0] : null;
+
+    if (!file) return;
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("upload_preset", "ml_default");
+
+    fetch(url, {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => {
+        return response.text();
+      })
+      .then((data) => {
+        console.log(data);
+      });
   };
 
   useEffect(() => {
@@ -945,8 +969,7 @@ function Profile() {
                         <input
                           type="file"
                           onChange={(event: any) => {
-                            const file = event.target.files[0];
-                            setFileUpload(file);
+                            handleFileUpload(event);
                           }}
                         />
                       </div>
