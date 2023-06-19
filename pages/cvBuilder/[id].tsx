@@ -13,7 +13,7 @@ import { FacebookIcon, LinkedInIcon, TwitterIcon } from "@/components/icons";
 import { LayoutMain } from "@/components/layout";
 import withAuth from "@/hocs/withAuth";
 import { selectAuth } from "@/redux/reducers/authReducers";
-import { checkImage, imageUpload } from "@/utils/imageUpload.util";
+import { checkImage, imageUpload } from "@/utils/upload.util";
 import {
   AddIcon,
   ChevronRightIcon,

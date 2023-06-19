@@ -1,9 +1,23 @@
 /* eslint-disable @next/next/no-img-element */
+import { submitCV } from "@/redux/apis/submitCvAPI";
 import { formatMoney } from "@/utils/number.util";
+import { filePdfUpload } from "@/utils/upload.util";
 import { ArrowRightIcon } from "@chakra-ui/icons";
-import { Button, IconButton } from "@chakra-ui/react";
-import Image from "next/image";
+import {
+  Button,
+  IconButton,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  useDisclosure,
+} from "@chakra-ui/react";
 import Link from "next/link";
+import { useState } from "react";
+import { toast } from "react-toastify";
 import CustomBadge from "../CustomBadge";
 import { HeartIcon, MapPinIcon } from "../icons";
 import styles from "./JobCard.module.scss";
@@ -12,6 +26,40 @@ export interface Props {
   data: any;
 }
 function JobCard({ data }: Props) {
+  const { isOpen, onClose, onOpen } = useDisclosure();
+  const [resume, setResume] = useState<any>();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSendResume = async () => {
+    let file: any = "";
+    if (!data._id && !data.company_info._id) return;
+
+    setIsLoading(true);
+    if (resume) {
+      file = await filePdfUpload(resume);
+    }
+
+    try {
+      await submitCV({
+        idJob: data._id,
+        idCompany: data.company_info._id,
+        resumeFile: file,
+        dateSubmit: new Date().toISOString(),
+      });
+
+      toast.success("Submit CV successfully!");
+      onClose();
+      setIsLoading(false);
+    } catch (err: any) {
+      setIsLoading(false);
+      if (err?.response?.data?.msg) {
+        toast.error(err?.response?.data?.msg);
+      } else {
+        toast.error("Something went wrong!");
+      }
+    }
+  };
+
   return (
     <div
       className={`w-full flex flex-col border-gray-300 bg-white rounded-lg min-h-[42px] ${styles.card_container}`}
@@ -135,9 +183,46 @@ function JobCard({ data }: Props) {
           variant="link"
           sx={{ fontSize: "15px", color: "#314047", marginLeft: "auto" }}
           size="xs"
+          onClick={onOpen}
         >
           Apply Now
         </Button>
+        <Modal
+          isCentered
+          onClose={onClose}
+          isOpen={isOpen}
+          motionPreset="slideInBottom"
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Apply For This Job</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <div>
+                <div className="mb-3">
+                  <label className="text-base mb-2 inline-block">
+                    Resume Upload
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={(event: any) => setResume(event.target.files)}
+                  />
+                </div>
+              </div>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button
+                colorScheme="green"
+                onClick={handleSendResume}
+                isLoading={isLoading}
+              >
+                Send Application
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </div>
     </div>
   );

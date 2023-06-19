@@ -25,7 +25,6 @@ import Link from "next/link";
 const jobList = () => {
   const { loading, pages, currentPage, setCurrentPage, totalPages } =
     useDataFetching("/jobPost/getAllJob");
-  console.log("🚀 ~ file: index.tsx:27 ~ jobList ~ pages:", pages);
   return (
     <LayoutMain>
       <section className="w-full bg-[url('/assets/images/page-title.png')] bg-cover bg-[#029663] bg-center border-radius-custom relative pt-14 pb-16">

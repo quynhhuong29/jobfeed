@@ -1,5 +1,5 @@
 import { Image, PostData } from "@/types/Posts";
-import { imageUpload } from "@/utils/imageUpload.util";
+import { imageUpload } from "@/utils/upload.util";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
   createPost,

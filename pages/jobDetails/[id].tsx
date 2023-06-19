@@ -16,6 +16,7 @@ import {
   UserIcon,
 } from "@/components/icons";
 import { LayoutMain } from "@/components/layout";
+import { submitCV } from "@/redux/apis/submitCvAPI";
 import { selectAuth } from "@/redux/reducers/authReducers";
 import {
   getInfoCompanyAsync,
@@ -24,23 +25,75 @@ import {
 import { getInfoJobAsync, selectJob } from "@/redux/reducers/jobReducers";
 import { useAppDispatch } from "@/redux/store";
 import { formatMoney } from "@/utils/number.util";
+import { filePdfUpload } from "@/utils/upload.util";
 import { ArrowForwardIcon, ChevronRightIcon, ViewIcon } from "@chakra-ui/icons";
-import { Button, IconButton, Spinner } from "@chakra-ui/react";
+import {
+  Button,
+  IconButton,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Spinner,
+  useDisclosure,
+} from "@chakra-ui/react";
 import dateFormat from "dateformat";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 function jobDetails() {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const { isOpen, onClose, onOpen } = useDisclosure();
+
   const [showButton, setShowButton] = useState(true);
+  const [resume, setResume] = useState<any>();
+  const [isLoading, setIsLoading] = useState(false);
 
   const job = useSelector(selectJob);
   const auth = useSelector(selectAuth);
 
-  const handleApplyJob = () => {};
+  const handleSendResume = async () => {
+    let file: any = "";
+    if (
+      !job &&
+      !job.infoJob &&
+      !job.infoJob._id &&
+      !job.infoJob.company_info._id
+    )
+      return;
+
+    setIsLoading(true);
+    if (resume) {
+      file = await filePdfUpload(resume);
+    }
+
+    try {
+      await submitCV({
+        idJob: job.infoJob._id,
+        idCompany: job.infoJob.company_info._id,
+        resumeFile: file,
+        dateSubmit: new Date().toISOString(),
+      });
+
+      toast.success("Submit CV successfully!");
+      onClose();
+      setIsLoading(false);
+    } catch (err: any) {
+      setIsLoading(false);
+      if (err?.response?.data?.msg) {
+        toast.error(err?.response?.data?.msg);
+      } else {
+        toast.error("Something went wrong!");
+      }
+    }
+  };
 
   const handleSavedJob = () => {};
 
@@ -53,7 +106,6 @@ function jobDetails() {
     if (auth?.role === "company") setShowButton(false);
   }, [auth?.role]);
 
-  console.log(job?.infoJob);
   return (
     <LayoutMain>
       <section className="w-full bg-[url('/assets/images/page-title.png')] bg-cover bg-[#029663] bg-center border-radius-custom relative pt-14 pb-16">
@@ -306,7 +358,7 @@ function jobDetails() {
                       w="100%"
                       marginTop="24px"
                       rightIcon={<ArrowForwardIcon />}
-                      onClick={handleApplyJob}
+                      onClick={onOpen}
                       sx={{
                         backgroundColor: "#02af74",
                         color: "#fff",
@@ -512,7 +564,7 @@ function jobDetails() {
                   w="100%"
                   marginTop="26px"
                   leftIcon={<ViewIcon color="#fff" />}
-                  onClick={handleApplyJob}
+                  onClick={() => {}}
                   sx={{
                     backgroundColor: "#02af74",
                     color: "#fff",
@@ -645,6 +697,42 @@ function jobDetails() {
         </div>
       </footer>
       <FooterAlt />
+      <Modal
+        isCentered
+        onClose={onClose}
+        isOpen={isOpen}
+        motionPreset="slideInBottom"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Apply For This Job</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <div>
+              <div className="mb-3">
+                <label className="text-base mb-2 inline-block">
+                  Resume Upload
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(event: any) => setResume(event.target.files)}
+                />
+              </div>
+            </div>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              colorScheme="green"
+              onClick={handleSendResume}
+              isLoading={isLoading}
+            >
+              Send Application
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </LayoutMain>
   );
 }

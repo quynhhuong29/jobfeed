@@ -56,7 +56,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import ErrorMessage from "@/components/ErrorMessage";
-import { checkImage, imageUpload } from "@/utils/imageUpload.util";
+import { checkImage, imageUpload } from "@/utils/upload.util";
 import { updateInfoUser } from "@/redux/apis/userAPI";
 import withAuth from "@/hocs/withAuth";
 import {
