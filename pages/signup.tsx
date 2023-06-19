@@ -14,6 +14,11 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
   useDisclosure,
 } from "@chakra-ui/react";
 import Link from "next/link";
@@ -24,6 +29,7 @@ import ErrorMessage from "@/components/ErrorMessage";
 import { useState } from "react";
 import { signup } from "@/redux/apis/authAPI";
 import { toast } from "react-toastify";
+import FormRegisterCompany from "@/components/FormRegisterCompany";
 
 interface ISignUp {}
 
@@ -113,213 +119,234 @@ const SignUp = ({}: ISignUp) => {
               Sign Up and get access to all the features of Jobvia
             </p>
           </div>
-          <form className="mb-4 w-full" onSubmit={handleSubmit(handleSignUp)}>
-            <div className="mb-4 text-white">
-              <label
-                htmlFor="firstName"
-                className="text-[15px] mb-2 inline-block"
-              >
-                FirstName
-              </label>
-              <Input
-                type="text"
-                id="firstName"
-                placeholder="Enter your firstName"
-                autoComplete="off"
-                _placeholder={{ opacity: 0.4, color: "#fff" }}
-                sx={{
-                  backgroundColor: "rgba(255,255,255,.1)",
-                  border: "none",
-                  color: "#fff",
-                  padding: "10px",
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  "&:focus-visible": {
-                    outline: "0",
-                    backgroundColor: "rgba(255,255,255,.1)",
-                    border: "none",
-                    boxShadow: "none",
-                  },
-                  "&:hover": {
-                    border: "none",
-                  },
-                }}
-                {...register("firstName")}
-              />
-              {errors.firstName && (
-                <ErrorMessage message={errors.firstName.message} />
-              )}
-            </div>
-            <div className="mb-4 text-white">
-              <label
-                htmlFor="lastName"
-                className="text-[15px] mb-2 inline-block"
-              >
-                LastName
-              </label>
-              <Input
-                type="text"
-                id="lastName"
-                placeholder="Enter your lastName"
-                autoComplete="off"
-                _placeholder={{ opacity: 0.4, color: "#fff" }}
-                sx={{
-                  backgroundColor: "rgba(255,255,255,.1)",
-                  border: "none",
-                  color: "#fff",
-                  padding: "10px",
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  "&:focus-visible": {
-                    outline: "0",
-                    backgroundColor: "rgba(255,255,255,.1)",
-                    border: "none",
-                    boxShadow: "none",
-                  },
-                  "&:hover": {
-                    border: "none",
-                  },
-                }}
-                {...register("lastName")}
-              />
-              {errors.lastName && (
-                <ErrorMessage message={errors.lastName.message} />
-              )}
-            </div>
-            <div className="mb-4 text-white">
-              <label
-                htmlFor="username"
-                className="text-[15px] mb-2 inline-block"
-              >
-                Username
-              </label>
-              <Input
-                type="text"
-                id="username"
-                placeholder="Enter your username"
-                autoComplete="off"
-                _placeholder={{ opacity: 0.4, color: "#fff" }}
-                sx={{
-                  backgroundColor: "rgba(255,255,255,.1)",
-                  border: "none",
-                  color: "#fff",
-                  padding: "10px",
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  "&:focus-visible": {
-                    outline: "0",
-                    backgroundColor: "rgba(255,255,255,.1)",
-                    border: "none",
-                    boxShadow: "none",
-                  },
-                  "&:hover": {
-                    border: "none",
-                  },
-                }}
-                {...register("username")}
-              />
-              {errors.username && (
-                <ErrorMessage message={errors.username.message} />
-              )}
-            </div>
-            <div className="mb-4 text-white">
-              <label htmlFor="email" className="text-[15px] mb-2 inline-block">
-                Email
-              </label>
-              <Input
-                type="email"
-                id="email"
-                placeholder="Enter your email"
-                autoComplete="off"
-                _placeholder={{ opacity: 0.4, color: "#fff" }}
-                sx={{
-                  backgroundColor: "rgba(255,255,255,.1)",
-                  border: "none",
-                  color: "#fff",
-                  padding: "10px",
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  "&:focus-visible": {
-                    outline: "0",
-                    backgroundColor: "rgba(255,255,255,.1)",
-                    border: "none",
-                    boxShadow: "none",
-                  },
-                  "&:hover": {
-                    border: "none",
-                  },
-                }}
-                {...register("email")}
-              />
-              {errors.email && <ErrorMessage message={errors.email.message} />}
-            </div>
-            <div className="mb-4 text-white">
-              <label
-                htmlFor="password"
-                className="text-[15px] mb-2 inline-block"
-              >
-                Password
-              </label>
+          <Tabs isFitted variant="enclosed">
+            <TabList mb="1em">
+              <Tab sx={{ color: "#fff" }}>Candidate</Tab>
+              <Tab sx={{ color: "#fff" }}>Company</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel p="0">
+                <form className="w-full" onSubmit={handleSubmit(handleSignUp)}>
+                  <div className="mb-4 text-white">
+                    <label
+                      htmlFor="firstName"
+                      className="text-[15px] mb-2 inline-block"
+                    >
+                      FirstName
+                    </label>
+                    <Input
+                      type="text"
+                      id="firstName"
+                      placeholder="Enter your firstName"
+                      autoComplete="off"
+                      _placeholder={{ opacity: 0.4, color: "#fff" }}
+                      sx={{
+                        backgroundColor: "rgba(255,255,255,.1)",
+                        border: "none",
+                        color: "#fff",
+                        padding: "10px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        "&:focus-visible": {
+                          outline: "0",
+                          backgroundColor: "rgba(255,255,255,.1)",
+                          border: "none",
+                          boxShadow: "none",
+                        },
+                        "&:hover": {
+                          border: "none",
+                        },
+                      }}
+                      {...register("firstName")}
+                    />
+                    {errors.firstName && (
+                      <ErrorMessage message={errors.firstName.message} />
+                    )}
+                  </div>
+                  <div className="mb-4 text-white">
+                    <label
+                      htmlFor="lastName"
+                      className="text-[15px] mb-2 inline-block"
+                    >
+                      LastName
+                    </label>
+                    <Input
+                      type="text"
+                      id="lastName"
+                      placeholder="Enter your lastName"
+                      autoComplete="off"
+                      _placeholder={{ opacity: 0.4, color: "#fff" }}
+                      sx={{
+                        backgroundColor: "rgba(255,255,255,.1)",
+                        border: "none",
+                        color: "#fff",
+                        padding: "10px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        "&:focus-visible": {
+                          outline: "0",
+                          backgroundColor: "rgba(255,255,255,.1)",
+                          border: "none",
+                          boxShadow: "none",
+                        },
+                        "&:hover": {
+                          border: "none",
+                        },
+                      }}
+                      {...register("lastName")}
+                    />
+                    {errors.lastName && (
+                      <ErrorMessage message={errors.lastName.message} />
+                    )}
+                  </div>
+                  <div className="mb-4 text-white">
+                    <label
+                      htmlFor="username"
+                      className="text-[15px] mb-2 inline-block"
+                    >
+                      Username
+                    </label>
+                    <Input
+                      type="text"
+                      id="username"
+                      placeholder="Enter your username"
+                      autoComplete="off"
+                      _placeholder={{ opacity: 0.4, color: "#fff" }}
+                      sx={{
+                        backgroundColor: "rgba(255,255,255,.1)",
+                        border: "none",
+                        color: "#fff",
+                        padding: "10px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        "&:focus-visible": {
+                          outline: "0",
+                          backgroundColor: "rgba(255,255,255,.1)",
+                          border: "none",
+                          boxShadow: "none",
+                        },
+                        "&:hover": {
+                          border: "none",
+                        },
+                      }}
+                      {...register("username")}
+                    />
+                    {errors.username && (
+                      <ErrorMessage message={errors.username.message} />
+                    )}
+                  </div>
+                  <div className="mb-4 text-white">
+                    <label
+                      htmlFor="email"
+                      className="text-[15px] mb-2 inline-block"
+                    >
+                      Email
+                    </label>
+                    <Input
+                      type="email"
+                      id="email"
+                      placeholder="Enter your email"
+                      autoComplete="off"
+                      _placeholder={{ opacity: 0.4, color: "#fff" }}
+                      sx={{
+                        backgroundColor: "rgba(255,255,255,.1)",
+                        border: "none",
+                        color: "#fff",
+                        padding: "10px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        "&:focus-visible": {
+                          outline: "0",
+                          backgroundColor: "rgba(255,255,255,.1)",
+                          border: "none",
+                          boxShadow: "none",
+                        },
+                        "&:hover": {
+                          border: "none",
+                        },
+                      }}
+                      {...register("email")}
+                    />
+                    {errors.email && (
+                      <ErrorMessage message={errors.email.message} />
+                    )}
+                  </div>
+                  <div className="mb-4 text-white">
+                    <label
+                      htmlFor="password"
+                      className="text-[15px] mb-2 inline-block"
+                    >
+                      Password
+                    </label>
 
-              <InputGroup size="md">
-                <Input
-                  pr="4.5rem"
-                  type={show ? "text" : "password"}
-                  placeholder="Enter password"
-                  _placeholder={{ opacity: 0.4, color: "#fff" }}
-                  sx={{
-                    backgroundColor: "rgba(255,255,255,.1)",
-                    border: "none",
-                    color: "#fff",
-                    padding: "10px",
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    "&:focus-visible": {
-                      outline: "0",
-                      backgroundColor: "rgba(255,255,255,.1)",
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                    "&:hover": {
-                      border: "none",
-                    },
-                  }}
-                  {...register("password")}
-                />
-                <InputRightElement width="4.5rem">
+                    <InputGroup size="md">
+                      <Input
+                        pr="4.5rem"
+                        type={show ? "text" : "password"}
+                        placeholder="Enter password"
+                        _placeholder={{ opacity: 0.4, color: "#fff" }}
+                        sx={{
+                          backgroundColor: "rgba(255,255,255,.1)",
+                          border: "none",
+                          color: "#fff",
+                          padding: "10px",
+                          fontSize: "14px",
+                          fontWeight: "500",
+                          "&:focus-visible": {
+                            outline: "0",
+                            backgroundColor: "rgba(255,255,255,.1)",
+                            border: "none",
+                            boxShadow: "none",
+                          },
+                          "&:hover": {
+                            border: "none",
+                          },
+                        }}
+                        {...register("password")}
+                      />
+                      <InputRightElement width="4.5rem">
+                        <Button
+                          h="1.45rem"
+                          size="sm"
+                          onClick={handleClick}
+                          className="text-black"
+                        >
+                          {show ? "Hide" : "Show"}
+                        </Button>
+                      </InputRightElement>
+                    </InputGroup>
+                    {errors.password && (
+                      <ErrorMessage message={errors.password.message} />
+                    )}
+                  </div>
+
+                  <div className="mb-6 text-white">
+                    <Checkbox colorScheme="green" {...register("terms")}>
+                      I agree to the{" "}
+                      <Link href="/" className="underline">
+                        Terms and conditions
+                      </Link>
+                    </Checkbox>
+                    {errors.terms && (
+                      <ErrorMessage message={errors.terms.message} />
+                    )}
+                  </div>
                   <Button
-                    h="1.45rem"
-                    size="sm"
-                    onClick={handleClick}
-                    className="text-black"
+                    type="submit"
+                    w={"100%"}
+                    padding={"10px 20px"}
+                    isLoading={isLoading}
                   >
-                    {show ? "Hide" : "Show"}
+                    Sign Up
                   </Button>
-                </InputRightElement>
-              </InputGroup>
-              {errors.password && (
-                <ErrorMessage message={errors.password.message} />
-              )}
-            </div>
+                </form>
+              </TabPanel>
+              <TabPanel p="0">
+                <FormRegisterCompany />
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
 
-            <div className="mb-6 text-white">
-              <Checkbox colorScheme="green" {...register("terms")}>
-                I agree to the{" "}
-                <Link href="/" className="underline">
-                  Terms and conditions
-                </Link>
-              </Checkbox>
-              {errors.terms && <ErrorMessage message={errors.terms.message} />}
-            </div>
-            <Button
-              type="submit"
-              w={"100%"}
-              padding={"10px 20px"}
-              isLoading={isLoading}
-            >
-              Sign Up
-            </Button>
-          </form>
           <div className="mt-4 text-center text-white">
             <p className="mb-0">
               Already a member?{" "}

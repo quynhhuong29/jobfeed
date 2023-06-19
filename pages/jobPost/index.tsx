@@ -45,99 +45,12 @@ import {
   selectCompany,
 } from "@/redux/reducers/companyReducers";
 import { User } from "@/types/User";
-
-const tinhTP = [
-  "An Giang",
-  "Kon Tum",
-  "Bà Rịa – Vũng Tàu",
-  "Lai Châu",
-  "Bắc Giang",
-  "Lâm Đồng",
-  "Bắc Kạn",
-  "Lạng Sơn",
-  "Bạc Liêu",
-  "Lào Cai",
-  "Bắc Ninh",
-  "Long An",
-  "Bến Tre",
-  "Nam Định",
-  "Bình Định",
-  "Nghệ An",
-  "Bình Dương",
-  "Ninh Bình",
-  "Bình Phước",
-  "Ninh Thuận",
-  "Bình Thuận",
-  "Phú Thọ",
-  "Cà Mau",
-  "Phú Yên",
-  "Cần Thơ",
-  "Quảng Bình",
-  "Cao Bằng",
-  "Quảng Nam",
-  "Đà Nẵng",
-  "Quảng Ngãi",
-  "Đắk Lắk",
-  "Quảng Ninh",
-  "Đắk Nông",
-  "Quảng Trị",
-  "Điện Biên",
-  "Sóc Trăng",
-  "Đồng Nai",
-  "Sơn La",
-  "Đồng Tháp",
-  "Tây Ninh",
-  "Gia Lai",
-  "Thái Bình",
-  "Hà Giang",
-  "Thái Nguyên",
-  "Hà Nam",
-  "Thanh Hóa",
-  "Hà Nội",
-  "Thừa Thiên Huế",
-  "Hà Tĩnh",
-  "Tiền Giang",
-  "Hải Dương",
-  "TP Hồ Chí Minh",
-  "Hải Phòng",
-  "Trà Vinh",
-  "Hậu Giang",
-  "Tuyên Quang",
-  "Hòa Bình",
-  "Vĩnh Long",
-  "Hưng Yên",
-  "Vĩnh Phúc",
-  "Khánh Hòa",
-  "Yên Bái",
-  "Kiên Giang",
-];
-
-const CurrencyOption = [
-  {
-    locale: "de-DE",
-    currency: "EUR",
-  },
-  {
-    locale: "en-US",
-    currency: "USD",
-  },
-  {
-    locale: "en-GB",
-    currency: "GBP",
-  },
-  {
-    locale: "ja-JP",
-    currency: "JPY",
-  },
-  {
-    locale: "en-IN",
-    currency: "INR",
-  },
-  {
-    locale: "vi-VN",
-    currency: "VND",
-  },
-];
+import {
+  CAREER_LEVEL,
+  CURRENCY_OPTION,
+  EMPLOYMENT_TYPE,
+  PROVINCE_CITY,
+} from "@/constants/jobPost";
 
 type FormData = {
   jobTitle: string;
@@ -154,6 +67,10 @@ type FormData = {
   address: string;
   minSalary: number;
   maxSalary: number;
+  experienceFrom: number;
+  experienceTo: number;
+  employmentType: string;
+  careerLevel: string;
 };
 
 const jobPost = () => {
@@ -161,7 +78,7 @@ const jobPost = () => {
   const dispatch = useAppDispatch();
 
   const [userAuth, setUserAuth] = useState<User>();
-  const [isExperience, setIsExperience] = useState(false);
+  const [isExperience, setIsExperience] = useState(true);
   const [salary, setSalary] = useState({
     minSalary: 0,
     maxSalary: 0,
@@ -169,14 +86,14 @@ const jobPost = () => {
   const [intlConfig, setIntlConfig] = useState<{
     locale: string;
     currency: string;
-  }>(CurrencyOption[0]);
+  }>(CURRENCY_OPTION[0]);
 
   const auth = useSelector(selectAuth);
   const industry = useSelector(selectIndustry);
   const company = useSelector(selectCompany);
   const job = useSelector(selectJob);
 
-  const { handleSubmit, register, setValue } = useForm<FormData>({
+  const { handleSubmit, register, setValue, reset } = useForm<FormData>({
     mode: "onChange",
   });
 
@@ -193,7 +110,7 @@ const jobPost = () => {
   const handleChangeCurrency = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    const config = CurrencyOption.find(
+    const config = CURRENCY_OPTION.find(
       (ele) => ele.locale === event.target.value
     );
     if (config) {
@@ -225,15 +142,15 @@ const jobPost = () => {
       industry: data.industry,
       working_location: data.workingLocation,
       address: data.address,
-      employment_type: "Part-time",
+      employment_type: data.employmentType,
       expiring_date: data.expiringDate,
       benefit: data.benefit,
       experience: {
         isRequired: isExperience,
-        from: "1",
-        to: "2",
+        from: isExperience ? data.experienceFrom : 0,
+        to: isExperience ? data.experienceTo : 0,
       },
-      level: "Entry-level",
+      level: data.careerLevel,
       salary: {
         money_type: intlConfig.currency,
         min: salary.minSalary.toString(),
@@ -250,6 +167,27 @@ const jobPost = () => {
     try {
       await dispatch(createJobAsync(request));
       toast.success("Create a job success!!!");
+      reset((formValues) => ({
+        ...formValues,
+        jobTitle: "",
+        jobRequirement: "",
+        jobDescription: "",
+        industry: "",
+        workingLocation: "",
+        benefit: "",
+        contactName: "",
+        contactPhone: "",
+        contactAddress: "",
+        contactEmail: "",
+        expiringDate: "",
+        address: "",
+        minSalary: 0,
+        maxSalary: 1,
+        experienceFrom: 0,
+        experienceTo: 1,
+        employmentType: "",
+        careerLevel: "",
+      }));
     } catch (err: any) {
       if (err.message) toast.error(err.message);
       else toast.error("Something went wrong. Please try again.");
@@ -307,7 +245,6 @@ const jobPost = () => {
                   <Input
                     type="text"
                     id="jobTitle"
-                    defaultValue={"jobTitle"}
                     placeholder="Enter your job title"
                     autoComplete="off"
                     sx={{
@@ -337,7 +274,6 @@ const jobPost = () => {
                     id="jobDescription"
                     placeholder="Say something..."
                     autoComplete="off"
-                    defaultValue={"jobDescription"}
                     sx={{
                       minHeight: "125px",
                       backgroundColor: "#fff",
@@ -366,7 +302,6 @@ const jobPost = () => {
                     id="jobRequirement"
                     placeholder="Say something..."
                     autoComplete="off"
-                    defaultValue={"jobRequirement"}
                     sx={{
                       minHeight: "125px",
                       backgroundColor: "#fff",
@@ -415,10 +350,10 @@ const jobPost = () => {
 
                     <Select
                       placeholder="Select working location"
-                      defaultValue={tinhTP[0]}
+                      defaultValue={PROVINCE_CITY[0]}
                       {...register("workingLocation")}
                     >
-                      {tinhTP.map((ele) => (
+                      {PROVINCE_CITY.map((ele) => (
                         <option value={ele} key={ele}>
                           {ele}
                         </option>
@@ -455,10 +390,10 @@ const jobPost = () => {
                     </label>
                     <div className="flex gap-10">
                       <Select
-                        defaultValue={CurrencyOption?.[0]?.locale}
+                        defaultValue={CURRENCY_OPTION?.[0]?.locale}
                         onChange={handleChangeCurrency}
                       >
-                        {CurrencyOption.map((ele: any, index: number) => (
+                        {CURRENCY_OPTION.map((ele: any, index: number) => (
                           <option value={ele.locale} key={index}>
                             {ele.currency}
                           </option>
@@ -536,6 +471,46 @@ const jobPost = () => {
                       {...register("expiringDate")}
                     />
                   </div>
+                  <div className="mb-4">
+                    <label
+                      htmlFor="employmentType"
+                      className="text-base mb-2 inline-block"
+                    >
+                      Employment type
+                    </label>
+
+                    <Select
+                      placeholder="Select employment type"
+                      defaultValue={EMPLOYMENT_TYPE[0]}
+                      {...register("employmentType")}
+                    >
+                      {EMPLOYMENT_TYPE.map((ele) => (
+                        <option value={ele} key={ele}>
+                          {ele}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                  <div className="mb-4">
+                    <label
+                      htmlFor="careerLevel"
+                      className="text-base mb-2 inline-block"
+                    >
+                      Career level
+                    </label>
+
+                    <Select
+                      placeholder="Select career level"
+                      defaultValue={CAREER_LEVEL[0]}
+                      {...register("careerLevel")}
+                    >
+                      {CAREER_LEVEL.map((ele) => (
+                        <option value={ele} key={ele}>
+                          {ele}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
                 </div>
                 <div className="mb-4">
                   <label
@@ -548,7 +523,6 @@ const jobPost = () => {
                     id="benefit"
                     placeholder="Say something..."
                     autoComplete="off"
-                    defaultValue={"Benefit"}
                     sx={{
                       minHeight: "125px",
                       backgroundColor: "#fff",
@@ -566,16 +540,14 @@ const jobPost = () => {
                     {...register("benefit")}
                   />
                 </div>
+
                 <div className="mb-4">
                   <label className="text-base mb-2 inline-block">
                     Experience
                   </label>
                   <div className="flex items-center gap-5">
                     <div className="max-w-[200px]">
-                      <Select
-                        onChange={handleExperienceChange}
-                        defaultValue={"No Experience"}
-                      >
+                      <Select onChange={handleExperienceChange}>
                         <option value={"Experience"}>Experience</option>
                         <option value={"No Experience"}>No Experience</option>
                       </Select>
@@ -601,6 +573,7 @@ const jobPost = () => {
                           },
                           maxWidth: "160px",
                         }}
+                        {...register("experienceFrom")}
                       />
                     )}
                     {isExperience && (
@@ -624,6 +597,7 @@ const jobPost = () => {
                           },
                           maxWidth: "160px",
                         }}
+                        {...register("experienceTo")}
                       />
                     )}
                   </div>
