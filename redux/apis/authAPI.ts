@@ -23,6 +23,32 @@ async function signup(
   ).data;
 }
 
+async function registerCompany(
+  email: string,
+  companyName: string,
+  password: string,
+  size: string,
+  city: string,
+  address: string,
+  info: string,
+  contactName: string,
+  phone: string
+): Promise<any> {
+  return (
+    await api.post("/company-register", {
+      email,
+      password,
+      companyName,
+      size,
+      city,
+      address,
+      info,
+      contactName,
+      phone,
+    })
+  ).data;
+}
+
 async function activeEmail(token: string): Promise<any> {
   return (await api.post(`/active_email`, { verifiedToken: token })).data;
 }
@@ -49,4 +75,12 @@ async function changePassword({
   ).data;
 }
 
-export { login, signup, activeEmail, refreshToken, logout, changePassword };
+export {
+  login,
+  signup,
+  activeEmail,
+  refreshToken,
+  logout,
+  changePassword,
+  registerCompany,
+};

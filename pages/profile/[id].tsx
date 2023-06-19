@@ -76,6 +76,7 @@ import {
 } from "@/redux/reducers/postReducers";
 import PostCard from "@/components/PostCard";
 import { PostData } from "@/types/Posts";
+import { downloadFile, uploadResumeFile } from "@/redux/apis/resumeAPI";
 
 const schema = yup.object().shape({
   firstName: yup.string(),
@@ -84,6 +85,7 @@ const schema = yup.object().shape({
   introduce: yup.string(),
   location: yup.string(),
   languages: yup.string(),
+  mobile: yup.string(),
 });
 
 const schemaPassword = yup.object().shape({
@@ -127,6 +129,8 @@ function Profile() {
   const [userAuth, setUserAuth] = useState<User>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [typeModalFollow, setTypeModalFollow] = useState("");
+  const [fileUpload, setFileUpload] = useState<any>();
+  console.log("🚀 ~ file: [id].tsx:132 ~ Profile ~ fileUpload:", fileUpload);
 
   const isAuthenticated = useSelector(selectIsLoggedIn);
   const searchUserData = useSelector(selectSearchUser);
@@ -150,7 +154,7 @@ function Profile() {
     handleSubmit: handleSubmitPassword,
     register: registerPassword,
     formState: { errors: errorsPassword },
-    setValue: setValuePassword
+    setValue: setValuePassword,
   } = useForm<FormDataPassword>({
     mode: "onChange",
     resolver: yupResolver(schemaPassword),
@@ -212,6 +216,7 @@ function Profile() {
         introduction: data.introduce,
         address: data.location,
         avatar: img[0]?.url || userData.avatar,
+        mobile: data.mobile,
       };
     }
 
@@ -291,6 +296,7 @@ function Profile() {
     setValue("introduce", userInfoData.data.introduction);
     setValue("location", userInfoData.data.address);
     setValue("languages", userInfoData.data.languages || "");
+    setValue("mobile", userInfoData.data.mobile || "");
   }, [userInfoData, setValue, onClose]);
 
   useEffect(() => {
@@ -896,6 +902,53 @@ function Profile() {
                             <ErrorMessage message={errors.email.message} />
                           )}
                         </div>
+                        <div>
+                          <label
+                            htmlFor="mobile"
+                            className="text-[15px] mb-2 inline-block"
+                          >
+                            Phone number
+                          </label>
+                          <Input
+                            type="number"
+                            id="mobile"
+                            defaultValue={"mobile"}
+                            placeholder="Enter your mobile"
+                            autoComplete="off"
+                            sx={{
+                              backgroundColor: "#fff",
+                              border: "1px solid #dbdfe2",
+                              color: "#495057",
+                              padding: "10px",
+                              fontSize: "14px",
+                              fontWeight: "500",
+                              "&:focus-visible": {
+                                outline: "0",
+                                border: "1px solid #dbdfe2",
+                                boxShadow: "none",
+                              },
+                            }}
+                            {...register("mobile")}
+                          />
+                          {errors.mobile && (
+                            <ErrorMessage message={errors.mobile.message} />
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col mt-4">
+                        <label
+                          htmlFor="mobile"
+                          className="text-[15px] mb-2 inline-block"
+                        >
+                          Attachments CV
+                        </label>
+                        <input
+                          type="file"
+                          onChange={(event: any) => {
+                            const file = event.target.files[0];
+                            setFileUpload(file);
+                          }}
+                        />
                       </div>
                     </div>
                     <div className="mt-4">
