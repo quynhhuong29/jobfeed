@@ -44,6 +44,10 @@ export const menu: MenuProps[] = [
     link: "/jobList",
   },
   {
+    name: "CV Builder",
+    link: "/cvBuilder",
+  },
+  {
     name: "HR Center",
     isCompany: true,
     submenu: [
