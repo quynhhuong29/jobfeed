@@ -34,22 +34,26 @@ export const menu: MenuProps[] = [
   {
     name: "Home",
     link: "/",
+    auth: "notAuth",
   },
   {
     name: "Job Feed",
     link: "/jobfeed",
+    auth: "notAuth",
   },
   {
     name: "Job List",
     link: "/jobList",
+    auth: "notAuth",
   },
   {
     name: "CV Builder",
     link: "/cvBuilder",
+    auth: "candidate",
   },
   {
     name: "HR Center",
-    isCompany: true,
+    auth: "company",
     submenu: [
       {
         name: "Dashboard",
@@ -98,11 +102,20 @@ const Topbar = () => {
 
   useEffect(() => {
     if (userAuth?.role === "candidate") {
-      setListMenu(menu.filter((item) => item.isCompany !== true));
+      setListMenu(
+        menu.filter(
+          (item) => item.auth === "notAuth" || item.auth === "candidate"
+        )
+      );
     } else {
-      setListMenu(menu);
+      setListMenu(
+        menu.filter(
+          (item) => item.auth === "notAuth" || item.auth === "company"
+        )
+      );
     }
   }, [userAuth]);
+
   return (
     <div className="bg-white z-[999] sticky top-0 right-0 left-0 shadow-[0_3px_10px_0_rgba(49,64,71,.08)]">
       <div className="max-w-[90%] mx-auto flex items-center justify-between px-3">

@@ -8,7 +8,13 @@ import { toast } from "react-toastify";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
-function CV1Preview({ dataResume }: { dataResume?: any }) {
+function CV1Preview({
+  dataResume,
+  isShowForCompany = false,
+}: {
+  dataResume?: any;
+  isShowForCompany?: boolean;
+}) {
   const dispatch = useAppDispatch();
   const cv = useSelector(selectCV);
   const pdfRef = useRef<any>();
@@ -280,14 +286,16 @@ function CV1Preview({ dataResume }: { dataResume?: any }) {
           &nbsp;
         </div>
       </div>
-      <div className="flex ml-auto items-center gap-3 ">
-        <Button type="submit" colorScheme={"green"} isLoading={cv?.isLoading}>
-          Submit
-        </Button>
-        <Button colorScheme={"purple"} onClick={downloadPDF}>
-          Download PDF
-        </Button>
-      </div>
+      {!isShowForCompany && (
+        <div className="flex ml-auto items-center gap-3 ">
+          <Button type="submit" colorScheme={"green"} isLoading={cv?.isLoading}>
+            Submit
+          </Button>
+          <Button colorScheme={"purple"} onClick={downloadPDF}>
+            Download PDF
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

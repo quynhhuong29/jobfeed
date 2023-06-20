@@ -35,6 +35,7 @@ import { ArrowForwardIcon, ChevronRightIcon, ViewIcon } from "@chakra-ui/icons";
 import {
   Button,
   IconButton,
+  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -57,8 +58,14 @@ import dateFormat from "dateformat";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+
+type FormData = {
+  name: string;
+  email: string;
+};
 
 function jobDetails() {
   const dispatch = useAppDispatch();
@@ -75,7 +82,11 @@ function jobDetails() {
   const job = useSelector(selectJob);
   const auth = useSelector(selectAuth);
 
-  const handleSendResume = async () => {
+  const { handleSubmit, register } = useForm<FormData>({
+    mode: "onChange",
+  });
+
+  const handleSendResume = async (data: FormData) => {
     let file: any = "";
     if (!job.infoJob._id && !job.infoJob.company_info._id) return;
 
@@ -90,6 +101,8 @@ function jobDetails() {
         idCompany: job.infoJob.company_info._id,
         resumeFile: file,
         dateSubmit: new Date().toISOString(),
+        name: data.name || "",
+        email: data.email || "",
       });
 
       toast.success("Submit CV successfully!");
@@ -651,6 +664,48 @@ function jobDetails() {
               </TabList>
               <TabPanels>
                 <TabPanel>
+                  <div className=" mb-3">
+                    <label className="text-gray-700">Name</label>
+                    <Input
+                      type="text"
+                      autoComplete="off"
+                      sx={{
+                        backgroundColor: "#fff",
+                        border: "1px solid #dbdfe2",
+                        color: "#495057",
+                        padding: "10px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        "&:focus-visible": {
+                          outline: "0",
+                          border: "1px solid #dbdfe2",
+                          boxShadow: "none",
+                        },
+                      }}
+                      {...register("name")}
+                    />
+                  </div>
+                  <div className=" mb-3">
+                    <label className="text-gray-700">Email</label>
+                    <Input
+                      type="text"
+                      autoComplete="off"
+                      sx={{
+                        backgroundColor: "#fff",
+                        border: "1px solid #dbdfe2",
+                        color: "#495057",
+                        padding: "10px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        "&:focus-visible": {
+                          outline: "0",
+                          border: "1px solid #dbdfe2",
+                          boxShadow: "none",
+                        },
+                      }}
+                      {...register("email")}
+                    />
+                  </div>
                   <div className="mb-5">
                     <label className="text-base mb-2 inline-block">
                       Resume Upload
@@ -663,7 +718,7 @@ function jobDetails() {
                   </div>
                   <Button
                     colorScheme="green"
-                    onClick={handleSendResume}
+                    onClick={handleSubmit(handleSendResume)}
                     isLoading={isLoading}
                     float="right"
                   >
