@@ -4,3 +4,5 @@ export const LANGUAGE_LEVEL = [
   "High-Level",
   "Native Language",
 ];
+
+export const STATUS = ["Waiting", "Accept", "Refuse"];

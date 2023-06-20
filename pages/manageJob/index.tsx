@@ -413,8 +413,7 @@ const manageJob = () => {
                                     icon={<ViewIcon />}
                                     variant="ghost"
                                     onClick={() => {
-                                      setIdDelete(item._id);
-                                      onOpen();
+                                      router.push(`/manageJob/listCV/${item._id}`)
                                     }}
                                   />
                                 </Td>
@@ -476,7 +475,8 @@ const manageJob = () => {
                                     icon={<EditIcon />}
                                     variant="ghost"
                                     onClick={() => {
-                                      router.push(`/jobPost/${item._id}`);
+                                      setIdEdit(item._id);
+                                      onOpenEdit();
                                     }}
                                   />
                                   <IconButton

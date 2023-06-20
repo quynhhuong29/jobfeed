@@ -7,6 +7,8 @@ async function submitCV({
   dataCV,
   dateSubmit,
   resumeFile,
+  name,
+  email,
 }: any): Promise<any> {
   let request;
   if (!resumeFile) {
@@ -24,9 +26,36 @@ async function submitCV({
       idCV,
       dateSubmit,
       resumeFile,
+      name,
+      email,
     };
   }
   return (await api.post(`/submitCV`, request)).data;
 }
 
-export { submitCV };
+async function getListCVByJob(id: string): Promise<any> {
+  return (await api.get(`/getSubmittedForCompany/${id}`)).data;
+}
+
+async function updateStatusCV({
+  idJob,
+  idCV,
+  status,
+  idCandidate,
+  resumeFile,
+}: any): Promise<any> {
+  try {
+    const response = await api.post("/setStatus", {
+      idJob,
+      idCV,
+      status,
+      idCandidate,
+      resumeFile,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error;
+  }
+}
+
+export { submitCV, getListCVByJob, updateStatusCV };

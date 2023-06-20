@@ -7,6 +7,7 @@ import { ArrowRightIcon } from "@chakra-ui/icons";
 import {
   Button,
   IconButton,
+  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -26,6 +27,7 @@ import {
 } from "@chakra-ui/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import CustomBadge from "../CustomBadge";
 import { HeartIcon, MapPinIcon } from "../icons";
@@ -34,6 +36,12 @@ import styles from "./JobCard.module.scss";
 export interface Props {
   data: any;
 }
+
+type FormData = {
+  name: string;
+  email: string;
+};
+
 function JobCard({ data }: Props) {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [resume, setResume] = useState<any>();
@@ -41,7 +49,12 @@ function JobCard({ data }: Props) {
   const [isLoadingCV, setIsLoadingCV] = useState(false);
   const [listResumes, setListResumes] = useState<any[]>([]);
   const [valueResume, setValueResume] = useState("");
-  const handleSendResume = async () => {
+
+  const { handleSubmit, register } = useForm<FormData>({
+    mode: "onChange",
+  });
+
+  const handleSendResume = async (dataForm: FormData) => {
     let file: any = "";
     if (!data._id && !data.company_info._id) return;
 
@@ -56,6 +69,8 @@ function JobCard({ data }: Props) {
         idCompany: data.company_info._id,
         resumeFile: file,
         dateSubmit: new Date().toISOString(),
+        name: dataForm.name || "",
+        email: dataForm.email || "",
       });
 
       toast.success("Submit CV successfully!");
@@ -263,6 +278,48 @@ function JobCard({ data }: Props) {
                 </TabList>
                 <TabPanels>
                   <TabPanel>
+                    <div className=" mb-3">
+                      <label className="text-gray-700">Name</label>
+                      <Input
+                        type="text"
+                        autoComplete="off"
+                        sx={{
+                          backgroundColor: "#fff",
+                          border: "1px solid #dbdfe2",
+                          color: "#495057",
+                          padding: "10px",
+                          fontSize: "14px",
+                          fontWeight: "500",
+                          "&:focus-visible": {
+                            outline: "0",
+                            border: "1px solid #dbdfe2",
+                            boxShadow: "none",
+                          },
+                        }}
+                        {...register("name")}
+                      />
+                    </div>
+                    <div className=" mb-3">
+                      <label className="text-gray-700">Email</label>
+                      <Input
+                        type="email"
+                        autoComplete="off"
+                        sx={{
+                          backgroundColor: "#fff",
+                          border: "1px solid #dbdfe2",
+                          color: "#495057",
+                          padding: "10px",
+                          fontSize: "14px",
+                          fontWeight: "500",
+                          "&:focus-visible": {
+                            outline: "0",
+                            border: "1px solid #dbdfe2",
+                            boxShadow: "none",
+                          },
+                        }}
+                        {...register("email")}
+                      />
+                    </div>
                     <div className="mb-5">
                       <label className="text-base mb-2 inline-block">
                         Resume Upload
@@ -275,7 +332,7 @@ function JobCard({ data }: Props) {
                     </div>
                     <Button
                       colorScheme="green"
-                      onClick={handleSendResume}
+                      onClick={handleSubmit(handleSendResume)}
                       isLoading={isLoading}
                       float="right"
                     >
