@@ -50,7 +50,6 @@ function CVBuilder() {
       router.push("/");
     }
   }, [auth, router]);
-  console.log(parsedState);
   return (
     <LayoutMain>
       <section className="w-full bg-[url('/assets/images/page-title.png')] bg-cover bg-[#029663] bg-center border-radius-custom relative pt-14 pb-16">

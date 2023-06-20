@@ -10,4 +10,7 @@ async function downloadFile(): Promise<any> {
   return (await api.get(`/getFileResume`)).data;
 }
 
-export { uploadResumeFile, downloadFile };
+async function getListResumes(): Promise<any> {
+  return (await api.get("/getListResume")).data;
+}
+export { uploadResumeFile, downloadFile, getListResumes };

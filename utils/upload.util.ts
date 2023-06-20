@@ -42,3 +42,29 @@ export const imageUpload = async (images: any) => {
   }
   return imgArr;
 };
+
+export const filePdfUpload = async (files: any) => {
+  const file = files?.length ? files[0] : null;
+  let fileUpload = "";
+
+  if (!file) return;
+  const formData = new FormData();
+
+  formData.append("file", file);
+  formData.append("upload_preset", "ml_default");
+
+  try {
+    const response = await fetch(
+      "https://api.cloudinary.com/v1_1/davidchoi15052000/image/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+    const data: any = await response.json();
+    fileUpload = data?.secure_url;
+  } catch (err) {
+    console.log(err);
+  }
+  return fileUpload;
+};

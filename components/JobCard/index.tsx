@@ -1,9 +1,32 @@
 /* eslint-disable @next/next/no-img-element */
+import { getListResumes } from "@/redux/apis/resumeAPI";
+import { submitCV } from "@/redux/apis/submitCvAPI";
 import { formatMoney } from "@/utils/number.util";
+import { filePdfUpload } from "@/utils/upload.util";
 import { ArrowRightIcon } from "@chakra-ui/icons";
-import { Button, IconButton } from "@chakra-ui/react";
-import Image from "next/image";
+import {
+  Button,
+  IconButton,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Radio,
+  RadioGroup,
+  Stack,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  useDisclosure,
+} from "@chakra-ui/react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import CustomBadge from "../CustomBadge";
 import { HeartIcon, MapPinIcon } from "../icons";
 import styles from "./JobCard.module.scss";
@@ -12,6 +35,82 @@ export interface Props {
   data: any;
 }
 function JobCard({ data }: Props) {
+  const { isOpen, onClose, onOpen } = useDisclosure();
+  const [resume, setResume] = useState<any>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingCV, setIsLoadingCV] = useState(false);
+  const [listResumes, setListResumes] = useState<any[]>([]);
+  const [valueResume, setValueResume] = useState("");
+  const handleSendResume = async () => {
+    let file: any = "";
+    if (!data._id && !data.company_info._id) return;
+
+    setIsLoading(true);
+    if (resume) {
+      file = await filePdfUpload(resume);
+    }
+
+    try {
+      await submitCV({
+        idJob: data._id,
+        idCompany: data.company_info._id,
+        resumeFile: file,
+        dateSubmit: new Date().toISOString(),
+      });
+
+      toast.success("Submit CV successfully!");
+      onClose();
+      setIsLoading(false);
+    } catch (err: any) {
+      setIsLoading(false);
+      if (err?.response?.data?.msg) {
+        toast.error(err?.response?.data?.msg);
+      } else {
+        toast.error("Something went wrong!");
+      }
+    }
+  };
+
+  const handleSendCV = async () => {
+    if (!valueResume && !data._id && !data.company_info._id) return;
+    setIsLoadingCV(true);
+
+    const resume = listResumes.find((item) => item._id === valueResume);
+
+    try {
+      await submitCV({
+        idJob: data._id,
+        idCompany: data.company_info._id,
+        dataCV: resume,
+        dateSubmit: new Date().toISOString(),
+        idCV: valueResume,
+      });
+
+      toast.success("Submit CV successfully!");
+      onClose();
+      setIsLoadingCV(false);
+    } catch (err: any) {
+      setIsLoadingCV(false);
+      if (err?.response?.data?.msg) {
+        toast.error(err?.response?.data?.msg);
+      } else {
+        toast.error("Something went wrong!");
+      }
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await getListResumes().then((res) => setListResumes(res));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div
       className={`w-full flex flex-col border-gray-300 bg-white rounded-lg min-h-[42px] ${styles.card_container}`}
@@ -132,12 +231,98 @@ function JobCard({ data }: Props) {
         )}
         <Button
           rightIcon={<ArrowRightIcon w={2} h={2} />}
-          variant="link"
-          sx={{ fontSize: "15px", color: "#314047", marginLeft: "auto" }}
+          variant="unstyled"
+          sx={{
+            fontSize: "15px",
+            color: "#314047",
+            marginLeft: "auto",
+            "&:hover": {
+              textDecoration: "underline",
+            },
+          }}
           size="xs"
+          onClick={onOpen}
         >
           Apply Now
         </Button>
+        <Modal
+          isCentered
+          onClose={onClose}
+          isOpen={isOpen}
+          motionPreset="slideInBottom"
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Apply For This Job</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Tabs variant="enclosed">
+                <TabList>
+                  <Tab>Upload Resume</Tab>
+                  <Tab>Your list resumes</Tab>
+                </TabList>
+                <TabPanels>
+                  <TabPanel>
+                    <div className="mb-5">
+                      <label className="text-base mb-2 inline-block">
+                        Resume Upload
+                      </label>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={(event: any) => setResume(event.target.files)}
+                      />
+                    </div>
+                    <Button
+                      colorScheme="green"
+                      onClick={handleSendResume}
+                      isLoading={isLoading}
+                      float="right"
+                    >
+                      Send Application
+                    </Button>
+                  </TabPanel>
+                  <TabPanel>
+                    <p className="text-gray-600 text-base">
+                      You have {listResumes?.length || 0} resume on Job Library.
+                      Please select a resume to apply for
+                    </p>
+                    <RadioGroup
+                      onChange={setValueResume}
+                      value={valueResume}
+                      mt={3}
+                    >
+                      <Stack spacing={5} direction="column">
+                        {listResumes?.map((ele) => {
+                          return (
+                            <Radio
+                              colorScheme="green"
+                              key={ele._id}
+                              value={ele._id}
+                              size="lg"
+                            >
+                              {ele.title}
+                            </Radio>
+                          );
+                        })}
+                      </Stack>
+                    </RadioGroup>
+                    <Button
+                      colorScheme="green"
+                      onClick={handleSendCV}
+                      isLoading={isLoadingCV}
+                      float="right"
+                    >
+                      Send Application
+                    </Button>
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
+            </ModalBody>
+
+            <ModalFooter></ModalFooter>
+          </ModalContent>
+        </Modal>
       </div>
     </div>
   );
