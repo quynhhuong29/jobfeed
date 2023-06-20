@@ -7,6 +7,7 @@ import cvReducers from "./reducers/cvReducers";
 import industryReducers from "./reducers/industryReducers";
 import jobReducers from "./reducers/jobReducers";
 import postReducers from "./reducers/postReducers";
+import resumeReducers from "./reducers/resumeReducers";
 import userReducers from "./reducers/userReducers";
 
 const reducer = combineReducers({
@@ -18,6 +19,7 @@ const reducer = combineReducers({
   job: jobReducers,
   company: companyReducers,
   cv: cvReducers,
+  resumes: resumeReducers,
 });
 
 const store = configureStore({

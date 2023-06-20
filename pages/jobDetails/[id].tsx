@@ -16,6 +16,7 @@ import {
   UserIcon,
 } from "@/components/icons";
 import { LayoutMain } from "@/components/layout";
+import { getListResumes } from "@/redux/apis/resumeAPI";
 import { submitCV } from "@/redux/apis/submitCvAPI";
 import { selectAuth } from "@/redux/reducers/authReducers";
 import {
@@ -23,6 +24,10 @@ import {
   selectCompany,
 } from "@/redux/reducers/companyReducers";
 import { getInfoJobAsync, selectJob } from "@/redux/reducers/jobReducers";
+import {
+  getListResumesAsync,
+  selectResumes,
+} from "@/redux/reducers/resumeReducers";
 import { useAppDispatch } from "@/redux/store";
 import { formatMoney } from "@/utils/number.util";
 import { filePdfUpload } from "@/utils/upload.util";
@@ -37,7 +42,15 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Radio,
+  RadioGroup,
   Spinner,
+  Stack,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
   useDisclosure,
 } from "@chakra-ui/react";
 import dateFormat from "dateformat";
@@ -55,19 +68,16 @@ function jobDetails() {
   const [showButton, setShowButton] = useState(true);
   const [resume, setResume] = useState<any>();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingCV, setIsLoadingCV] = useState(false);
+  const [listResumes, setListResumes] = useState<any[]>([]);
+  const [valueResume, setValueResume] = useState("");
 
   const job = useSelector(selectJob);
   const auth = useSelector(selectAuth);
 
   const handleSendResume = async () => {
     let file: any = "";
-    if (
-      !job &&
-      !job.infoJob &&
-      !job.infoJob._id &&
-      !job.infoJob.company_info._id
-    )
-      return;
+    if (!job.infoJob._id && !job.infoJob.company_info._id) return;
 
     setIsLoading(true);
     if (resume) {
@@ -95,6 +105,34 @@ function jobDetails() {
     }
   };
 
+  const handleSendCV = async () => {
+    if (!valueResume) return;
+    setIsLoadingCV(true);
+
+    const resume = listResumes.find((item) => item._id === valueResume);
+
+    try {
+      await submitCV({
+        idJob: job.infoJob._id,
+        idCompany: job.infoJob.company_info._id,
+        dataCV: resume,
+        dateSubmit: new Date().toISOString(),
+        idCV: valueResume,
+      });
+
+      toast.success("Submit CV successfully!");
+      onClose();
+      setIsLoadingCV(false);
+    } catch (err: any) {
+      setIsLoadingCV(false);
+      if (err?.response?.data?.msg) {
+        toast.error(err?.response?.data?.msg);
+      } else {
+        toast.error("Something went wrong!");
+      }
+    }
+  };
+
   const handleSavedJob = () => {};
 
   useEffect(() => {
@@ -105,6 +143,18 @@ function jobDetails() {
   useEffect(() => {
     if (auth?.role === "company") setShowButton(false);
   }, [auth?.role]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await getListResumes().then((res) => setListResumes(res));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchData();
+  }, [dispatch]);
 
   return (
     <LayoutMain>
@@ -708,29 +758,71 @@ function jobDetails() {
           <ModalHeader>Apply For This Job</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <div>
-              <div className="mb-3">
-                <label className="text-base mb-2 inline-block">
-                  Resume Upload
-                </label>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={(event: any) => setResume(event.target.files)}
-                />
-              </div>
-            </div>
+            <Tabs variant="enclosed">
+              <TabList>
+                <Tab>Upload Resume</Tab>
+                <Tab>Your list resumes</Tab>
+              </TabList>
+              <TabPanels>
+                <TabPanel>
+                  <div className="mb-5">
+                    <label className="text-base mb-2 inline-block">
+                      Resume Upload
+                    </label>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={(event: any) => setResume(event.target.files)}
+                    />
+                  </div>
+                  <Button
+                    colorScheme="green"
+                    onClick={handleSendResume}
+                    isLoading={isLoading}
+                    float="right"
+                  >
+                    Send Application
+                  </Button>
+                </TabPanel>
+                <TabPanel>
+                  <p className="text-gray-600 text-base">
+                    You have {listResumes?.length || 0} resume on Job Library.
+                    Please select a resume to apply for
+                  </p>
+                  <RadioGroup
+                    onChange={setValueResume}
+                    value={valueResume}
+                    mt={3}
+                  >
+                    <Stack spacing={5} direction="column">
+                      {listResumes?.map((ele) => {
+                        return (
+                          <Radio
+                            colorScheme="green"
+                            key={ele._id}
+                            value={ele._id}
+                            size="lg"
+                          >
+                            {ele.title}
+                          </Radio>
+                        );
+                      })}
+                    </Stack>
+                  </RadioGroup>
+                  <Button
+                    colorScheme="green"
+                    onClick={handleSendCV}
+                    isLoading={isLoadingCV}
+                    float="right"
+                  >
+                    Send Application
+                  </Button>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
           </ModalBody>
 
-          <ModalFooter>
-            <Button
-              colorScheme="green"
-              onClick={handleSendResume}
-              isLoading={isLoading}
-            >
-              Send Application
-            </Button>
-          </ModalFooter>
+          <ModalFooter></ModalFooter>
         </ModalContent>
       </Modal>
     </LayoutMain>
