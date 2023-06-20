@@ -60,4 +60,46 @@ async function deleteJob(id: string): Promise<any> {
   return (await api.delete(`/jobPost/deleteJob/${id}`)).data;
 }
 
-export { createJob, getInfoJob, getJobsByCompany, deleteJob };
+async function updateJob({
+  id,
+  benefit,
+  job_description,
+  job_requirement,
+  job_title,
+  expiring_date,
+  contact_name,
+  contact_phone,
+  contact_address,
+  contact_email,
+  experience,
+  industry,
+  working_location,
+  address,
+  employment_type,
+  level,
+  salary,
+}: any): Promise<any> {
+  return (
+    await api.post(`/jobPost/updateJobPost`, {
+      id,
+      benefit,
+      job_description,
+      job_requirement,
+      job_title,
+      expiring_date,
+      contact_name,
+      contact_phone,
+      contact_address,
+      contact_email,
+      experience,
+      industry,
+      working_location,
+      address,
+      employment_type,
+      level,
+      salary,
+    })
+  ).data;
+}
+
+export { createJob, getInfoJob, getJobsByCompany, deleteJob, updateJob };

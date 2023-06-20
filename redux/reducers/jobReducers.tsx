@@ -1,5 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { createJob, getInfoJob, getJobsByCompany } from "../apis/jobApi";
+import {
+  createJob,
+  getInfoJob,
+  getJobsByCompany,
+  updateJob,
+} from "../apis/jobApi";
 import { RootState } from "../store";
 import { JobState } from "../types/job.type";
 
@@ -130,10 +135,68 @@ export const getJobsByCompanyAsync = createAsyncThunk(
   }
 );
 
+export const updateJobAsync = createAsyncThunk(
+  "job/updateJob",
+  async (
+    {
+      id,
+      benefit,
+      job_description,
+      job_requirement,
+      job_title,
+      expiring_date,
+      contact_name,
+      contact_phone,
+      contact_address,
+      contact_email,
+      experience,
+      industry,
+      working_location,
+      address,
+      employment_type,
+      level,
+      salary,
+    }: any,
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await updateJob({
+        id,
+        benefit,
+        job_description,
+        job_requirement,
+        job_title,
+        expiring_date,
+        contact_name,
+        contact_phone,
+        contact_address,
+        contact_email,
+        experience,
+        industry,
+        working_location,
+        address,
+        employment_type,
+        level,
+        salary,
+      });
+      return response;
+    } catch (err: any) {
+      if (!err.response) {
+        throw err;
+      }
+      return rejectWithValue(err.response.data);
+    }
+  }
+);
+
 const jobSlice = createSlice({
   name: "job",
   initialState,
-  reducers: {},
+  reducers: {
+    // updateJobAction (state, action) {
+    //   state.listJobCompany
+    // }
+  },
   extraReducers: (build) => {
     build
       .addCase(createJobAsync.pending, (state) => {
@@ -176,6 +239,20 @@ const jobSlice = createSlice({
         state.error = "";
       })
       .addCase(getJobsByCompanyAsync.rejected, (state, action: any) => {
+        state.isLoading = false;
+
+        state.error = action.payload?.message ?? "";
+      })
+      .addCase(updateJobAsync.pending, (state) => {
+        state.error = "";
+        state.isLoading = true;
+      })
+      .addCase(updateJobAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+
+        state.error = "";
+      })
+      .addCase(updateJobAsync.rejected, (state, action: any) => {
         state.isLoading = false;
 
         state.error = action.payload?.message ?? "";
