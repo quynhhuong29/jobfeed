@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { createJob, getInfoJob } from "../apis/jobApi";
+import { createJob, getInfoJob, getJobsByCompany } from "../apis/jobApi";
 import { RootState } from "../store";
 import { JobState } from "../types/job.type";
 
@@ -35,6 +35,7 @@ const initialState: JobState = {
     working_location: "",
     _id: "",
   },
+  listJobCompany: [],
   error: "",
   isLoading: false,
 };
@@ -114,6 +115,21 @@ export const getInfoJobAsync = createAsyncThunk(
   }
 );
 
+export const getJobsByCompanyAsync = createAsyncThunk(
+  "job/getJobsByCompany",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await getJobsByCompany(id);
+      return response;
+    } catch (err: any) {
+      if (!err.response) {
+        throw err;
+      }
+      return rejectWithValue(err.response.data);
+    }
+  }
+);
+
 const jobSlice = createSlice({
   name: "job",
   initialState,
@@ -145,6 +161,21 @@ const jobSlice = createSlice({
         state.error = "";
       })
       .addCase(getInfoJobAsync.rejected, (state, action: any) => {
+        state.isLoading = false;
+
+        state.error = action.payload?.message ?? "";
+      })
+      .addCase(getJobsByCompanyAsync.pending, (state) => {
+        state.error = "";
+        state.isLoading = true;
+      })
+      .addCase(getJobsByCompanyAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+
+        state.listJobCompany = action.payload;
+        state.error = "";
+      })
+      .addCase(getJobsByCompanyAsync.rejected, (state, action: any) => {
         state.isLoading = false;
 
         state.error = action.payload?.message ?? "";

@@ -52,4 +52,12 @@ async function getInfoJob(id: string): Promise<any> {
   return (await api.get(`/jobPost/getJob/${id}`)).data;
 }
 
-export { createJob, getInfoJob };
+async function getJobsByCompany(id: string): Promise<any> {
+  return (await api.get(`/jobPost/getJobsByCompany/${id}`)).data;
+}
+
+async function deleteJob(id: string): Promise<any> {
+  return (await api.delete(`/jobPost/deleteJob/${id}`)).data;
+}
+
+export { createJob, getInfoJob, getJobsByCompany, deleteJob };
