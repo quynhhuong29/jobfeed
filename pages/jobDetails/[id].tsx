@@ -627,7 +627,11 @@ function jobDetails() {
                   w="100%"
                   marginTop="26px"
                   leftIcon={<ViewIcon color="#fff" />}
-                  onClick={() => {}}
+                  onClick={() => {
+                    router.push(
+                      `/companyDetails/${job?.infoJob?.company_info?.idCompany}`
+                    );
+                  }}
                   sx={{
                     backgroundColor: "#02af74",
                     color: "#fff",
