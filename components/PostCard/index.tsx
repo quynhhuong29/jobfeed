@@ -124,16 +124,19 @@ const PostCard = ({ post, userAuth }: Props) => {
     if (isLike && post) {
       try {
         setIsLike(false);
-        await unLikePost(post._id);
 
         if (socket && socket.emit) {
           const newPost = {
             ...post,
-            likes: post.likes.filter((like) => like !== auth?.user),
+            likes: post.likes.filter(
+              (like: any) => like._id !== auth?.user?._id
+            ),
           };
           dispatch(updatePostAction(newPost));
           socket.emit("unLikePost", newPost);
         }
+        await unLikePost(post._id);
+
         setLoadingLike(false);
       } catch (err) {
         setIsLike(true);
@@ -142,13 +145,12 @@ const PostCard = ({ post, userAuth }: Props) => {
     } else {
       try {
         setIsLike(true);
-        await likePost(post._id);
-
         if (socket && socket.emit) {
           const newPost = { ...post, likes: [...post.likes, auth?.user] };
           dispatch(updatePostAction(newPost));
           socket.emit("likePost", newPost);
         }
+        await likePost(post._id);
         setLoadingLike(false);
       } catch (err) {
         setLoadingLike(false);

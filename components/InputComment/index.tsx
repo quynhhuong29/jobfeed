@@ -5,6 +5,7 @@ import {
   updateCommentAsync,
 } from "@/redux/reducers/commentReducers";
 import { updatePostAction } from "@/redux/reducers/postReducers";
+import { selectSocket } from "@/redux/reducers/socketReducers";
 import { useAppDispatch } from "@/redux/store";
 import { Comment } from "@/types/Comment";
 import { PostData } from "@/types/Posts";
@@ -42,6 +43,7 @@ const InputComment = ({
   const [isLoadingReply, setIsLoadingReply] = useState(false);
 
   const isLoading = useSelector(selectLoadingNewComment);
+  const socket = useSelector(selectSocket);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -74,6 +76,10 @@ const InputComment = ({
           ],
         };
         dispatch(updatePostAction(updatedPost));
+        if (socket && socket.emit) {
+          // Socket
+          socket.emit("createComment", updatedPost);
+        }
         if (setOnReply) return setOnReply(false);
         if (onReply?.commentId) setIsLoadingReply(false);
         setContent("");

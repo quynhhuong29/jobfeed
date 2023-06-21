@@ -3,7 +3,10 @@ import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
 import { selectSocket, setSocket } from "@/redux/reducers/socketReducers";
 import withAuth from "./hocs/withAuth";
-import { selectAuth } from "./redux/reducers/authReducers";
+import {
+  selectAuth,
+  updateUserAuthAction,
+} from "./redux/reducers/authReducers";
 import { updatePostAction } from "./redux/reducers/postReducers";
 import { PostData } from "./types/Posts";
 import { useAppDispatch } from "./redux/store";
@@ -44,6 +47,7 @@ function SocketClient() {
     }
   }, [socket, auth?.user]);
 
+  // Like
   useEffect(() => {
     if (socket && socket.on) {
       socket.on("likeToClient", (newPost: PostData) => {
@@ -72,6 +76,59 @@ function SocketClient() {
     };
   }, [socket, dispatch]);
 
+  // Comment
+  useEffect(() => {
+    if (socket && socket.on) {
+      socket.on("createCommentToClient", (newPost: PostData) => {
+        dispatch(updatePostAction(newPost));
+      });
+    }
+
+    return () => {
+      if (socket && socket.off) {
+        socket.off("createCommentToClient");
+      }
+    };
+  }, [socket, dispatch]);
+
+  useEffect(() => {
+    if (socket && socket.on) {
+      socket.on("deleteCommentToClient", (newPost: PostData) => {
+        dispatch(updatePostAction(newPost));
+      });
+    }
+
+    return () => {
+      if (socket && socket.off) {
+        socket.off("deleteCommentToClient");
+      }
+    };
+  }, [socket, dispatch]);
+
+  // Follow User
+  useEffect(() => {
+    socket?.on("followToClient", (newUser: any) => {
+      dispatch(
+        updateUserAuthAction({
+          newUser,
+        })
+      );
+    });
+
+    return () => socket?.off("followToClient");
+  }, [socket, dispatch, auth]);
+
+  useEffect(() => {
+    socket?.on("unFollowToClient", (newUser: any) => {
+      dispatch(
+        updateUserAuthAction({
+          newUser,
+        })
+      );
+    });
+
+    return () => socket?.off("unFollowToClient");
+  }, [socket, dispatch, auth]);
   return null;
 }
 

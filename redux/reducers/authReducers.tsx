@@ -77,6 +77,9 @@ const authSlice = createSlice({
     setRole(state, action) {
       state.role = action.payload;
     },
+    updateUserAuthAction(state, action) {
+      state.data.user = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -131,5 +134,5 @@ export const selectIsLoggedIn = (state: RootState) => state.auth.isLoggedIn;
 export const selectUsername = (state: RootState) =>
   state.auth.data.user?.username;
 
-export const { setRole } = authSlice.actions;
+export const { setRole, updateUserAuthAction } = authSlice.actions;
 export default authSlice.reducer;

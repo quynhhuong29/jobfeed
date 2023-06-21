@@ -4,6 +4,7 @@ import {
   unLikeComment,
 } from "@/redux/apis/commentAPI";
 import { updatePostAction } from "@/redux/reducers/postReducers";
+import { selectSocket } from "@/redux/reducers/socketReducers";
 import { useAppDispatch } from "@/redux/store";
 import { Comment } from "@/types/Comment";
 import { Post, PostData } from "@/types/Posts";
@@ -28,6 +29,7 @@ import {
 import moment from "moment";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { HamburgerDotIcon, HeartIcon } from "../icons";
 import InputComment from "../InputComment";
@@ -66,6 +68,8 @@ const CommentCard = ({
 
   const [onReply, setOnReply] = useState<any>(false);
 
+  const socket = useSelector(selectSocket);
+
   const handleToggleExpand = () => {
     setExpanded(!expanded);
   };
@@ -88,6 +92,10 @@ const CommentCard = ({
         };
 
         dispatch(updatePostAction(newPost));
+        if (socket && socket.emit) {
+          // Socket
+          socket.emit("deleteComment", newPost);
+        }
         setIsLoading(false);
       } catch (err) {
         setIsLoading(false);
