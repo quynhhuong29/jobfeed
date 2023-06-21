@@ -44,6 +44,7 @@ import {
   deletePostAction,
   getPostsAsync,
   selectPosts,
+  updatePostAction,
   updatePostAsync,
 } from "@/redux/reducers/postReducers";
 import { useEffect, useState } from "react";
@@ -120,14 +121,17 @@ const PostCard = ({ post, userAuth }: Props) => {
   const handleLikePost = async () => {
     if (loadingLike) return;
 
-    setLoadingLike(true);
     if (isLike && post) {
       try {
         setIsLike(false);
         await unLikePost(post._id);
 
         if (socket && socket.emit) {
-          const newPost = { ...post, likes: [...post.likes, auth?.user] };
+          const newPost = {
+            ...post,
+            likes: post.likes.filter((like) => like !== auth?.user),
+          };
+          dispatch(updatePostAction(newPost));
           socket.emit("unLikePost", newPost);
         }
         setLoadingLike(false);
@@ -142,6 +146,7 @@ const PostCard = ({ post, userAuth }: Props) => {
 
         if (socket && socket.emit) {
           const newPost = { ...post, likes: [...post.likes, auth?.user] };
+          dispatch(updatePostAction(newPost));
           socket.emit("likePost", newPost);
         }
         setLoadingLike(false);
