@@ -5,12 +5,13 @@ import { RootState } from "../store";
 import { getItem } from "@/utils/localStorage.util";
 
 const role = getItem("user") && JSON.parse(getItem("user")!)?.role;
+const user = getItem("user") && JSON.parse(getItem("user")!);
 
 const initialState: AuthState = {
   isLoggedIn: getItem("isAuthenticated") === "true",
   data: {
     access_token: "",
-    user: null,
+    user: user || null,
   },
   role: role || "candidate",
   isLoading: false,

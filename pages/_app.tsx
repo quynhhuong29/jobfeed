@@ -10,7 +10,7 @@ import { getItem, setLocalStorageContent } from "@/utils/localStorage.util";
 import { refreshToken } from "@/redux/apis/authAPI";
 import jwt_decode from "jwt-decode";
 import { getUserInfoById } from "@/redux/apis/userAPI";
-import { setRole } from "@/redux/reducers/authReducers";
+import SocketClient from "@/SocketClient";
 
 export default function App({ Component, pageProps }: AppProps) {
   const isTokenExpired = () => {
@@ -47,16 +47,18 @@ export default function App({ Component, pageProps }: AppProps) {
       console.log(err);
     }
   };
-  useEffect(() => {
-    if (isTokenExpired()) {
-      getRefreshToken();
-    } else {
-      updateUserAuth();
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (isTokenExpired()) {
+  //     getRefreshToken();
+  //   } else {
+  //     updateUserAuth();
+  //   }
+  // }, []);
+
   return (
     <Provider store={store}>
       <ChakraProvider>
+        <SocketClient />
         <Component {...pageProps} />
         <ToastContainer
           position="top-right"
