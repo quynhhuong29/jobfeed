@@ -24,13 +24,25 @@ const reducer = combineReducers({
   socket: socketReducers,
 });
 
-const store = configureStore({
-  reducer,
-});
+// Create a separate function to configure and return the store
+const configureAppStore = () =>
+  configureStore({
+    reducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: false,
+      }),
+  });
 
+// Export the store directly from the module
+export const store = configureAppStore();
+
+// Define the RootState and AppDispatch types
 export type RootState = ReturnType<typeof store.getState>;
-
 export type AppDispatch = typeof store.dispatch;
-export const useAppDispatch: () => AppDispatch = useDispatch;
 
+// Export the useDispatch hook using the correct syntax
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+
+// Export the configured store as the default export
 export default store;

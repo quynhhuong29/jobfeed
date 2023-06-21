@@ -1,7 +1,7 @@
 import "@/styles/globals.scss";
 import { ChakraProvider } from "@chakra-ui/react";
 import type { AppProps } from "next/app";
-import { Provider } from "react-redux";
+import { Provider, useDispatch } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import store from "@/redux/store";
@@ -10,7 +10,10 @@ import { getItem, setLocalStorageContent } from "@/utils/localStorage.util";
 import { refreshToken } from "@/redux/apis/authAPI";
 import jwt_decode from "jwt-decode";
 import { getUserInfoById } from "@/redux/apis/userAPI";
+import { setRole } from "@/redux/reducers/authReducers";
 import SocketClient from "@/SocketClient";
+import { io } from "socket.io-client";
+import { setSocket } from "@/redux/reducers/socketReducers";
 
 export default function App({ Component, pageProps }: AppProps) {
   const isTokenExpired = () => {
@@ -47,13 +50,13 @@ export default function App({ Component, pageProps }: AppProps) {
       console.log(err);
     }
   };
-  // useEffect(() => {
-  //   if (isTokenExpired()) {
-  //     getRefreshToken();
-  //   } else {
-  //     updateUserAuth();
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (isTokenExpired()) {
+      getRefreshToken();
+    } else {
+      updateUserAuth();
+    }
+  }, []);
 
   return (
     <Provider store={store}>

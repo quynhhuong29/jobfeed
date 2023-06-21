@@ -1,11 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { initial } from "lodash";
 import { RootState } from "../store";
+
+type SocketState = {
+  socket: any;
+};
+
+const initialState: SocketState = {
+  socket: null,
+};
 
 const socketSlice = createSlice({
   name: "socket",
-  initialState: {
-    socket: null,
-  },
+  initialState,
   reducers: {
     setSocket: (state, action) => {
       state.socket = action.payload;
@@ -14,7 +21,7 @@ const socketSlice = createSlice({
   extraReducers(builder) {},
 });
 
-export const selectSocket = (state: RootState) => state.socket;
+export const selectSocket = (state: RootState) => state.socket.socket;
 
 export const { setSocket } = socketSlice.actions;
 export default socketSlice.reducer;
