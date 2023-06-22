@@ -20,12 +20,18 @@ export type FormLanguageValues = {
 interface Props {
   handleRemoveLanguage: (id: string) => void;
   id: string;
+  value?: any;
   handleForm: (
     form: FormLanguageValues,
     type: "experience" | "education" | "language"
   ) => void;
 }
-const FormLanguage = ({ id, handleRemoveLanguage, handleForm }: Props) => {
+const FormLanguage = ({
+  id,
+  handleRemoveLanguage,
+  handleForm,
+  value,
+}: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [form, setForm] = useState<FormLanguageValues>({
     language: "",
@@ -53,6 +59,11 @@ const FormLanguage = ({ id, handleRemoveLanguage, handleForm }: Props) => {
     });
   };
 
+  useEffect(() => {
+    if (value) {
+      setForm(value);
+    }
+  }, [value]);
   useEffect(() => {
     if (form) {
       setForm(form);

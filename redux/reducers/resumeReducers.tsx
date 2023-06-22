@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getListResumes } from "../apis/resumeAPI";
+import { deleteResume, getListResumes } from "../apis/resumeAPI";
 import { getListCVByJob } from "../apis/submitCvAPI";
 import { RootState } from "../store";
 
@@ -12,7 +12,7 @@ const initialState = {
 
 export const getListResumesAsync = createAsyncThunk(
   "resumes/getListResumes",
-  async ({}, { rejectWithValue }) => {
+  async () => {
     try {
       const response = await getListResumes();
       return response;
@@ -20,7 +20,6 @@ export const getListResumesAsync = createAsyncThunk(
       if (!err.response) {
         throw err;
       }
-      return rejectWithValue(err.response.data);
     }
   }
 );
@@ -40,10 +39,32 @@ export const getListCVByJobAsync = createAsyncThunk(
   }
 );
 
+export const deleteResumeAsync = createAsyncThunk(
+  "resumes/deleteResume",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await deleteResume(id);
+
+      return response;
+    } catch (err: any) {
+      if (!err.response) {
+        throw err;
+      }
+      return rejectWithValue(err.response.data);
+    }
+  }
+);
+
 const resumeSlice = createSlice({
   name: "resumes",
   initialState,
-  reducers: {},
+  reducers: {
+    deleteResumeAction: (state, action) => {
+      state.data = state.data.filter(
+        (item: any) => item._id !== action.payload
+      );
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(getListResumesAsync.pending, (state) => {
@@ -79,4 +100,5 @@ const resumeSlice = createSlice({
 
 export const selectResumes = (state: RootState) => state.resumes;
 
+export const { deleteResumeAction } = resumeSlice.actions;
 export default resumeSlice.reducer;

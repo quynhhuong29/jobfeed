@@ -285,7 +285,7 @@ const Topbar = () => {
                   </MenuItem>
                   <MenuItem sx={{ padding: "10px 12px" }}>
                     <Link
-                      href={`/manageCV/${userAuth?._id}`}
+                      href={`/manageCV`}
                       className="flex items-center gap-2 text-gray-700 text-base font-medium"
                     >
                       <ManageIcon width="20px" height="20px" fill="#323232" />

@@ -13,4 +13,50 @@ async function downloadFile(): Promise<any> {
 async function getListResumes(): Promise<any> {
   return (await api.get("/getListResume")).data;
 }
-export { uploadResumeFile, downloadFile, getListResumes };
+
+async function deleteResume(id: string): Promise<any> {
+  return (await api.patch(`/deleteCV`, { id })).data;
+}
+
+async function updateResume({
+  id,
+  avatar,
+  firstName,
+  lastName,
+  email,
+  dateOfBirth,
+  position,
+  phoneNumber,
+  address,
+  descriptionProfile,
+  educations,
+  experiences,
+  skill,
+  language,
+}: any): Promise<any> {
+  return (
+    await api.patch(`/updateCV`, {
+      id,
+      avatar,
+      firstName,
+      lastName,
+      email,
+      dateOfBirth,
+      position,
+      phoneNumber,
+      address,
+      descriptionProfile,
+      educations,
+      experiences,
+      skill,
+      language,
+    })
+  );
+}
+export {
+  uploadResumeFile,
+  downloadFile,
+  getListResumes,
+  deleteResume,
+  updateResume,
+};
