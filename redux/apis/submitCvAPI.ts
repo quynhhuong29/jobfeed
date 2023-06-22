@@ -9,6 +9,7 @@ async function submitCV({
   resumeFile,
   name,
   email,
+  documentFile,
 }: any): Promise<any> {
   let request;
   if (!resumeFile) {
@@ -18,6 +19,7 @@ async function submitCV({
       idCV,
       dataCV,
       dateSubmit,
+      documentFile,
     };
   } else {
     request = {
@@ -28,6 +30,7 @@ async function submitCV({
       resumeFile,
       name,
       email,
+      documentFile,
     };
   }
   return (await api.post(`/submitCV`, request)).data;

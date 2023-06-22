@@ -74,6 +74,7 @@ function jobDetails() {
 
   const [showButton, setShowButton] = useState(true);
   const [resume, setResume] = useState<any>();
+  const [document, setDocument] = useState<any>();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCV, setIsLoadingCV] = useState(false);
   const [listResumes, setListResumes] = useState<any[]>([]);
@@ -88,11 +89,20 @@ function jobDetails() {
 
   const handleSendResume = async (data: FormData) => {
     let file: any = "";
+    let documentFile: any = "";
     if (!job.infoJob._id && !job.infoJob.company_info._id) return;
+
+    if (!resume) {
+      toast.error("Please select resume!");
+      return;
+    }
 
     setIsLoading(true);
     if (resume) {
       file = await filePdfUpload(resume);
+    }
+    if (document) {
+      documentFile = await filePdfUpload(document);
     }
 
     try {
@@ -103,6 +113,7 @@ function jobDetails() {
         dateSubmit: new Date().toISOString(),
         name: data.name || "",
         email: data.email || "",
+        documentFile: documentFile,
       });
 
       toast.success("Submit CV successfully!");
@@ -122,7 +133,16 @@ function jobDetails() {
     if (!valueResume) return;
     setIsLoadingCV(true);
 
+    let documentFile: any = "";
+
     const resume = listResumes.find((item) => item._id === valueResume);
+    if (!resume) {
+      toast.error("Please select resume!");
+      return;
+    }
+    if (document) {
+      documentFile = await filePdfUpload(document);
+    }
 
     try {
       await submitCV({
@@ -131,6 +151,7 @@ function jobDetails() {
         dataCV: resume,
         dateSubmit: new Date().toISOString(),
         idCV: valueResume,
+        documentFile: documentFile,
       });
 
       toast.success("Submit CV successfully!");
@@ -710,7 +731,7 @@ function jobDetails() {
                       {...register("email")}
                     />
                   </div>
-                  <div className="mb-5">
+                  <div className="mb-3">
                     <label className="text-base mb-2 inline-block">
                       Resume Upload
                     </label>
@@ -718,6 +739,16 @@ function jobDetails() {
                       type="file"
                       accept=".pdf"
                       onChange={(event: any) => setResume(event.target.files)}
+                    />
+                  </div>
+                  <div className="mb-5">
+                    <label className="text-base mb-2 inline-block">
+                      Document
+                    </label>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={(event: any) => setDocument(event.target.files)}
                     />
                   </div>
                   <Button

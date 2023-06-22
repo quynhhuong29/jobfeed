@@ -45,6 +45,7 @@ type FormData = {
 function JobCard({ data }: Props) {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [resume, setResume] = useState<any>();
+  const [document, setDocument] = useState<any>();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCV, setIsLoadingCV] = useState(false);
   const [listResumes, setListResumes] = useState<any[]>([]);
@@ -56,11 +57,21 @@ function JobCard({ data }: Props) {
 
   const handleSendResume = async (dataForm: FormData) => {
     let file: any = "";
+    let documentFile: any = "";
     if (!data._id && !data.company_info._id) return;
+
+    if (!resume) {
+      toast.error("Please select resume!");
+      return;
+    }
 
     setIsLoading(true);
     if (resume) {
       file = await filePdfUpload(resume);
+    }
+
+    if (document) {
+      documentFile = await filePdfUpload(document);
     }
 
     try {
@@ -71,6 +82,7 @@ function JobCard({ data }: Props) {
         dateSubmit: new Date().toISOString(),
         name: dataForm.name || "",
         email: dataForm.email || "",
+        documentFile: documentFile,
       });
 
       toast.success("Submit CV successfully!");
@@ -92,6 +104,15 @@ function JobCard({ data }: Props) {
 
     const resume = listResumes.find((item) => item._id === valueResume);
 
+    if (!resume) {
+      toast.error("Please select resume!");
+      return;
+    }
+
+    let documentFile: any = "";
+    if (document) {
+      documentFile = await filePdfUpload(document);
+    }
     try {
       await submitCV({
         idJob: data._id,
@@ -99,6 +120,7 @@ function JobCard({ data }: Props) {
         dataCV: resume,
         dateSubmit: new Date().toISOString(),
         idCV: valueResume,
+        documentFile: documentFile,
       });
 
       toast.success("Submit CV successfully!");
@@ -320,7 +342,7 @@ function JobCard({ data }: Props) {
                         {...register("email")}
                       />
                     </div>
-                    <div className="mb-5">
+                    <div className="mb-3">
                       <label className="text-base mb-2 inline-block">
                         Resume Upload
                       </label>
@@ -328,6 +350,18 @@ function JobCard({ data }: Props) {
                         type="file"
                         accept=".pdf"
                         onChange={(event: any) => setResume(event.target.files)}
+                      />
+                    </div>
+                    <div className="mb-5">
+                      <label className="text-base mb-2 inline-block">
+                        Document
+                      </label>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={(event: any) =>
+                          setDocument(event.target.files)
+                        }
                       />
                     </div>
                     <Button
@@ -364,6 +398,18 @@ function JobCard({ data }: Props) {
                         })}
                       </Stack>
                     </RadioGroup>
+                    <div className="mb-5">
+                      <label className="text-base mb-2 inline-block">
+                        Document
+                      </label>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={(event: any) =>
+                          setDocument(event.target.files)
+                        }
+                      />
+                    </div>
                     <Button
                       colorScheme="green"
                       onClick={handleSendCV}

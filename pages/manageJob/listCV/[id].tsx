@@ -174,6 +174,7 @@ const manageJob = () => {
                       <Th>Email</Th>
                       <Th>Status</Th>
                       <Th sx={{ textAlign: "center" }}>CV</Th>
+                      <Th sx={{ textAlign: "center" }}>Document</Th>
                       <Th sx={{ textAlign: "center" }}>Action</Th>
                     </Tr>
                   </Thead>
@@ -189,58 +190,71 @@ const manageJob = () => {
                     </div>
                   ) : (
                     <Tbody>
-                      {resumes?.listCVOfJob?.map((item: any, index) => (
-                        <Tr key={index}>
-                          <Td>
-                            {item?.name
-                              ? item?.name
-                              : `${item?.dataCV?.firstName} ${item?.dataCV?.lastName}`}
-                          </Td>
-                          <Td>
-                            {item?.email
-                              ? item?.email
-                              : `${item?.dataCV?.email}`}
-                          </Td>
-                          <Td>{item?.status}</Td>
-                          <Td sx={{ textAlign: "center" }}>
-                            {item?.resumeFile ? (
-                              <Link href={item?.resumeFile} target="_blank">
+                      {Array.isArray(resumes?.listCVOfJob) &&
+                        resumes?.listCVOfJob?.map((item: any, index) => (
+                          <Tr key={index}>
+                            <Td>
+                              {item?.name
+                                ? item?.name
+                                : `${item?.dataCV?.firstName} ${item?.dataCV?.lastName}`}
+                            </Td>
+                            <Td>
+                              {item?.email
+                                ? item?.email
+                                : `${item?.dataCV?.email}`}
+                            </Td>
+                            <Td>{item?.status}</Td>
+                            <Td sx={{ textAlign: "center" }}>
+                              {item?.resumeFile ? (
+                                <Link href={item?.resumeFile} target="_blank">
+                                  <IconButton
+                                    aria-label="View CV"
+                                    icon={<ViewIcon />}
+                                    variant="ghost"
+                                    onClick={() => {}}
+                                  />
+                                </Link>
+                              ) : (
                                 <IconButton
                                   aria-label="View CV"
                                   icon={<ViewIcon />}
                                   variant="ghost"
-                                  onClick={() => {}}
+                                  onClick={() => {
+                                    window.open(
+                                      `/manageJob/viewCV?state=${encodeURIComponent(
+                                        JSON.stringify(item?.dataCV)
+                                      )}`,
+                                      "_blank"
+                                    );
+                                  }}
                                 />
-                              </Link>
-                            ) : (
+                              )}
+                            </Td>
+                            <Td sx={{ textAlign: "center" }}>
+                              {item?.documentFile && (
+                                <Link href={item?.documentFile} target="_blank">
+                                  <IconButton
+                                    aria-label="View CV"
+                                    icon={<ViewIcon />}
+                                    variant="ghost"
+                                    onClick={() => {}}
+                                  />
+                                </Link>
+                              )}
+                            </Td>
+                            <Td sx={{ textAlign: "center" }}>
                               <IconButton
-                                aria-label="View CV"
-                                icon={<ViewIcon />}
+                                aria-label="Edit"
+                                icon={<EditIcon />}
                                 variant="ghost"
                                 onClick={() => {
-                                  window.open(
-                                    `/manageJob/viewCV?state=${encodeURIComponent(
-                                      JSON.stringify(item?.dataCV)
-                                    )}`,
-                                    "_blank"
-                                  );
+                                  setCvUpload(item);
+                                  onOpen();
                                 }}
                               />
-                            )}
-                          </Td>
-                          <Td sx={{ textAlign: "center" }}>
-                            <IconButton
-                              aria-label="Edit"
-                              icon={<EditIcon />}
-                              variant="ghost"
-                              onClick={() => {
-                                setCvUpload(item);
-                                onOpen();
-                              }}
-                            />
-                          </Td>
-                        </Tr>
-                      ))}
+                            </Td>
+                          </Tr>
+                        ))}
                     </Tbody>
                   )}
                 </Table>
