@@ -1,3 +1,5 @@
+import { createNotify } from "@/redux/apis/notifyAPI";
+import { selectAuth } from "@/redux/reducers/authReducers";
 import {
   createCommentAsync,
   selectLoading,
@@ -44,6 +46,7 @@ const InputComment = ({
 
   const isLoading = useSelector(selectLoadingNewComment);
   const socket = useSelector(selectSocket);
+  const auth = useSelector(selectAuth);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -76,10 +79,36 @@ const InputComment = ({
           ],
         };
         dispatch(updatePostAction(updatedPost));
-        if (socket && socket.emit) {
-          // Socket
-          socket.emit("createComment", updatedPost);
-        }
+        // Socket
+        socket?.emit("createComment", updatedPost);
+
+        // Notify
+        const msg = {
+          id: response.newComment._id,
+          text: response?.newComment.reply
+            ? "mentioned you in a comment."
+            : "has commented on your post.",
+          recipients: response?.newComment.reply
+            ? [response?.newComment.tag._id]
+            : [post.user._id],
+          url: `/post/${post._id}`,
+          content: post.content,
+          image: post.images[0]?.url ? post.images[0]?.url : "",
+        };
+
+        const res = await createNotify(msg);
+        socket?.emit("createNotify", {
+          ...res.notify,
+          user: {
+            username: auth?.data?.user.username,
+            avatar: auth?.data?.user.avatar,
+            fullName:
+              auth.role !== "company"
+                ? auth?.data?.user.firstName + " " + auth?.data?.user.lastName
+                : auth?.data?.user.lastName,
+          },
+        });
+
         if (setOnReply) return setOnReply(false);
         if (onReply?.commentId) setIsLoadingReply(false);
         setContent("");

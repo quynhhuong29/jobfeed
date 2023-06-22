@@ -38,3 +38,5 @@ export { default as HistoryIcon } from "./HistoryIcon";
 export { default as PhoneIcon } from "./PhoneIcon";
 export { default as MailIcon } from "./MailIcon";
 export { default as GlobalIcon } from "./GlobalIcon";
+export { default as BellAlarmIcon } from "./BellAlarmIcon";
+export { default as DotIcon } from "./DotIcon";

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
 import { selectSocket, setSocket } from "@/redux/reducers/socketReducers";
@@ -10,12 +10,38 @@ import {
 import { updatePostAction } from "./redux/reducers/postReducers";
 import { PostData } from "./types/Posts";
 import { useAppDispatch } from "./redux/store";
+import {
+  createNotifyAction,
+  removeNotifyAction,
+  selectNotify,
+} from "./redux/reducers/notifyReducers";
+
+const spawnNotification = (
+  body: any,
+  icon: any,
+  url: string,
+  title: string
+) => {
+  let options = {
+    body,
+    icon,
+  };
+  let n = new Notification(title, options);
+
+  n.onclick = (e) => {
+    e.preventDefault();
+    window.open(url, "_blank");
+  };
+};
 
 function SocketClient() {
   const dispatch = useAppDispatch();
 
+  const audioRef = useRef<any>();
+
   const socket = useSelector(selectSocket);
   const auth = useSelector(selectAuth)?.data;
+  const notify = useSelector(selectNotify);
 
   useEffect(() => {
     const socket = io("http://localhost:5001");
@@ -129,7 +155,38 @@ function SocketClient() {
 
     return () => socket?.off("unFollowToClient");
   }, [socket, dispatch, auth]);
-  return null;
+
+  // Notification
+  useEffect(() => {
+    socket?.on("createNotifyToClient", (msg: any) => {
+      dispatch(createNotifyAction(msg));
+      if (notify.sound) audioRef.current.play();
+      spawnNotification(
+        msg.user.firstName + " " + msg.user.lastName + " " + msg.text,
+        msg.user.avatar,
+        msg.url,
+        "RankWork"
+      );
+    });
+
+    return () => socket?.off("createNotifyToClient");
+  }, [socket, dispatch, notify.sound]);
+
+  useEffect(() => {
+    socket?.on("removeNotifyToClient", (msg: any) => {
+      dispatch(removeNotifyAction(msg));
+    });
+
+    return () => socket?.off("removeNotifyToClient");
+  }, [socket, dispatch]);
+
+  return (
+    <>
+      <audio controls ref={audioRef} style={{ display: "none" }}>
+        <source src={"assets/audio/got-it-done-613.mp3"} type="audio/mp3" />
+      </audio>
+    </>
+  );
 }
 
 export default withAuth(SocketClient);
