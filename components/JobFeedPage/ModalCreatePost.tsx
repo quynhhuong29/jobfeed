@@ -1,3 +1,5 @@
+import { createNotify } from "@/redux/apis/notifyAPI";
+import { selectAuth } from "@/redux/reducers/authReducers";
 import {
   createPostAsync,
   getPostsAsync,
@@ -5,8 +7,10 @@ import {
   selectLoadingPost,
   updatePostAsync,
 } from "@/redux/reducers/postReducers";
+import { selectSocket } from "@/redux/reducers/socketReducers";
 import { useAppDispatch } from "@/redux/store";
 import { Image, Post } from "@/types/Posts";
+import { imageUpload } from "@/utils/upload.util";
 import {
   Button,
   IconButton,
@@ -43,8 +47,11 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data, userId }: Props) => {
   const videoRef = useRef<any>();
   const refCanvas = useRef<any>();
   const [tracks, setTracks] = useState<any>("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const isLoading = useSelector(selectLoadingPost);
+  // const isLoading = useSelector(selectLoadingPost);
+  const socket = useSelector(selectSocket);
+  const auth = useSelector(selectAuth);
 
   const handleContentChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>
@@ -123,11 +130,12 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data, userId }: Props) => {
   const handleSubmitPost = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (images.length === 0) {
-      toast.error("Please select an image!");
-      return;
-    }
+    // if (images.length === 0) {
+    //   toast.error("Please select an image!");
+    //   return;
+    // }
 
+    setIsLoading(true);
     try {
       if (isEdit && data) {
         const { _id } = data;
@@ -135,9 +143,40 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data, userId }: Props) => {
         await dispatch(
           updatePostAsync({ _id, content, media: images, data })
         ).unwrap();
+        setIsLoading(false);
         toast.success("Update a post success!!!");
       } else {
-        await dispatch(createPostAsync({ content, images }));
+        let media = [];
+        if (images.length > 0) media = await imageUpload(images);
+
+        const response = (
+          await dispatch(createPostAsync({ content, media, socket, auth }))
+        )?.payload;
+
+        // Notify
+        const msg = {
+          id: response?.newPost?._id,
+          text: "added a new post.",
+          recipients: response?.newPost.user.followers,
+          url: `/post/${response?.newPost._id}`,
+          content,
+          image: media[0]?.url ? media[0]?.url : "",
+        };
+
+        const res = await createNotify(msg);
+        socket?.emit("createNotify", {
+          ...res.notify,
+          user: {
+            username: auth.data.user.username,
+            avatar: auth.data.user.avatar,
+            fullName:
+              auth.role !== "company"
+                ? auth.data.user.firstName + " " + auth.data.user.lastName
+                : auth.data.user.lastName,
+          },
+        });
+        setIsLoading(false);
+
         toast.success("Create a post success!!!");
       }
 
@@ -153,6 +192,8 @@ const ModalCreatePost = ({ isOpen, onClose, isEdit, data, userId }: Props) => {
       }
       onClose();
     } catch (err: any) {
+      setIsLoading(false);
+
       if (err.message) toast.error(err.message);
       else toast.error("Something went wrong. Please try again.");
     }

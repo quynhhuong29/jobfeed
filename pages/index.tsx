@@ -19,6 +19,8 @@ import {
 import { LayoutMain } from "@/components/layout";
 import withAuth from "@/hocs/withAuth";
 import { selectAuth } from "@/redux/reducers/authReducers";
+import { setSocket } from "@/redux/reducers/socketReducers";
+import SocketClient from "@/SocketClient";
 import {
   ArrowForwardIcon,
   ChevronRightIcon,
@@ -35,7 +37,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { io } from "socket.io-client";
 import { jobCard } from "../data/homePageData";
 
 const dataCards: DataCardProps[] = [
@@ -81,10 +84,13 @@ const dataCards: DataCardProps[] = [
   },
 ];
 
+let socket: any = null;
 function Home() {
+  const dispatch = useDispatch();
   const router = useRouter();
   const auth = useSelector(selectAuth);
   const [content, setContent] = useState("");
+
   useEffect(() => {
     auth?.role === "company"
       ? setContent("candidates")

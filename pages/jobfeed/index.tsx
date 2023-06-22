@@ -10,6 +10,7 @@ import HomeIcon from "@/components/icons/HomeIcon";
 import NewsFeed from "@/components/JobFeedPage/NewsFeed";
 import { useDebounce } from "@/hooks/debounceHook";
 import { getPosts } from "@/redux/apis/postApi";
+import { getNotifiesAsync } from "@/redux/reducers/notifyReducers";
 import { getPostsAsync } from "@/redux/reducers/postReducers";
 import {
   getUsersSuggestionAsync,
@@ -84,6 +85,7 @@ function JobFeed() {
 
   useEffect(() => {
     dispatch(getPostsAsync());
+    dispatch(getNotifiesAsync());
   }, [dispatch]);
 
   return (

@@ -5,12 +5,13 @@ import { RootState } from "../store";
 import { getItem } from "@/utils/localStorage.util";
 
 const role = getItem("user") && JSON.parse(getItem("user")!)?.role;
+const user = getItem("user") && JSON.parse(getItem("user")!);
 
 const initialState: AuthState = {
   isLoggedIn: getItem("isAuthenticated") === "true",
   data: {
     access_token: "",
-    user: null,
+    user: user || null,
   },
   role: role || "candidate",
   isLoading: false,
@@ -76,6 +77,9 @@ const authSlice = createSlice({
     setRole(state, action) {
       state.role = action.payload;
     },
+    updateUserAuthAction(state, action) {
+      state.data.user = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -130,5 +134,5 @@ export const selectIsLoggedIn = (state: RootState) => state.auth.isLoggedIn;
 export const selectUsername = (state: RootState) =>
   state.auth.data.user?.username;
 
-export const { setRole } = authSlice.actions;
+export const { setRole, updateUserAuthAction } = authSlice.actions;
 export default authSlice.reducer;

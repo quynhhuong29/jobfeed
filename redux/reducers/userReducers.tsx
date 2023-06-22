@@ -68,7 +68,11 @@ export const getUsersSuggestionAsync = createAsyncThunk(
 const userSlice = createSlice({
   name: "user",
   initialState,
-  reducers: {},
+  reducers: {
+    updateProfileUserAction(state, action) {
+      state.userInfo = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(searchUserAsync.pending, (state) => {
@@ -126,4 +130,5 @@ export const selectUserInfo = (state: RootState) => state.user.userInfo;
 export const selectSuggestionUsers = (state: RootState) =>
   state.user.suggestionUsers;
 
+export const { updateProfileUserAction } = userSlice.actions;
 export default userSlice.reducer;

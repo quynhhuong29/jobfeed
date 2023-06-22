@@ -3,7 +3,10 @@ import {
   likeComment,
   unLikeComment,
 } from "@/redux/apis/commentAPI";
+import { selectAuth } from "@/redux/reducers/authReducers";
+import { removeNotifyAsync } from "@/redux/reducers/notifyReducers";
 import { updatePostAction } from "@/redux/reducers/postReducers";
+import { selectSocket } from "@/redux/reducers/socketReducers";
 import { useAppDispatch } from "@/redux/store";
 import { Comment } from "@/types/Comment";
 import { Post, PostData } from "@/types/Posts";
@@ -28,6 +31,7 @@ import {
 import moment from "moment";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { HamburgerDotIcon, HeartIcon } from "../icons";
 import InputComment from "../InputComment";
@@ -66,6 +70,9 @@ const CommentCard = ({
 
   const [onReply, setOnReply] = useState<any>(false);
 
+  const socket = useSelector(selectSocket);
+  const auth = useSelector(selectAuth);
+
   const handleToggleExpand = () => {
     setExpanded(!expanded);
   };
@@ -88,6 +95,25 @@ const CommentCard = ({
         };
 
         dispatch(updatePostAction(newPost));
+        if (socket && socket.emit) {
+          // Socket
+          socket.emit("deleteComment", newPost);
+        }
+
+        deleteArr.forEach((item) => {
+          // Notify
+          const msg = {
+            id: item._id,
+            text: comment.reply
+              ? "mentioned you in a comment."
+              : "has commented on your post.",
+            recipients: comment.reply ? [comment?.tag?._id] : [post.user._id],
+            url: `/post/${post._id}`,
+          };
+          console.log({ msg });
+          dispatch(removeNotifyAsync({ msg, socket }));
+        });
+
         setIsLoading(false);
       } catch (err) {
         setIsLoading(false);

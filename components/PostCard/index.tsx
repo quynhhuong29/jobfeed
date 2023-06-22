@@ -44,6 +44,7 @@ import {
   deletePostAction,
   getPostsAsync,
   selectPosts,
+  updatePostAction,
   updatePostAsync,
 } from "@/redux/reducers/postReducers";
 import { useEffect, useState } from "react";
@@ -51,6 +52,10 @@ import { useSelector } from "react-redux";
 import InputComment from "../InputComment";
 import Comments from "../Comments";
 import Link from "next/link";
+import { selectSocket } from "@/redux/reducers/socketReducers";
+import { selectAuth } from "@/redux/reducers/authReducers";
+import { createNotify, removeNotify } from "@/redux/apis/notifyAPI";
+import { removeNotifyAsync } from "@/redux/reducers/notifyReducers";
 
 interface Props {
   post: PostData;
@@ -71,12 +76,14 @@ const PostCard = ({ post, userAuth }: Props) => {
   const [expanded, setExpanded] = useState(false);
   const [isLike, setIsLike] = useState(false);
   const [loadingLike, setLoadingLike] = useState(false);
-  const [numberLikes, setNumberLikes] = useState(0);
   const [saved, setSaved] = useState(false);
   const [loadingSaved, setLoadingSaved] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
 
   const { content, images, _id } = post;
+
+  const socket = useSelector(selectSocket);
+  const auth = useSelector(selectAuth);
 
   const settings = {
     dots: true,
@@ -99,8 +106,18 @@ const PostCard = ({ post, userAuth }: Props) => {
   const handleRemovePost = async () => {
     try {
       setLoadingDelete(true);
-      await deletePost(post._id);
+      const res = await deletePost(post._id);
       dispatch(deletePostAction({ _id: post._id }));
+
+      // Notify
+      const msg = {
+        id: post._id,
+        text: "added a new post.",
+        recipients: res.newPost.user.followers,
+        url: `/post/${post._id}`,
+      };
+      dispatch(removeNotifyAsync({ msg, socket }));
+
       toast.success("Post deleted successfully");
       setLoadingDelete(false);
     } catch (err: any) {
@@ -116,28 +133,73 @@ const PostCard = ({ post, userAuth }: Props) => {
   const handleLikePost = async () => {
     if (loadingLike) return;
 
-    setLoadingLike(true);
     if (isLike && post) {
       try {
         setIsLike(false);
-        setNumberLikes(numberLikes - 1);
+
+        if (socket && socket?.emit) {
+          const newPost = {
+            ...post,
+            likes: post.likes.filter(
+              (like: any) => like._id !== auth?.data?.user?._id
+            ),
+          };
+          dispatch(updatePostAction(newPost));
+          socket?.emit("unLikePost", newPost);
+        }
         await unLikePost(post._id);
+
+        // Notify
+        const msg = {
+          id: auth.data.user._id,
+          text: "like your post.",
+          recipients: [post.user._id],
+          url: `/post/${post._id}`,
+        };
+        dispatch(removeNotifyAsync({ msg, socket }));
+
         setLoadingLike(false);
       } catch (err) {
         setIsLike(true);
-        setNumberLikes(numberLikes + 1);
         setLoadingLike(false);
       }
     } else {
       try {
         setIsLike(true);
-        setNumberLikes(numberLikes + 1);
+        if (socket && socket?.emit) {
+          const newPost = { ...post, likes: [...post.likes, auth?.data?.user] };
+          dispatch(updatePostAction(newPost));
+          socket?.emit("likePost", newPost);
+        }
         await likePost(post._id);
+
+        // Notify
+        const msg = {
+          id: auth.data.user._id,
+          text: "like your post.",
+          recipients: [post.user._id],
+          url: `/post/${post._id}`,
+          content: post.content,
+          image: post.images[0]?.url ? post.images[0]?.url : "",
+        };
+
+        const res = await createNotify(msg);
+        socket?.emit("createNotify", {
+          ...res.notify,
+          user: {
+            username: auth.data.user.username,
+            avatar: auth.data.user.avatar,
+            fullName:
+              auth.role !== "company"
+                ? auth.data.user.firstName + " " + auth.data.user.lastName
+                : auth.data.user.lastName,
+          },
+        });
+
         setLoadingLike(false);
       } catch (err) {
         setLoadingLike(false);
         setIsLike(false);
-        setNumberLikes(numberLikes - 1);
       }
     }
   };
@@ -175,7 +237,6 @@ const PostCard = ({ post, userAuth }: Props) => {
     } else {
       setIsLike(false);
     }
-    setNumberLikes(post?.likes?.length);
   }, [post?.likes, userAuth?._id]);
 
   useEffect(() => {
@@ -314,7 +375,9 @@ const PostCard = ({ post, userAuth }: Props) => {
         />
       </div>
       <div className="flex items-center justify-between px-8 mt-1 border-y border-gray-400 py-2">
-        <p className="text-gray-800 font-semibold">{numberLikes} Likes</p>
+        <p className="text-gray-800 font-semibold">
+          {post?.likes?.length} Likes
+        </p>
         <p className="text-gray-800 font-semibold">
           {post?.comments?.length || 0} Comments
         </p>
