@@ -3,7 +3,7 @@ import api from "@/configs/axios";
 async function uploadResumeFile(file: any): Promise<any> {
   const formData = new FormData();
   formData.append("file", file);
-  return (await api.post(`/updateResume`, formData)).data;
+  return (await api.post(`/uploadResumeFile`, formData)).data;
 }
 
 async function downloadFile(): Promise<any> {
@@ -15,48 +15,62 @@ async function getListResumes(): Promise<any> {
 }
 
 async function deleteResume(id: string): Promise<any> {
-  return (await api.patch(`/deleteCV`, { id })).data;
+  return (await api.delete(`/deleteResumeById/${id}`)).data;
 }
 
 async function updateResume({
   id,
-  avatar,
+  title,
   firstName,
   lastName,
-  email,
-  dateOfBirth,
-  position,
-  phoneNumber,
-  address,
-  descriptionProfile,
-  educations,
-  experiences,
-  skill,
+  phone,
+  DOB,
+  country,
   language,
+  email,
+  city,
+  address,
+  overview,
+  workExperience,
+  skill,
+  education,
+  hobbies,
+  avatar,
+  linkedin,
+  tags,
 }: any): Promise<any> {
-  return (
-    await api.patch(`/updateCV`, {
-      id,
-      avatar,
-      firstName,
-      lastName,
-      email,
-      dateOfBirth,
-      position,
-      phoneNumber,
-      address,
-      descriptionProfile,
-      educations,
-      experiences,
-      skill,
-      language,
-    })
-  );
+  return await api.patch(`/updateResume`, {
+    id,
+    title,
+    firstName,
+    lastName,
+    phone,
+    DOB,
+    country,
+    language,
+    email,
+    city,
+    address,
+    overview,
+    workExperience,
+    skill,
+    education,
+    hobbies,
+    avatar,
+    linkedin,
+    tags,
+  });
 }
+
+async function getCVInfo(id: string): Promise<any> {
+  return (await api.get(`/getResumeById/${id}`)).data;
+}
+
 export {
   uploadResumeFile,
   downloadFile,
   getListResumes,
   deleteResume,
   updateResume,
+  getCVInfo,
 };

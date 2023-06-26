@@ -40,7 +40,8 @@ import { useForm } from "react-hook-form";
 import { cloneDeep } from "lodash";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import { updateResume } from "@/redux/apis/resumeAPI";
+import { getCVInfo, updateResume } from "@/redux/apis/resumeAPI";
+import { isUrl } from "@/utils/string.util";
 
 type FormValues = {
   profileTitle: string;
@@ -63,18 +64,46 @@ type FormValues = {
 
 function updateCV() {
   const router = useRouter();
-  const { state } = router.query;
   const auth = useSelector(selectAuth);
 
   const [avatar, setAvatar] = useState<any>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const [formExperience, setFormExperience] = useState<FormExperienceValues[]>(
-    []
-  );
-  const [formEducation, setFormEducation] = useState<FormEducationValues[]>([]);
-  const [formSkill, setFormSkill] = useState<FormSkillValues[]>([]);
-  const [formLanguage, setFormLanguage] = useState<FormLanguageValues[]>([]);
+  const [formExperience, setFormExperience] = useState<FormExperienceValues[]>([
+    {
+      id: "0",
+      position: "",
+      company: "",
+      startDate: "",
+      endDate: "",
+      description: "",
+    },
+  ]);
+  const [formEducation, setFormEducation] = useState<FormEducationValues[]>([
+    {
+      id: "0",
+      description: "",
+      endDate: "",
+      major: "",
+      school: "",
+      startDate: "",
+    },
+  ]);
+  const [formSkill, setFormSkill] = useState<FormSkillValues[]>([
+    {
+      id: "0",
+      description: "",
+      skill: "",
+    },
+  ]);
+  const [formLanguage, setFormLanguage] = useState<FormLanguageValues[]>([
+    {
+      id: "0",
+      description: "",
+      language: "",
+      level: "",
+    },
+  ]);
   const [experienceList, setExperienceList] = useState<any[]>([
     {
       id: 0,
@@ -119,34 +148,47 @@ function updateCV() {
       router.push("/");
     }
   }, [auth, router]);
+
   useEffect(() => {
-    if (!state) return;
-    let data: any;
-    if (typeof state === "string") {
-      data = JSON.parse(state);
-    } else if (Array.isArray(state)) {
-      data = state.join(",");
-    }
+    const fetchData = async () => {
+      try {
+        if (!router.query.id) return;
 
-    setAvatar(data?.avatar);
-    setValue("profileTitle", data?.title);
-    setValue("firstName", data?.firstName);
-    setValue("lastName", data?.lastName);
-    setValue("phone", data?.phone);
-    setValue("DOB", data?.DOB);
-    setValue("country", data?.country);
-    setValue("email", data?.email);
-    setValue("city", data?.city);
-    setValue("address", data?.address);
-    setValue("hobbies", data?.hobbies);
-    setValue("linkIn", data?.linkIn);
-    setValue("overview", data?.overview);
+        const res = await getCVInfo(router.query.id.toString());
+        return res;
+      } catch (err) {
+        console.log(err);
+      }
+    };
 
-    setExperienceList(data?.workExperience);
-    setEducationList(data?.education);
-    setSkillsList(data?.skill);
-    setLanguagesList(data?.language);
-  }, [state, setValue]);
+    const fetchDataAndSetValues = async () => {
+      const data = await fetchData();
+      if (data) {
+        console.log(data?.avatar);
+        setAvatar(data?.avatar);
+        setValue("profileTitle", data?.title);
+        setValue("firstName", data?.firstName);
+        setValue("lastName", data?.lastName);
+        setValue("phone", data?.phone);
+        setValue("DOB", data?.DOB);
+        setValue("country", data?.country);
+        setValue("email", data?.email);
+        setValue("city", data?.city);
+        setValue("address", data?.address);
+        setValue("hobbies", data?.hobbies);
+        setValue("linkIn", data?.linkIn);
+        setValue("overview", data?.overview);
+
+        setFormExperience(data?.workExperience);
+        setFormEducation(data?.education);
+        setFormSkill(data?.skill);
+        setFormLanguage(data?.language);
+      }
+    };
+
+    fetchDataAndSetValues();
+  }, [router.query.id, setValue]);
+
   const handleChangeAvatar = (e: any) => {
     const file = e.target.files[0];
 
@@ -159,9 +201,9 @@ function updateCV() {
   };
 
   const handleAddExperience = () => {
-    setExperienceList((prevList: any) => [
+    setFormExperience((prevList: any) => [
       ...prevList,
-      { id: experienceList.length },
+      { id: formExperience.length },
     ]);
   };
 
@@ -266,21 +308,23 @@ function updateCV() {
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
+
     let dataRequest;
-    // let img: any = [];
-    // if (avatar) {
-    //   img = await imageUpload([avatar]);
-    // }
+    let img: any = [];
+    if (avatar) {
+      img = await imageUpload([avatar]);
+    }
 
     if (data) {
       dataRequest = {
+        id: router.query.id?.toString(),
         title: data.profileTitle || "",
         firstName: data.firstName || "",
         lastName: data.lastName || "",
         email: data.email || "",
         overview: data.overview || "",
         address: data.address || "",
-        avatar: avatar || "",
+        avatar: img[0]?.url || "",
         phone: data.phone || "",
         DOB: data.DOB || "",
         country: data.country || "",
@@ -378,7 +422,11 @@ function updateCV() {
                                 <Avatar
                                   size="2xl"
                                   src={
-                                    avatar ? avatar : "/assets/images/img/png"
+                                    avatar
+                                      ? isUrl(avatar)
+                                        ? avatar
+                                        : URL.createObjectURL(avatar)
+                                      : "/assets/images/img/png"
                                   }
                                 />
                               </WrapItem>
@@ -676,7 +724,7 @@ function updateCV() {
                     </h2>
                     <AccordionPanel pb={4}>
                       <div className="flex flex-col gap-3">
-                        {experienceList.map((item) => (
+                        {formExperience.map((item) => (
                           <FormExperience
                             key={item.id}
                             id={item.id}
@@ -716,12 +764,13 @@ function updateCV() {
                     </h2>
                     <AccordionPanel pb={4}>
                       <div className="flex flex-col gap-3">
-                        {educationList.map((item) => (
+                        {formEducation.map((item) => (
                           <FormEducation
                             key={item.id}
                             id={item.id}
                             handleRemoveEducation={handleRemoveEducation}
                             handleForm={handleForm}
+                            value={item}
                           />
                         ))}
                         <div className="flex justify-end">
@@ -755,12 +804,13 @@ function updateCV() {
                     </h2>
                     <AccordionPanel pb={4}>
                       <div className="flex flex-col gap-3">
-                        {languagesList.map((item) => (
+                        {formLanguage.map((item) => (
                           <FormLanguage
                             key={item.id}
                             id={item.id}
                             handleRemoveLanguage={handleRemoveLanguage}
                             handleForm={handleForm}
+                            value={item}
                           />
                         ))}
                         <div className="flex justify-end">
@@ -794,12 +844,13 @@ function updateCV() {
                     </h2>
                     <AccordionPanel pb={4}>
                       <div className="flex flex-col gap-3">
-                        {skillsList.map((item) => (
+                        {formSkill.map((item) => (
                           <FormSkill
                             key={item.id}
                             id={item.id}
                             handleRemove={handleRemoveSkill}
                             handleForm={handleForm}
+                            value={item}
                           />
                         ))}
                         <div className="flex justify-end">

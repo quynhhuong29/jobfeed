@@ -11,7 +11,7 @@ export type FormSkillValues = {
 interface Props {
   handleRemove: (id: string) => void;
   id: string;
-  value?: string;
+  value?: any;
   handleForm: (
     form: FormSkillValues,
     type: "experience" | "education" | "skill"

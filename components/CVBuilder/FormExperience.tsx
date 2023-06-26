@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { useController, UseControllerProps } from "react-hook-form";
 import dateFormat from "dateformat";
+import { formatDate } from "@/utils/datetime.util";
 
 export type FormExperienceValues = {
   position: string;
@@ -161,7 +162,7 @@ const FormExperience = ({
           <Input
             type="date"
             autoComplete="off"
-            value={form.startDate || ""}
+            value={formatDate(form.startDate) || ""}
             sx={{
               backgroundColor: "#fff",
               border: "1px solid #dbdfe2",
@@ -200,7 +201,7 @@ const FormExperience = ({
           <Input
             type="date"
             autoComplete="off"
-            value={form.endDate && !isPresent ? form.endDate : ""}
+            value={form.endDate && !isPresent ? formatDate(form.endDate) : ""}
             sx={{
               backgroundColor: "#fff",
               border: "1px solid #dbdfe2",

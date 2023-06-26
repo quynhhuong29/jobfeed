@@ -1,4 +1,5 @@
-import ViewCV from "@/pages/manageJob/viewCV";
+import ViewCV from "@/pages/viewCV";
+import { deleteResume } from "@/redux/apis/resumeAPI";
 import {
   deleteResumeAction,
   deleteResumeAsync,
@@ -35,7 +36,7 @@ const ResumeCard = ({ data, index }: Props) => {
 
     setIsLoading(true);
     try {
-      dispatch(deleteResumeAsync(data._id));
+      await deleteResume(data._id);
       dispatch(deleteResumeAction(data._id));
       setIsLoading(false);
       onClose();
@@ -81,11 +82,7 @@ const ResumeCard = ({ data, index }: Props) => {
           size="md"
           colorScheme={"green"}
           onClick={() => {
-            router.push(
-              `/manageCV/updateCV?state=${encodeURIComponent(
-                JSON.stringify(data)
-              )}`
-            );
+            router.push(`/manageCV/updateCV?id=${data?._id}`);
           }}
         >
           Update

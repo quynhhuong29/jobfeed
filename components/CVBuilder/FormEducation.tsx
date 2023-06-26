@@ -8,6 +8,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import dateFormat from "dateformat";
+import { formatDate } from "@/utils/datetime.util";
 
 export type FormEducationValues = {
   school: string;
@@ -161,7 +162,7 @@ const FormEducation = ({
             type="date"
             autoComplete="off"
             name="startDate"
-            value={form.startDate || ""}
+            value={formatDate(form.startDate) || ""}
             onChange={handleOnChange}
             sx={{
               backgroundColor: "#fff",
@@ -195,7 +196,7 @@ const FormEducation = ({
             type="date"
             autoComplete="off"
             name="endDate"
-            value={form.endDate && !isPresent ? form.endDate : ""}
+            value={form.endDate && !isPresent ? formatDate(form.endDate) : ""}
             onChange={handleOnChange}
             isDisabled={isPresent}
             sx={{

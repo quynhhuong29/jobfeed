@@ -11,7 +11,7 @@ function getApiRootUrl(): string | undefined {
   const { port, origin } = window.location;
 
   if (isProduction) {
-    return "http://localhost:5000/api";
+    return "https://jobfeed-server.onrender.com/api";
   }
   if (isLocalDevelopment && port === "3000") {
     return "http://localhost:5000/api";
