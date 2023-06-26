@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { useController, UseControllerProps } from "react-hook-form";
 import dateFormat from "dateformat";
+import { formatDate } from "@/utils/datetime.util";
 
 export type FormExperienceValues = {
   position: string;
@@ -22,13 +23,19 @@ export type FormExperienceValues = {
 interface Props {
   handleRemoveExperience: (id: string) => void;
   id: string;
+  value?: any;
   handleForm: (
     form: FormExperienceValues,
     type: "experience" | "education"
   ) => void;
 }
 
-const FormExperience = ({ id, handleRemoveExperience, handleForm }: Props) => {
+const FormExperience = ({
+  id,
+  handleRemoveExperience,
+  handleForm,
+  value,
+}: Props) => {
   const [isPresent, setIsPresent] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [form, setForm] = useState<FormExperienceValues>({
@@ -74,6 +81,12 @@ const FormExperience = ({ id, handleRemoveExperience, handleForm }: Props) => {
       setIsLoading(false);
     }, 1000);
   };
+
+  useEffect(() => {
+    if (value) {
+      setForm(value);
+    }
+  }, [value]);
 
   useEffect(() => {
     if (form) {
@@ -149,7 +162,7 @@ const FormExperience = ({ id, handleRemoveExperience, handleForm }: Props) => {
           <Input
             type="date"
             autoComplete="off"
-            value={form.startDate || ""}
+            value={formatDate(form.startDate) || ""}
             sx={{
               backgroundColor: "#fff",
               border: "1px solid #dbdfe2",
@@ -188,7 +201,7 @@ const FormExperience = ({ id, handleRemoveExperience, handleForm }: Props) => {
           <Input
             type="date"
             autoComplete="off"
-            value={form.endDate && !isPresent ? form.endDate : ""}
+            value={form.endDate && !isPresent ? formatDate(form.endDate) : ""}
             sx={{
               backgroundColor: "#fff",
               border: "1px solid #dbdfe2",

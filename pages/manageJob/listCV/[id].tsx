@@ -221,7 +221,7 @@ const manageJob = () => {
                                   variant="ghost"
                                   onClick={() => {
                                     window.open(
-                                      `/manageJob/viewCV?state=${encodeURIComponent(
+                                      `/viewCV?state=${encodeURIComponent(
                                         JSON.stringify(item?.dataCV)
                                       )}`,
                                       "_blank"

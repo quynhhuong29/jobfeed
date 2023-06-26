@@ -11,12 +11,13 @@ export type FormSkillValues = {
 interface Props {
   handleRemove: (id: string) => void;
   id: string;
+  value?: any;
   handleForm: (
     form: FormSkillValues,
     type: "experience" | "education" | "skill"
   ) => void;
 }
-const FormSkill = ({ id, handleRemove, handleForm }: Props) => {
+const FormSkill = ({ id, handleRemove, handleForm, value }: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [form, setForm] = useState<FormSkillValues>({
     skill: "",
@@ -48,6 +49,11 @@ const FormSkill = ({ id, handleRemove, handleForm }: Props) => {
       setForm(form);
     }
   }, [form]);
+  useEffect(() => {
+    if (value) {
+      setForm(value);
+    }
+  }, [value]);
   return (
     <form
       className="border border-gray-500 py-3 px-5 rounded-lg"

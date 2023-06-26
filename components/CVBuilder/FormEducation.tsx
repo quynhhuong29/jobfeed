@@ -8,6 +8,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import dateFormat from "dateformat";
+import { formatDate } from "@/utils/datetime.util";
 
 export type FormEducationValues = {
   school: string;
@@ -21,13 +22,19 @@ export type FormEducationValues = {
 interface Props {
   handleRemoveEducation: (id: string) => void;
   id: string;
+  value?: any;
   handleForm: (
     form: FormEducationValues,
     type: "experience" | "education"
   ) => void;
 }
 
-const FormEducation = ({ id, handleRemoveEducation, handleForm }: Props) => {
+const FormEducation = ({
+  id,
+  handleRemoveEducation,
+  handleForm,
+  value,
+}: Props) => {
   const [isPresent, setIsPresent] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [form, setForm] = useState<FormEducationValues>({
@@ -91,6 +98,12 @@ const FormEducation = ({ id, handleRemoveEducation, handleForm }: Props) => {
       setForm(form);
     }
   }, [form]);
+
+  useEffect(() => {
+    if (value) {
+      setForm(value);
+    }
+  }, [value]);
   return (
     <form
       className="border border-gray-500 py-3 px-5 rounded-lg"
@@ -149,7 +162,7 @@ const FormEducation = ({ id, handleRemoveEducation, handleForm }: Props) => {
             type="date"
             autoComplete="off"
             name="startDate"
-            value={form.startDate || ""}
+            value={formatDate(form.startDate) || ""}
             onChange={handleOnChange}
             sx={{
               backgroundColor: "#fff",
@@ -183,7 +196,7 @@ const FormEducation = ({ id, handleRemoveEducation, handleForm }: Props) => {
             type="date"
             autoComplete="off"
             name="endDate"
-            value={form.endDate && !isPresent ? form.endDate : ""}
+            value={form.endDate && !isPresent ? formatDate(form.endDate) : ""}
             onChange={handleOnChange}
             isDisabled={isPresent}
             sx={{
