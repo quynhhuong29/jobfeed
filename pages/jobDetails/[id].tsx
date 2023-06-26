@@ -57,7 +57,7 @@ import {
 import dateFormat from "dateformat";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -805,4 +805,4 @@ function jobDetails() {
   );
 }
 
-export default jobDetails;
+export default memo(jobDetails);

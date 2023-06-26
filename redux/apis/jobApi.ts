@@ -102,4 +102,26 @@ async function updateJob({
   ).data;
 }
 
-export { createJob, getInfoJob, getJobsByCompany, deleteJob, updateJob };
+async function searchJobs(
+  search?: string,
+  working_location?: string,
+  industry?: string
+): Promise<any> {
+  const  response = await api.get(`/jobPost/searchJobPost`, {
+    params: {
+      search,
+      workingLocation: working_location,
+      industry,
+    },
+  });
+  return response.data;
+}
+
+export {
+  createJob,
+  getInfoJob,
+  getJobsByCompany,
+  deleteJob,
+  updateJob,
+  searchJobs,
+};

@@ -9,8 +9,16 @@ import {
 import JobCard from "@/components/JobCard";
 import { LayoutMain } from "@/components/layout";
 import Pagination from "@/components/Pagination";
+import { PROVINCE_CITY } from "@/constants/jobPost";
 import { jobCard, jobListData } from "@/data/homePageData";
 import { useDataFetching } from "@/hooks/dataFetchingHook";
+import { searchJobs } from "@/redux/apis/jobApi";
+import {
+  getAllIndustryAsync,
+  selectIndustry,
+} from "@/redux/reducers/industryReducers";
+import { useAppDispatch } from "@/redux/store";
+import { Industry } from "@/types/Industry";
 import { ChevronRightIcon, SearchIcon } from "@chakra-ui/icons";
 import {
   Button,
@@ -21,10 +29,38 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 const jobList = () => {
   const { loading, pages, currentPage, setCurrentPage, totalPages } =
     useDataFetching("/jobPost/getAllJob");
+
+  const dispatch = useAppDispatch();
+
+  const [selectedWorkingLocation, setSelectedWorkingLocation] = useState("");
+  const [selectedIndustry, setSelectedIndustry] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+
+  const [dataSearch, setDataSearch] = useState([]);
+  const industry = useSelector(selectIndustry);
+
+  useEffect(() => {
+    dispatch(getAllIndustryAsync());
+  }, [dispatch]);
+
+  const handleSearchJob = async () => {
+    setDataSearch([]);
+    const result = await searchJobs(
+      searchValue || "",
+      selectedWorkingLocation || "",
+      selectedIndustry || ""
+    );
+    if (result) {
+      setDataSearch(result);
+    }
+  };
+
   return (
     <LayoutMain>
       <section className="w-full bg-[url('/assets/images/page-title.png')] bg-cover bg-[#029663] bg-center border-radius-custom relative pt-14 pb-16">
@@ -45,31 +81,56 @@ const jobList = () => {
               />
               <Input
                 placeholder="Job, Company name..."
+                value={searchValue || ""}
                 size={"md"}
                 sx={{
                   backgroundColor: "#fff",
                   fontSize: "14px",
                 }}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  if (event.target.value.length <= 0) {
+                    setDataSearch([]);
+                  }
+                  setSearchValue(event.target.value);
+                }}
               />
             </InputGroup>
             <Select
-              variant="outline"
-              placeholder="Outline"
+              placeholder="Select working location"
               sx={{
                 backgroundColor: "#fff",
                 fontSize: "14px",
               }}
+              value={selectedWorkingLocation || ""}
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                setSelectedWorkingLocation(event.target.value);
+              }}
               size={"md"}
-            />
+            >
+              {PROVINCE_CITY.map((ele) => (
+                <option value={ele} key={ele}>
+                  {ele}
+                </option>
+              ))}
+            </Select>
             <Select
-              variant="outline"
-              placeholder="Outline"
+              placeholder="Select industry"
               sx={{
                 backgroundColor: "#fff",
                 fontSize: "14px",
               }}
               size={"md"}
-            />
+              value={selectedIndustry || ""}
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                setSelectedIndustry(event.target.value);
+              }}
+            >
+              {industry?.data?.map((ele: Industry) => (
+                <option key={ele._id} value={ele._id}>
+                  {ele.title}
+                </option>
+              ))}
+            </Select>
             <Button
               leftIcon={<SearchIcon />}
               colorScheme="teal"
@@ -83,6 +144,7 @@ const jobList = () => {
               _hover={{
                 backgroundColor: "#028c5d",
               }}
+              onClick={handleSearchJob}
             >
               Find Job
             </Button>
@@ -105,15 +167,22 @@ const jobList = () => {
             ) : (
               <>
                 <div className="grid grid-cols-2 grid-flow-row gap-5 mt-6">
-                  {pages?.map((ele: any, index: number) => (
-                    <JobCard data={ele} key={ele?._id || index} />
-                  ))}
+                  {dataSearch.length <= 0
+                    ? pages?.map((ele: any, index: number) => (
+                        <JobCard data={ele} key={ele?._id || index} />
+                      ))
+                    : Array.isArray(dataSearch) &&
+                      dataSearch?.map((ele: any, index: number) => (
+                        <JobCard data={ele} key={ele?._id || index} />
+                      ))}
                 </div>
-                <Pagination
-                  totalPages={totalPages}
-                  currentPage={currentPage}
-                  setCurrentPage={setCurrentPage}
-                />
+                {dataSearch.length <= 0 && (
+                  <Pagination
+                    totalPages={totalPages}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                  />
+                )}
               </>
             )}
           </div>

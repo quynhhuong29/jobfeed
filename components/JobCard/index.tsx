@@ -26,7 +26,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import CustomBadge from "../CustomBadge";
@@ -431,4 +431,4 @@ function JobCard({ data }: Props) {
   );
 }
 
-export default JobCard;
+export default memo(JobCard);
