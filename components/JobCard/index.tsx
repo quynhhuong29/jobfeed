@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-import { getListResumes } from "@/redux/apis/resumeAPI";
 import { submitCV } from "@/redux/apis/submitCvAPI";
 import { formatMoney } from "@/utils/number.util";
 import { filePdfUpload } from "@/utils/upload.util";
@@ -35,6 +34,7 @@ import styles from "./JobCard.module.scss";
 
 export interface Props {
   data: any;
+  listResumes?: any;
 }
 
 type FormData = {
@@ -42,13 +42,12 @@ type FormData = {
   email: string;
 };
 
-function JobCard({ data }: Props) {
+function JobCard({ data, listResumes }: Props) {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [resume, setResume] = useState<any>();
   const [document, setDocument] = useState<any>();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCV, setIsLoadingCV] = useState(false);
-  const [listResumes, setListResumes] = useState<any[]>([]);
   const [valueResume, setValueResume] = useState("");
 
   const { handleSubmit, register } = useForm<FormData>({
@@ -102,7 +101,7 @@ function JobCard({ data }: Props) {
     if (!valueResume && !data._id && !data.company_info._id) return;
     setIsLoadingCV(true);
 
-    const resume = listResumes.find((item) => item._id === valueResume);
+    const resume = listResumes.find((item: any) => item._id === valueResume);
 
     if (!resume) {
       toast.error("Please select resume!");
@@ -135,18 +134,6 @@ function JobCard({ data }: Props) {
       }
     }
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await getListResumes().then((res) => setListResumes(res));
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   return (
     <div
@@ -384,7 +371,7 @@ function JobCard({ data }: Props) {
                       mt={3}
                     >
                       <Stack spacing={5} direction="column">
-                        {listResumes?.map((ele) => {
+                        {listResumes?.map((ele: any) => {
                           return (
                             <Radio
                               colorScheme="green"

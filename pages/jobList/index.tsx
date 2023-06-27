@@ -13,6 +13,7 @@ import { PROVINCE_CITY } from "@/constants/jobPost";
 import { jobCard, jobListData } from "@/data/homePageData";
 import { useDataFetching } from "@/hooks/dataFetchingHook";
 import { searchJobs } from "@/redux/apis/jobApi";
+import { getListResumes } from "@/redux/apis/resumeAPI";
 import {
   getAllIndustryAsync,
   selectIndustry,
@@ -41,6 +42,7 @@ const jobList = () => {
   const [selectedWorkingLocation, setSelectedWorkingLocation] = useState("");
   const [selectedIndustry, setSelectedIndustry] = useState("");
   const [searchValue, setSearchValue] = useState("");
+  const [listResumes, setListResumes] = useState<any[]>([]);
 
   const [dataSearch, setDataSearch] = useState([]);
   const industry = useSelector(selectIndustry);
@@ -60,6 +62,18 @@ const jobList = () => {
       setDataSearch(result);
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await getListResumes().then((res) => setListResumes(res));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <LayoutMain>
@@ -169,11 +183,11 @@ const jobList = () => {
                 <div className="grid grid-cols-2 grid-flow-row gap-5 mt-6">
                   {dataSearch.length <= 0
                     ? pages?.map((ele: any, index: number) => (
-                        <JobCard data={ele} key={ele?._id || index} />
+                        <JobCard data={ele} key={ele?._id || index} listResumes={listResumes} />
                       ))
                     : Array.isArray(dataSearch) &&
                       dataSearch?.map((ele: any, index: number) => (
-                        <JobCard data={ele} key={ele?._id || index} />
+                        <JobCard data={ele} key={ele?._id || index} listResumes={listResumes} />
                       ))}
                 </div>
                 {dataSearch.length <= 0 && (
