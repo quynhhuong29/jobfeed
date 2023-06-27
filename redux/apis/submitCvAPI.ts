@@ -61,4 +61,18 @@ async function updateStatusCV({
   }
 }
 
-export { submitCV, getListCVByJob, updateStatusCV };
+async function getSubmitted(): Promise<any> {
+  return (await api.get("/getSubmitted")).data;
+}
+
+async function unSubmitted(idJob: string): Promise<any> {
+  try {
+    const response = await api.post("/unSubmitCV", { idJob });
+    return response.data;
+  } catch (error) {
+    // Handle error if necessary
+    throw error;
+  }
+}
+
+export { submitCV, getListCVByJob, updateStatusCV, getSubmitted, unSubmitted };

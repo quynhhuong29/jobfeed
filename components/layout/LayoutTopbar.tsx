@@ -272,7 +272,7 @@ const Topbar = () => {
                   </MenuItem>
                   <MenuItem sx={{ padding: "10px 12px" }}>
                     <Link
-                      href={`/appliedJobs/${userAuth?._id}`}
+                      href={`/appliedJobs`}
                       className="flex items-center gap-2 text-gray-700 text-base font-medium"
                     >
                       <BriefcaseIcon

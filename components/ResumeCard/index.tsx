@@ -58,7 +58,7 @@ const ResumeCard = ({ data, index }: Props) => {
         </p>
         <p className="text-sm text-gray-700">
           <span className="font-semibold">Date create: </span>
-          {dateFormat(new Date(data?.createdAt), "dd/MM/yyyy")}
+          {dateFormat(new Date(data?.createdAt), "dd/mm/yyyy")}
         </p>
       </div>
       <div className="flex items-center mx-auto gap-3 mt-3">

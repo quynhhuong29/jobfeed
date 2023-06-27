@@ -10,6 +10,7 @@ import notifyReducers from "./reducers/notifyReducers";
 import postReducers from "./reducers/postReducers";
 import resumeReducers from "./reducers/resumeReducers";
 import socketReducers from "./reducers/socketReducers";
+import submitReducers from "./reducers/submitReducers";
 import userReducers from "./reducers/userReducers";
 
 const reducer = combineReducers({
@@ -24,6 +25,7 @@ const reducer = combineReducers({
   resumes: resumeReducers,
   socket: socketReducers,
   notify: notifyReducers,
+  submit: submitReducers,
 });
 
 // Create a separate function to configure and return the store
