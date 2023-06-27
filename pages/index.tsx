@@ -17,6 +17,7 @@ import {
   ValiIcon,
 } from "@/components/icons";
 import { LayoutMain } from "@/components/layout";
+import { PROVINCE_CITY } from "@/constants/jobPost";
 import withAuth from "@/hocs/withAuth";
 import { selectAuth } from "@/redux/reducers/authReducers";
 import { setSocket } from "@/redux/reducers/socketReducers";
@@ -90,6 +91,7 @@ function Home() {
   const router = useRouter();
   const auth = useSelector(selectAuth);
   const [content, setContent] = useState("");
+  const [selectedWorkingLocation, setSelectedWorkingLocation] = useState("");
 
   useEffect(() => {
     auth?.role === "company"
@@ -141,8 +143,8 @@ function Home() {
                 <div className="flex-1 relative">
                   <div className="absolute z-10 text-gray-400 top-3">|</div>
                   <Select
+                    placeholder="Select working location"
                     variant="outline"
-                    placeholder="Outline"
                     sx={{
                       border: "none",
                       backgroundColor: "#fff",
@@ -152,7 +154,17 @@ function Home() {
                     }}
                     _focusVisible={{ border: "none" }}
                     size={"lg"}
-                  />
+                    value={selectedWorkingLocation || ""}
+                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                      setSelectedWorkingLocation(event.target.value);
+                    }}
+                  >
+                    {PROVINCE_CITY.map((ele) => (
+                      <option value={ele} key={ele}>
+                        {ele}
+                      </option>
+                    ))}
+                  </Select>
                 </div>
                 <div className="flex-[0.5]">
                   <Button
