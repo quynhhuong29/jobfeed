@@ -1,4 +1,13 @@
+/* eslint-disable @next/next/no-img-element */
+import { deleteAllNotifies, isReadNotify } from "@/redux/apis/notifyAPI";
 import { selectIsLoggedIn } from "@/redux/reducers/authReducers";
+import {
+  deleteAllNotifiesAction,
+  isReadNotifyAction,
+  selectNotify,
+  updateSoundAction,
+} from "@/redux/reducers/notifyReducers";
+import { useAppDispatch } from "@/redux/store";
 import { MenuProps } from "@/types/Topbar";
 import { getItem } from "@/utils/localStorage.util";
 import {
@@ -20,6 +29,7 @@ import Image from "next/image";
 import { memo, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {
+  BellAlarmIcon,
   BriefcaseIcon,
   HeartIcon,
   LogoutIcon,
@@ -28,7 +38,9 @@ import {
   UserIcon,
   ValiIcon,
 } from "../icons";
+import MutedBellAlarmIcon from "../icons/MutedBellAlarmIcon";
 import MenuBar from "../MenuBar/MenuBar";
+import NotifyComponent from "../NotifyComponent";
 
 export const menu: MenuProps[] = [
   {
@@ -83,17 +95,37 @@ const Link = dynamic(() => import("next/link").then((Link) => Link), {
 });
 
 const Topbar = () => {
+  const dispatch = useAppDispatch();
   const isAuthenticated = useSelector(selectIsLoggedIn);
   const username = getItem("username");
   const [userAuth, setUserAuth] = useState<any>();
   const [listMenu, setListMenu] = useState<MenuProps[]>(menu);
+  const [visible, setVisible] = useState(false);
 
   // const userAuth = JSON.parse(localStorage.getItem("user")!);
+  const notifies = useSelector(selectNotify);
 
   let userLocal: string | null = "";
   if (typeof window !== "undefined") {
     userLocal = localStorage.getItem("user");
   }
+
+  const handleDeleteAll = async () => {
+    const newArr = notifies?.data?.filter((item: any) => item.isRead === false);
+    if (newArr.length !== 0) {
+      dispatch(deleteAllNotifiesAction());
+
+      try {
+        await deleteAllNotifies();
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+
+  const handleSound = () => {
+    dispatch(updateSoundAction(!notifies.sound));
+  };
 
   useEffect(() => {
     if (!userLocal) return;
@@ -138,22 +170,67 @@ const Topbar = () => {
                 variant="ghost"
               />
               <span className="absolute -top-[2px] -right-[2px] bg-red-100 text-xs text-white w-6 h-6 flex items-center justify-center rounded-full border-[2px] border-white">
-                3
+                {notifies?.data?.length || 0}
               </span>
             </div>
-            <MenuList>
-              <MenuItem icon={<AddIcon />} command="⌘T">
-                New Tab
-              </MenuItem>
-              <MenuItem icon={<ExternalLinkIcon />} command="⌘N">
-                New Window
-              </MenuItem>
-              <MenuItem icon={<RepeatIcon />} command="⌘⇧N">
-                Open Closed Tab
-              </MenuItem>
-              <MenuItem icon={<EditIcon />} command="⌘O">
-                Open File...
-              </MenuItem>
+            <MenuList
+              sx={{
+                minWidth: "300px",
+                boxShadow:
+                  "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+              }}
+            >
+              <div className="py-1 px-3 flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-gray-800">
+                  Notifications
+                </h3>
+                {notifies?.sound ? (
+                  <IconButton
+                    aria-label="Sound"
+                    icon={
+                      <BellAlarmIcon
+                        width="24px"
+                        height="24px"
+                        fill="#dc3545"
+                      />
+                    }
+                    variant="unstyled"
+                    onClick={handleSound}
+                  />
+                ) : (
+                  <IconButton
+                    aria-label="Sound"
+                    icon={
+                      <MutedBellAlarmIcon
+                        width="24px"
+                        height="24px"
+                        fill="#dc3545"
+                      />
+                    }
+                    variant="unstyled"
+                    onClick={handleSound}
+                  />
+                )}
+              </div>
+
+              {notifies?.data?.length === 0 && (
+                <img
+                  src={"/assets/images/notice.png"}
+                  alt="NoNotice"
+                  className="w-full max-w-[140px] mx-auto"
+                />
+              )}
+              {notifies?.data?.map((item: any) => (
+                <NotifyComponent notify={item} key={item?._id} />
+              ))}
+
+              <hr className="my-1" />
+              <div
+                className="text-right mr-3 cursor-pointer hover:underline"
+                onClick={handleDeleteAll}
+              >
+                Read All
+              </div>
             </MenuList>
           </Menu>
           <div className="ml-4 text-base font-sans text-gray-800">

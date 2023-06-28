@@ -6,6 +6,7 @@ import companyReducers from "./reducers/companyReducers";
 import cvReducers from "./reducers/cvReducers";
 import industryReducers from "./reducers/industryReducers";
 import jobReducers from "./reducers/jobReducers";
+import notifyReducers from "./reducers/notifyReducers";
 import postReducers from "./reducers/postReducers";
 import resumeReducers from "./reducers/resumeReducers";
 import socketReducers from "./reducers/socketReducers";
@@ -30,6 +31,7 @@ const reducer = combineReducers({
   call: callReducers,
   online: onlineReducers,
   message: messageReducers,
+  notify: notifyReducers,
 });
 
 // Create a separate function to configure and return the store

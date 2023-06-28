@@ -1,6 +1,7 @@
 import { Image, PostData } from "@/types/Posts";
 import { imageUpload } from "@/utils/upload.util";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createNotify } from "../apis/notifyAPI";
 import {
   createPost,
   getPosts,
@@ -21,11 +22,8 @@ const initialState: PostState = {
 
 export const createPostAsync = createAsyncThunk(
   "posts/create",
-  async ({ content, images, socket }: any, { rejectWithValue }: any) => {
-    let media = [];
+  async ({ content, media }: any, { rejectWithValue }: any) => {
     try {
-      if (images.length > 0) media = await imageUpload(images);
-
       const response = await createPost(content, media);
       return response;
     } catch (err: any) {

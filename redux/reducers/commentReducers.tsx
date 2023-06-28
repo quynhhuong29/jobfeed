@@ -3,7 +3,22 @@ import { createComment, updateComment } from "../apis/commentAPI";
 import { RootState, useAppDispatch } from "../store";
 import { updatePostAction, updatePostAsync } from "./postReducers";
 
-const initialState = {
+type CommentState = {
+  comments: {
+    isLoading: boolean;
+    error: string;
+    data: any[];
+  };
+  newComment: {
+    isLoading: boolean;
+    error: string;
+    data: any[];
+  };
+  isLoading: boolean;
+  error: string;
+};
+
+const initialState: CommentState = {
   comments: {
     isLoading: false,
     error: "",
@@ -61,7 +76,14 @@ export const updateCommentAsync = createAsyncThunk(
 const commentSlice = createSlice({
   name: "comments",
   initialState,
-  reducers: {},
+  reducers: {
+    updateCommentAction(state, action) {
+      const comments: any[] = state.comments?.data.map((comment: any) =>
+        comment._id === action.payload._id ? action.payload : comment
+      );
+      state.comments.data = comments;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(createCommentAsync.pending, (state) => {
@@ -101,4 +123,5 @@ export const selectLoading = (state: RootState) => {
 export const selectLoadingNewComment = (state: RootState) =>
   state.comment.newComment.isLoading;
 
+export const { updateCommentAction } = commentSlice.actions;
 export default commentSlice.reducer;

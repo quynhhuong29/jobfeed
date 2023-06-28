@@ -54,6 +54,8 @@ import Comments from "../Comments";
 import Link from "next/link";
 import { selectSocket } from "@/redux/reducers/socketReducers";
 import { selectAuth } from "@/redux/reducers/authReducers";
+import { createNotify, removeNotify } from "@/redux/apis/notifyAPI";
+import { removeNotifyAsync } from "@/redux/reducers/notifyReducers";
 
 interface Props {
   post: PostData;
@@ -81,7 +83,7 @@ const PostCard = ({ post, userAuth }: Props) => {
   const { content, images, _id } = post;
 
   const socket = useSelector(selectSocket);
-  const auth = useSelector(selectAuth)?.data;
+  const auth = useSelector(selectAuth);
 
   const settings = {
     dots: true,
@@ -104,8 +106,18 @@ const PostCard = ({ post, userAuth }: Props) => {
   const handleRemovePost = async () => {
     try {
       setLoadingDelete(true);
-      await deletePost(post._id);
+      const res = await deletePost(post._id);
       dispatch(deletePostAction({ _id: post._id }));
+
+      // Notify
+      const msg = {
+        id: post._id,
+        text: "added a new post.",
+        recipients: res.newPost.user.followers,
+        url: `/post/${post._id}`,
+      };
+      dispatch(removeNotifyAsync({ msg, socket }));
+
       toast.success("Post deleted successfully");
       setLoadingDelete(false);
     } catch (err: any) {
@@ -124,16 +136,28 @@ const PostCard = ({ post, userAuth }: Props) => {
     if (isLike && post) {
       try {
         setIsLike(false);
-        await unLikePost(post._id);
 
-        if (socket && socket.emit) {
+        if (socket && socket?.emit) {
           const newPost = {
             ...post,
-            likes: post.likes.filter((like) => like !== auth?.user),
+            likes: post.likes.filter(
+              (like: any) => like._id !== auth?.data?.user?._id
+            ),
           };
           dispatch(updatePostAction(newPost));
-          socket.emit("unLikePost", newPost);
+          socket?.emit("unLikePost", newPost);
         }
+        await unLikePost(post._id);
+
+        // Notify
+        const msg = {
+          id: auth.data.user._id,
+          text: "like your post.",
+          recipients: [post.user._id],
+          url: `/post/${post._id}`,
+        };
+        dispatch(removeNotifyAsync({ msg, socket }));
+
         setLoadingLike(false);
       } catch (err) {
         setIsLike(true);
@@ -142,13 +166,36 @@ const PostCard = ({ post, userAuth }: Props) => {
     } else {
       try {
         setIsLike(true);
+        if (socket && socket?.emit) {
+          const newPost = { ...post, likes: [...post.likes, auth?.data?.user] };
+          dispatch(updatePostAction(newPost));
+          socket?.emit("likePost", newPost);
+        }
         await likePost(post._id);
 
-        if (socket && socket.emit) {
-          const newPost = { ...post, likes: [...post.likes, auth?.user] };
-          dispatch(updatePostAction(newPost));
-          socket.emit("likePost", newPost);
-        }
+        // Notify
+        const msg = {
+          id: auth.data.user._id,
+          text: "like your post.",
+          recipients: [post.user._id],
+          url: `/post/${post._id}`,
+          content: post.content,
+          image: post.images[0]?.url ? post.images[0]?.url : "",
+        };
+
+        const res = await createNotify(msg);
+        socket?.emit("createNotify", {
+          ...res.notify,
+          user: {
+            username: auth.data.user.username,
+            avatar: auth.data.user.avatar,
+            fullName:
+              auth.role !== "company"
+                ? auth.data.user.firstName + " " + auth.data.user.lastName
+                : auth.data.user.lastName,
+          },
+        });
+
         setLoadingLike(false);
       } catch (err) {
         setLoadingLike(false);
