@@ -10,10 +10,8 @@ import { getItem, setLocalStorageContent } from "@/utils/localStorage.util";
 import { refreshToken } from "@/redux/apis/authAPI";
 import jwt_decode from "jwt-decode";
 import { getUserInfoById } from "@/redux/apis/userAPI";
-import { setRole } from "@/redux/reducers/authReducers";
 import SocketClient from "@/SocketClient";
-import { io } from "socket.io-client";
-import { setSocket } from "@/redux/reducers/socketReducers";
+
 
 export default function App({ Component, pageProps }: AppProps) {
   const isTokenExpired = () => {
