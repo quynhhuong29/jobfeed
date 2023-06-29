@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import Avatar from '../Avatar'
 import { selectAuth } from '@/redux/reducers/authReducers'
-import { addMessage, selectMessage } from '@/redux/reducers/messageReducers'
+import { addMessageAsync } from '@/redux/reducers/messageReducers'
 import { selectSocket } from '@/redux/reducers/socketReducers'
 import { selectPeer } from '@/redux/reducers/peerReducers'
 import { selectCall } from '@/redux/reducers/callReducers'
@@ -60,7 +60,7 @@ const CallModal = () => {
                 createdAt: new Date().toISOString()
             }
 
-            dispatch(addMessage(msg))
+            dispatch(addMessageAsync({msg, auth, socket}))
             const { _id, avatar, firstname, lastname } = auth.user
             socket.emit('addMessage', {...msg, user: { _id, avatar, firstname, lastname } })
             try {

@@ -27,7 +27,8 @@ export const getMessagesAsync = createAsyncThunk(
     async ({ id, page }: any, { rejectWithValue }) => {
       try {
         const response = await getMessagesApi(id, page);
-        return {...response, id};
+        const newData = {...response.data, messages: response.data.messages.reverse()}
+        return {...newData, _id: id, page};
       } catch (err: any) {
         if (!err.response) {
           throw err;
@@ -43,7 +44,15 @@ export const getMessagesAsync = createAsyncThunk(
       try {
         const data  = page || 1
         const response = await getConversationsApi(data);
-        return {data: response, auth};
+        let newArr = [] as any;
+        response.data.conversations.forEach((item: any) => {
+            item.recipients.forEach((cv:any) => {
+                if(cv._id !== auth.user._id){
+                    newArr.push({...cv, text: item.text, media: item.media, call: item.call})
+                }
+            })
+        })
+        return {newArr, result: response.data.result, auth};
       } catch (err: any) {
         if (!err.response) {
           throw err;
@@ -82,34 +91,6 @@ const messageSlice = createSlice({
         }
         return state;
     },
-    addMessage: (state, action) => {
-
-        return {
-            ...state,
-            data: state.data.map(item => {
-                let messages = [] as any;
-                if(item && item.messages)
-                    messages = [...item.messages];
-                return (item._id === action.payload.recipient || item._id === action.payload.sender 
-                    ? {
-                        ...item,
-                        messages: [...messages, action.payload],
-                        result: item.result + 1
-                    }
-                    : item)
-            }),
-            users: state.users.map(user => 
-                user._id === action.payload.recipient || user._id === action.payload.sender
-                ? {
-                    ...user, 
-                    text: action.payload.text, 
-                    media: action.payload.media,
-                    call: action.payload.call
-                }
-                : user
-            )
-        };
-    },
     getConversations: (state, action) => {
         return {
             ...state,
@@ -118,13 +99,6 @@ const messageSlice = createSlice({
             firstLoad: true
         };
     },
-    // getMessages: (state, action) => {
-    //     const {id, auth, page = 1} = action.payload;
-    //     return {
-    //         ...state,
-    //         data: [...state.data, action.payload]
-    //     };
-    // },
     updateMessage: (state, action) => {
         return {
             ...state,
@@ -169,30 +143,19 @@ const messageSlice = createSlice({
         };
     })
     .addCase(getConversationsAsync.fulfilled, (state, action) => {
-        console.log("action", action.payload)
-        const {data, auth} = action.payload;
-
-        let newArr = [] as any;
-        data.conversations.forEach((item:any) => {
-            item.recipients.forEach((cv: any) => {
-                if(cv._id !== auth.user._id){
-                    newArr.push({...cv, text: item.text, media: item.media, call: item.call})
-                }
-            })
-        })
         return {
             ...state,
-            users: newArr || [],
-            resultUsers: data.result || [],
+            users: action.payload.newArr,
+            resultUsers: action.payload.result,
             firstLoad: true
         };
     })
     .addCase(addMessageAsync.fulfilled, (state, action) => {
         const {msg, auth, socket, data} = action.payload;
 
-        const { _id, avatar, firstname, lastname } = auth.user
-        socket.emit('addMessage', {...msg, user: { _id, avatar, firstname, lastname } })
-        console.log({data})
+        const { _id, avatar, firstName, lastName } = auth.user
+        socket.emit('addMessage', {...msg, user: { _id, avatar, firstName, lastName } })
+        console.log("state users", state.users)
         return {
             ...state,
             data: state.data.map(item => {
@@ -224,5 +187,5 @@ const messageSlice = createSlice({
 
 export const selectMessage = (state: RootState) => state.message;
 
-export const { addUser, getConversations, addMessage, updateMessage, deleteMessage, deleteConversation, checkOnlineOffline } = messageSlice.actions;
+export const { addUser, updateMessage, deleteMessage, deleteConversation, checkOnlineOffline } = messageSlice.actions;
 export default messageSlice.reducer;

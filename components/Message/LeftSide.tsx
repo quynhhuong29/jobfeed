@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import { selectOnline } from '@/redux/reducers/onlineReducers'
 import { selectAuth } from '@/redux/reducers/authReducers'
 import { useRouter } from 'next/router'
-import { addUser, checkOnlineOffline, getConversations, getConversationsAsync, selectMessage } from '@/redux/reducers/messageReducers'
+import { addUser, checkOnlineOffline, getConversationsAsync, selectMessage } from '@/redux/reducers/messageReducers'
 import UserCard from '../UserCard'
 import { searchUser } from '@/redux/apis/userAPI'
 import { useAppDispatch } from '@/redux/store'
@@ -36,6 +36,7 @@ const LeftSide = () => {
         if(!search) return setSearchUsers([]);
         try {
             const res = await searchUser(search)
+            console.log({res})
             setSearchUsers(res.users)
         } catch (err) {
             // dispatch({
@@ -59,7 +60,7 @@ const LeftSide = () => {
 
     useEffect(() => {
         if(message.firstLoad) return;
-        dispatch(getConversationsAsync({auth, page: 1}))
+        dispatch(getConversationsAsync({auth}))
     },[dispatch, auth, message.firstLoad])
 
     // Load More
@@ -77,7 +78,7 @@ const LeftSide = () => {
 
     useEffect(() => {
         if(message.resultUsers >= (page - 1) * 9 && page > 1){
-            dispatch(getConversations({auth, page}))
+            dispatch(getConversationsAsync({auth, page}))
         }
     },[message.resultUsers, page, auth, dispatch])
     

@@ -8,7 +8,7 @@ import { imageUpload } from '../../utils/upload.util'
 import { useAppDispatch } from '@/redux/store'
 import { useRouter } from 'next/router'
 import { selectAuth } from '@/redux/reducers/authReducers'
-import { addMessage, deleteConversation,  getMessagesAsync, selectMessage } from '@/redux/reducers/messageReducers'
+import {  addMessageAsync, deleteConversation,  getMessagesAsync, selectMessage } from '@/redux/reducers/messageReducers'
 import { selectSocket } from '@/redux/reducers/socketReducers'
 import { selectPeer } from '@/redux/reducers/peerReducers'
 import { setCall } from '@/redux/reducers/callReducers'
@@ -104,14 +104,7 @@ const RightSide = () => {
         }
 
         setLoadMedia(false)
-        dispatch(addMessage(msg))
-        const { _id, avatar, firstname, lastname } = auth.user
-        socket.emit('addMessage', {...msg, user: { _id, avatar, firstname, lastname } })
-        try {
-            await messageApi(msg)
-        } catch (err) {
-            console.log(err)
-        }
+        dispatch(addMessageAsync({msg, auth, socket}))
         if(refDisplay.current){
             // refDisplay.current.scrollIntoView({behavior: 'smooth', block: 'end'})
         }
@@ -120,14 +113,15 @@ const RightSide = () => {
     useEffect(() => {
         const getMessagesData = async () => {
             if(message.data.every(item => item._id !== id)){
-                await dispatch(getMessagesAsync({ id, page}))
+                console.log('getMessagesData')
+                dispatch(getMessagesAsync({ id }))
                 setTimeout(() => {
                     // refDisplay.current.scrollIntoView({behavior: 'smooth', block: 'end'})
                 },50)
             }
         }
         getMessagesData()
-    },[])
+    },[id, dispatch, auth, message.data])
 
 
     // Load More

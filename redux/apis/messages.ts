@@ -5,7 +5,7 @@ async function getMessagesApi( id: string, page = 1): Promise<any> {
 }
 
 async function messageApi( msg : any): Promise<any> {
-  return (await api.get(`/message`, msg)).data;
+  return (await api.post(`/message`, msg)).data;
 }
 
 async function getConversationsApi( page = 1): Promise<any> {
