@@ -8,7 +8,6 @@ import { selectPeer } from '@/redux/reducers/peerReducers'
 import { selectCall } from '@/redux/reducers/callReducers'
 import { setCall } from '@/redux/reducers/callReducers'
 import { useAppDispatch } from '@/redux/store'
-import { messageApi } from '@/redux/apis/messages'
 
 const CallModal = () => {
     // const { call, auth, peer, socket, theme } = useSelector(state => state)
@@ -61,13 +60,6 @@ const CallModal = () => {
             }
 
             dispatch(addMessageAsync({msg, auth, socket}))
-            const { _id, avatar, firstname, lastname } = auth.user
-            socket.emit('addMessage', {...msg, user: { _id, avatar, firstname, lastname } })
-            try {
-                messageApi(msg)
-            } catch (err) {
-                console.log(err)
-            }
         }
     },[auth, dispatch, socket])
 
@@ -213,7 +205,7 @@ const CallModal = () => {
                 <div className="text-center" style={{padding: '40px 0'}} >
                     <Avatar src={call.avatar} size="supper-avatar" />
                     <h4>{call.username}</h4>
-                    <h6>{call.fullname}</h6>
+                    <h6>{call.fullName}</h6>
 
                     {
                         answer 

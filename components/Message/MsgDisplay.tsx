@@ -33,7 +33,7 @@ const MsgDisplay = ({ user, msg, theme, data }: MsgProps) => {
         <>
             <div className="chat_title">
                 <Avatar src={user.avatar} size="small-avatar" />
-                <span>{user.firstname + ' ' + user.lastname + ' '}
+                <span>{user.firstName + ' ' + user.lastName + ' '}
                     {
                         user.role === 'company' &&
                         <i className="fas fa-check-circle text-primary"></i>

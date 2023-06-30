@@ -8,11 +8,10 @@ import { imageUpload } from '../../utils/upload.util'
 import { useAppDispatch } from '@/redux/store'
 import { useRouter } from 'next/router'
 import { selectAuth } from '@/redux/reducers/authReducers'
-import {  addMessageAsync, deleteConversation,  getMessagesAsync, selectMessage } from '@/redux/reducers/messageReducers'
+import {  addMessageAsync, deleteConversation,  getMessagesAsync, loadMoreMessagesAsync, selectMessage } from '@/redux/reducers/messageReducers'
 import { selectSocket } from '@/redux/reducers/socketReducers'
 import { selectPeer } from '@/redux/reducers/peerReducers'
 import { setCall } from '@/redux/reducers/callReducers'
-import { messageApi } from '@/redux/apis/messages'
 
 const RightSide = () => {
     // const { auth, message, theme, socket, peer } = useSelector(state => state)
@@ -29,8 +28,8 @@ const RightSide = () => {
     const [media, setMedia] = useState<Array<any>>([])
     const [loadMedia, setLoadMedia] = useState(false)
 
-    const refDisplay = useRef(null)
-    const pageEnd = useRef(null)
+    const refDisplay = useRef<null | HTMLElement>(null)
+    const pageEnd = useRef<null | HTMLElement>(null)
 
     const [data, setData] = useState([])
     const [result, setResult] = useState(9)
@@ -51,7 +50,8 @@ const RightSide = () => {
     useEffect(() => {
         if(id && message.users && message.users.length > 0){
             setTimeout(() => {
-                // refDisplay.current.scrollIntoView({behavior: 'smooth', block: 'end'})
+                if(refDisplay.current)
+                    refDisplay.current.scrollIntoView({behavior: 'smooth', block: 'end'} as any)
             },50)
 
             const newUser = message.users.find(user => user._id === id)
@@ -104,9 +104,9 @@ const RightSide = () => {
         }
 
         setLoadMedia(false)
-        dispatch(addMessageAsync({msg, auth, socket}))
+        await dispatch(addMessageAsync({msg, auth, socket}))
         if(refDisplay.current){
-            // refDisplay.current.scrollIntoView({behavior: 'smooth', block: 'end'})
+            refDisplay.current.scrollIntoView({behavior: 'smooth', block: 'end'})
         }
     }
 
@@ -114,9 +114,10 @@ const RightSide = () => {
         const getMessagesData = async () => {
             if(message.data.every(item => item._id !== id)){
                 console.log('getMessagesData')
-                dispatch(getMessagesAsync({ id }))
+                await dispatch(getMessagesAsync({ id }))
                 setTimeout(() => {
-                    // refDisplay.current.scrollIntoView({behavior: 'smooth', block: 'end'})
+                    if(refDisplay.current)
+                        refDisplay.current.scrollIntoView({behavior: 'smooth', block: 'end'})
                 },50)
             }
         }
@@ -133,14 +134,14 @@ const RightSide = () => {
         },{
             threshold: 0.1
         })
-
-        // observer.observe(pageEnd.current)
+        if(pageEnd.current)
+            observer.observe(pageEnd.current)
     },[setIsLoadMore])
 
     useEffect(() => {
         if(isLoadMore > 1){
             if(result >= page * 9){
-                // dispatch(loadMoreMessages({auth, id, page: page + 1}))
+                dispatch(loadMoreMessagesAsync({auth, id, page: page + 1}))
                 setIsLoadMore(1)
             }
         }
@@ -156,26 +157,26 @@ const RightSide = () => {
 
     // Call
     const caller = ({video}: any) => {
-        const { _id, avatar, username, fullname } = user as any
-
+        const { _id, avatar, username, firstName, lastName } = user as any
+        const fullName = firstName + ' ' + lastName
         const msg = {
             sender: auth.user._id,
             recipient: _id, 
-            avatar, username, fullname, video
+            avatar, username, fullName, video
         }
         // dispatch({ type: GLOBALTYPES.CALL, payload: msg })
         dispatch(setCall(msg))
     }
 
     const callUser = ({video}: any) => {
-        const { _id, avatar, username, fullname } = auth.user
-
+        const { _id, avatar, username, firstName, lastName } = auth.user
+        const fullName = firstName + ' ' + lastName
+        
         const msg = {
             sender: _id,
             recipient: user._id, 
-            avatar, username, fullname, video
+            avatar, username, fullName, video
         } as any
-
         if(peer.open) msg.peerId = peer._id
 
         socket.emit('callUser', msg)
@@ -212,8 +213,8 @@ const RightSide = () => {
             </div>
             <div className="chat_container" 
             style={{height: media.length > 0 ? 'calc(100% - 180px)' : ''}} >
-                <div className="chat_display" ref={refDisplay}>
-                    <button style={{marginTop: '-25px', opacity: 0}} ref={pageEnd}>
+                <div className="chat_display" ref={refDisplay as any}>
+                    <button style={{marginTop: '-25px', opacity: 0}} ref={pageEnd as any}>
                         Load more
                     </button>
                     

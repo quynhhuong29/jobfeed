@@ -27,7 +27,8 @@ export const getMessagesAsync = createAsyncThunk(
     async ({ id, page }: any, { rejectWithValue }) => {
       try {
         const response = await getMessagesApi(id, page);
-        const newData = {...response.data, messages: response.data.messages.reverse()}
+        console.log("getMessagesAsync", response)
+        const newData = {...response, messages: response.messages.reverse()}
         return {...newData, _id: id, page};
       } catch (err: any) {
         if (!err.response) {
@@ -44,20 +45,21 @@ export const getMessagesAsync = createAsyncThunk(
       try {
         const data  = page || 1
         const response = await getConversationsApi(data);
+        console.log("getConversationsAsync", response)
         let newArr = [] as any;
-        response.data.conversations.forEach((item: any) => {
+        response.conversations.forEach((item: any) => {
             item.recipients.forEach((cv:any) => {
                 if(cv._id !== auth.user._id){
                     newArr.push({...cv, text: item.text, media: item.media, call: item.call})
                 }
             })
         })
-        return {newArr, result: response.data.result, auth};
+        return {newArr, result: response.result, auth};
       } catch (err: any) {
         if (!err.response) {
           throw err;
         }
-        return rejectWithValue(err.response.data);
+        return rejectWithValue(err.response);
       }
     }
   );
@@ -67,7 +69,26 @@ export const getMessagesAsync = createAsyncThunk(
     async ({ msg, auth, socket }: any, { rejectWithValue }) => {
       try {
         const response = await messageApi(msg);
+        console.log("AddMessageAsync", response)
         return {data: response, auth, socket, msg};
+      } catch (err: any) {
+        if (!err.response) {
+          throw err;
+        }
+        return rejectWithValue(err.response.data);
+      }
+    }
+  );
+
+  export const loadMoreMessagesAsync = createAsyncThunk(
+    "message/updateMessage",
+    async ({ id, page }: any, { rejectWithValue }) => {
+      try {
+        const data  = page || 1
+        const response = await getMessagesApi(id, data);
+        console.log("loadMoreMessagesAsync", response)
+        const newData = {...response.data, messages: response.data.messages.reverse()}
+        return {...newData, _id:id };
       } catch (err: any) {
         if (!err.response) {
           throw err;
@@ -91,18 +112,36 @@ const messageSlice = createSlice({
         }
         return state;
     },
+    addMessage: (state, action) => {
+      return {
+        ...state,
+        data: state.data.map(item => 
+            item._id === action.payload.recipient || item._id === action.payload.sender 
+            ? {
+                ...item,
+                messages: [...item.messages, action.payload],
+                result: item.result + 1
+            }
+            : item
+        ),
+        users: state.users.map(user => 
+            user._id === action.payload.recipient || user._id === action.payload.sender
+            ? {
+                ...user, 
+                text: action.payload.text, 
+                media: action.payload.media,
+                call: action.payload.call
+            }
+            : user
+        )
+    };
+    },
     getConversations: (state, action) => {
         return {
             ...state,
             users: action.payload.newArr || [],
             resultUsers: action.payload.result || [],
             firstLoad: true
-        };
-    },
-    updateMessage: (state, action) => {
-        return {
-            ...state,
-            data: EditData(state.data, action.payload._id, action.payload)
         };
     },
     deleteMessage: (state, action) => {
@@ -141,6 +180,10 @@ const messageSlice = createSlice({
             ...state,
             data: [...state.data, action.payload]
         };
+    })
+    .addCase(getMessagesAsync.rejected, (state, action) => {
+      console.log("getMessages rejected", action.payload)
+      return state
     })
     .addCase(getConversationsAsync.fulfilled, (state, action) => {
         return {
@@ -182,10 +225,16 @@ const messageSlice = createSlice({
             )
         };
     })
+    .addCase(loadMoreMessagesAsync.fulfilled, (state, action) => {
+      return {
+        ...state,
+        data: EditData(state.data, action.payload._id, action.payload)
+    }
+    })
   },
 });
 
 export const selectMessage = (state: RootState) => state.message;
 
-export const { addUser, updateMessage, deleteMessage, deleteConversation, checkOnlineOffline } = messageSlice.actions;
+export const { addUser, deleteMessage, deleteConversation, checkOnlineOffline, addMessage } = messageSlice.actions;
 export default messageSlice.reducer;

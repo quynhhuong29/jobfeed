@@ -13,7 +13,7 @@ import { useAppDispatch } from "./redux/store";
 import { setCall } from "./redux/reducers/callReducers";
 import { setPeer } from "./redux/reducers/peerReducers";
 import { selectOnline, setOffline, setOnline } from "./redux/reducers/onlineReducers";
-import { addMessageAsync, addUser } from "./redux/reducers/messageReducers";
+import { addMessage, addUser } from "./redux/reducers/messageReducers";
 
 import {
   createNotifyAction,
@@ -171,7 +171,7 @@ function SocketClient() {
   useEffect(() => {
     if(socket && socket.on)
       socket.on('addMessageToClient', (msg : any) =>{
-          dispatch(addMessageAsync(msg))
+          dispatch(addMessage(msg))
 
           dispatch(addUser({
             ...msg.user, 
