@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+//Avatar
+@import url("./Avatar.css");
+//CallModal
+@import url("./CallModal.css");
+//Message
+@import url("./Message.css");
+
 *,
 *::before,
 *::after {

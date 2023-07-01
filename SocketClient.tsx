@@ -10,6 +10,11 @@ import {
 import { updatePostAction } from "./redux/reducers/postReducers";
 import { PostData } from "./types/Posts";
 import { useAppDispatch } from "./redux/store";
+import { setCall } from "./redux/reducers/callReducers";
+import { setPeer } from "./redux/reducers/peerReducers";
+import { selectOnline, setOffline, setOnline } from "./redux/reducers/onlineReducers";
+import { addMessage, addUser } from "./redux/reducers/messageReducers";
+
 import {
   createNotifyAction,
   removeNotifyAction,
@@ -41,6 +46,21 @@ function SocketClient() {
 
   const socket = useSelector(selectSocket);
   const auth = useSelector(selectAuth)?.data;
+  const online = useSelector(selectOnline);
+
+  // setup peer
+  useEffect(() => {
+    if (typeof navigator !== "undefined") {
+      const Peer = require("peerjs").default
+
+      const peer = new Peer({
+        path: "/",
+        secure: true
+      })
+      dispatch(setPeer(peer))
+    }
+
+  },[dispatch])
   const notify = useSelector(selectNotify);
 
   useEffect(() => {
@@ -50,15 +70,7 @@ function SocketClient() {
       // Wait for the next tick to dispatch the action
       setTimeout(() => {
         dispatch(setSocket(socket));
-      }, 0);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Socket disconnected");
-    });
-
-    socket.on("error", (error) => {
-      console.error("Socket error:", error);
+      }, 1000);
     });
 
     return () => {
@@ -68,7 +80,7 @@ function SocketClient() {
 
   // joinUser
   useEffect(() => {
-    if (socket && socket.emit) {
+    if (socket && socket.emit && auth?.user) {
       socket.emit("joinUser", auth?.user);
     }
   }, [socket, auth?.user]);
@@ -101,6 +113,73 @@ function SocketClient() {
       }
     };
   }, [socket, dispatch]);
+
+  // Check User Online / Offline
+  useEffect(() => {
+    if(socket && socket.emit)
+      socket.emit('checkUserOnline', auth.user)
+  },[socket, auth.user])
+
+  useEffect(() => {
+    if(socket && socket.on)
+      socket.on('checkUserOnlineToMe', (data : any) =>{
+          data.forEach((item : any) => {
+              if(!online.includes(item.id)){
+                  dispatch(setOnline(item.id))
+              }
+          })
+      })
+
+      return () => socket?.off && socket.off('checkUserOnlineToMe')
+  },[socket, dispatch, online])
+
+  useEffect(() => {
+    if(socket && socket.on)
+      socket.on('checkUserOnlineToClient', (id : string) =>{
+          if(!online.includes(id)){
+              dispatch(setOnline(id))
+          }
+      })
+
+      return () =>socket?.off && socket.off('checkUserOnlineToClient')
+  },[socket, dispatch, online])
+
+  // Check User Offline
+  useEffect(() => {
+    if(socket && socket.on)
+      socket.on('CheckUserOffline', (id : string) =>{
+          dispatch(setOffline(id))
+      })
+
+      return () => socket && socket.off && socket.off('CheckUserOffline')
+  },[socket, dispatch])
+
+  // Call User
+  useEffect(() => {
+    if (socket && socket.off) {
+      socket.on('callUserToClient', (data: any) => {
+        dispatch(setCall(data))
+      })
+    }
+
+    return () => socket?.off('callUserToClient')
+}, [socket, dispatch])
+
+  // Message
+  useEffect(() => {
+    if(socket && socket.on)
+      socket.on('addMessageToClient', (msg : any) =>{
+          dispatch(addMessage(msg))
+
+          dispatch(addUser({
+            ...msg.user, 
+            text: msg.text, 
+            media: msg.media
+        }))
+      })
+
+    return () => socket?.off && socket.off('addMessageToClient')
+  },[socket, dispatch])
 
   // Comment
   useEffect(() => {

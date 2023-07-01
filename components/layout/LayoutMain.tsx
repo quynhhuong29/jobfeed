@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Inter } from "next/font/google";
 import Topbar from "./LayoutTopbar";
 import BackToTopButton from "../BackToTopButton";
@@ -6,6 +6,9 @@ import FooterAlt from "../FooterAlt";
 import { ChevronRightIcon } from "@chakra-ui/icons";
 import Link from "next/link";
 import { FacebookIcon, LinkedInIcon, TwitterIcon } from "../icons";
+import { useSelector } from "react-redux";
+import { selectCall } from "@/redux/reducers/callReducers";
+import CallModal from "../Message/CallModal";
 
 const inter = Inter({
   weight: ["400", "500", "600", "700"],
@@ -17,8 +20,13 @@ interface ILayoutMainProps {
 }
 
 const LayoutMain = ({ children }: ILayoutMainProps) => {
+
+  const call = useSelector(selectCall)
   return (
     <div className={inter.className}>
+      {
+        call && <CallModal />
+      }
       <Topbar />
       {children}
       <footer className="w-full py-[60px] bg-[#2e3538] text-sm">

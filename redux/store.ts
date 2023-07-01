@@ -12,6 +12,10 @@ import resumeReducers from "./reducers/resumeReducers";
 import socketReducers from "./reducers/socketReducers";
 import submitReducers from "./reducers/submitReducers";
 import userReducers from "./reducers/userReducers";
+import peerReducers from "./reducers/peerReducers";
+import callReducers from "./reducers/callReducers";
+import onlineReducers from "./reducers/onlineReducers";
+import messageReducers from "./reducers/messageReducers";
 
 const reducer = combineReducers({
   auth: authReducers,
@@ -24,6 +28,10 @@ const reducer = combineReducers({
   cv: cvReducers,
   resumes: resumeReducers,
   socket: socketReducers,
+  peer: peerReducers,
+  call: callReducers,
+  online: onlineReducers,
+  message: messageReducers,
   notify: notifyReducers,
   submit: submitReducers,
 });

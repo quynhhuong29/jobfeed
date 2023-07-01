@@ -72,12 +72,7 @@ const ModalFollower = ({
         <ModalCloseButton />
         <ModalBody>
           {listUser?.map((item: User) => (
-            <UserCard
-              user={item}
-              key={item._id}
-              userAuth={userAuth}
-              type={type}
-            />
+            <UserCard user={item} key={item._id} userAuth={userAuth} />
           ))}
         </ModalBody>
       </ModalContent>

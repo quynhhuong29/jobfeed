@@ -169,7 +169,7 @@ function JobFeed() {
           </div>
         </div>
       </section>
-      <section className="w-full bg-white relative py-5 min-h-[100vh]">
+      <section className="w-full bg-white relative py-4 min-h-[100vh]">
         <NewsFeed />
       </section>
     </LayoutMain>

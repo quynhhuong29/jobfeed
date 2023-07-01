@@ -329,7 +329,7 @@ function Profile() {
 
   return (
     <LayoutMain>
-      <section className="w-full bg-white shadow-[0_3px_10px_0_rgba(49,64,71,.08)] relative py-5">
+      <section className="w-full bg-white shadow-[0_3px_10px_0_rgba(49,64,71,.08)] relative py-4">
         <div className="md:max-w-[1140px] mx-auto flex items-center justify-between">
           <div className="relative mx-auto">
             <InputGroup w={"300px"}>

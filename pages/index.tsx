@@ -20,8 +20,6 @@ import { LayoutMain } from "@/components/layout";
 import { PROVINCE_CITY } from "@/constants/jobPost";
 import withAuth from "@/hocs/withAuth";
 import { selectAuth } from "@/redux/reducers/authReducers";
-import { setSocket } from "@/redux/reducers/socketReducers";
-import SocketClient from "@/SocketClient";
 import {
   ArrowForwardIcon,
   ChevronRightIcon,
@@ -35,11 +33,9 @@ import {
   Select,
 } from "@chakra-ui/react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { io } from "socket.io-client";
+import { useSelector } from "react-redux";
 import { jobCard } from "../data/homePageData";
 
 const dataCards: DataCardProps[] = [
@@ -85,9 +81,7 @@ const dataCards: DataCardProps[] = [
   },
 ];
 
-let socket: any = null;
 function Home() {
-  const dispatch = useDispatch();
   const router = useRouter();
   const auth = useSelector(selectAuth);
   const [content, setContent] = useState("");
