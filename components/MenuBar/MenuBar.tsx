@@ -56,7 +56,7 @@ const MenuBar = ({ data, className = "" }: IMenu) => {
             <Menu key={index}>
               <MenuButton
                 onClick={() => handleSelect(item.name)}
-                className={`px-4 py-5 text-sm text-gray-800 uppercase font-sans font-semibold ${
+                className={`px-4 py-4 text-sm text-gray-800 uppercase font-sans font-semibold ${
                   selectedMenu === item.name ||
                   item.submenu.find((submenu) => submenu.link === active)
                     ? "text-green-200"
@@ -99,7 +99,7 @@ const MenuBar = ({ data, className = "" }: IMenu) => {
             <Link
               href={item.link!}
               key={index}
-              className={`px-4 py-5 text-sm text-gray-800 uppercase font-sans font-semibold ${
+              className={`px-4 py-4 text-sm text-gray-800 uppercase font-sans font-semibold ${
                 active === item.link ? "text-green-200" : ""
               }`}
             >
