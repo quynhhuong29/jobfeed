@@ -11,10 +11,11 @@ interface Props {
     setShowFollowers?: (value: boolean) => void,
     setShowFollowing?: (value: boolean) => void,
     msg?: boolean,
-    userAuth?: any
+    userAuth?: any,
+    type?: any
 }
 
-const UserCard = ({children, user, border, handleClose, setShowFollowers, setShowFollowing, msg, userAuth}: Props) => {
+const UserCard = ({children, user, border, handleClose, setShowFollowers, setShowFollowing, msg, userAuth, type}: Props) => {
 
     // const { theme } = useSelector(state => state)
 
