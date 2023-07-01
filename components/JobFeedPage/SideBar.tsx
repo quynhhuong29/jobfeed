@@ -34,7 +34,12 @@ const SideBar = ({ user }: Props) => {
         <FireIcon height="34px" width="34px" />
         <p className="text-base text-black font-semibold">Follow</p>
       </div>
-      <div className="flex items-center gap-3 hover:bg-gray-300 cursor-pointer rounded-lg p-2 pl-3">
+      <div
+        className="flex items-center gap-3 hover:bg-gray-300 cursor-pointer rounded-lg p-2 pl-3"
+        onClick={() => {
+          router.push("/message");
+        }}
+      >
         <MessengerIcon height="32px" width="32px" />
         <p className="text-base text-black font-semibold">Messenger</p>
       </div>
