@@ -60,13 +60,13 @@ const UserCard = ({children, user, border, handleClose, setShowFollowers, setSho
                     <Avatar src={user.avatar} size="big-avatar" />
 
                     <div className="ml-1" style={{transform: 'translateY(-2px)'}}>
-                        <span className="d-block">{user.username}</span>
+                        <span className="d-block">{user.firstName + ' ' + user.lastName}</span>
                         
                         <small style={{opacity: 0.7}}>
                             {
                                 msg 
                                 ? showMsg(user)
-                                : user.fullname
+                                : user.username
                             }
                         </small>
                     </div>

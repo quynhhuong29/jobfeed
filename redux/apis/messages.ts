@@ -12,8 +12,14 @@ async function getConversationsApi( page = 1): Promise<any> {
   return (await api.get(`conversations?limit=${page * 9}`)).data;
 }
 
+async function deleteConversationApi(id : string): Promise<any> {
+  return (await api.delete(`conversation/${id}`));
+}
+
+
 export {
     getMessagesApi,
     messageApi,
-    getConversationsApi
+    getConversationsApi,
+    deleteConversationApi
 }

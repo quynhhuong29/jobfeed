@@ -21,14 +21,12 @@ interface ILayoutMainProps {
 
 const LayoutMain = ({ children }: ILayoutMainProps) => {
 
-  const {call} = useSelector(selectCall)
-
-  useEffect(()=>{
-    console.log('call',call)
-  },[call])
+  const call = useSelector(selectCall)
   return (
     <div className={inter.className}>
-      { call && <CallModal />}
+      {
+        call && <CallModal />
+      }
       <Topbar />
       {children}
       <footer className="w-full py-[60px] bg-[#2e3538] text-sm">

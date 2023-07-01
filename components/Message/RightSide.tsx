@@ -8,7 +8,7 @@ import { imageUpload } from '../../utils/upload.util'
 import { useAppDispatch } from '@/redux/store'
 import { useRouter } from 'next/router'
 import { selectAuth } from '@/redux/reducers/authReducers'
-import {  addMessageAsync, deleteConversation,  getMessagesAsync, loadMoreMessagesAsync, selectMessage } from '@/redux/reducers/messageReducers'
+import {  addMessageAsync,  deleteConversationAsync,  getMessagesAsync, loadMoreMessagesAsync, selectMessage } from '@/redux/reducers/messageReducers'
 import { selectSocket } from '@/redux/reducers/socketReducers'
 import { selectPeer } from '@/redux/reducers/peerReducers'
 import { setCall } from '@/redux/reducers/callReducers'
@@ -150,7 +150,8 @@ const RightSide = () => {
 
     const handleDeleteConversation = () => {
         if(window.confirm('Do you want to delete?')){
-            dispatch(deleteConversation({auth, id}))
+            console.log('deleteConversation', id)
+            dispatch(deleteConversationAsync(id))
             return history.push('/message')
         }
     }

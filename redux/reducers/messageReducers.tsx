@@ -1,7 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 import { DeleteData, EditData } from "@/utils/handleData";
-import { getConversationsApi, getMessagesApi, messageApi } from "../apis/messages";
+import { getConversationsApi, getMessagesApi, messageApi, deleteConversationApi } from "../apis/messages";
+import { toast } from "react-toastify";
 
 type MessageState = {
     users: Array<any>;
@@ -27,7 +28,6 @@ export const getMessagesAsync = createAsyncThunk(
     async ({ id, page }: any, { rejectWithValue }) => {
       try {
         const response = await getMessagesApi(id, page);
-        console.log("getMessagesAsync", response)
         const newData = {...response, messages: response.messages.reverse()}
         return {...newData, _id: id, page};
       } catch (err: any) {
@@ -98,6 +98,26 @@ export const getMessagesAsync = createAsyncThunk(
     }
   );
 
+  export const deleteConversationAsync = createAsyncThunk(
+    "message/deleteConversation",
+    async ( id : any, { rejectWithValue }) => {
+      try {
+        const response = await deleteConversationApi(id);
+        if(response.status === 200){
+            toast.success(response.data.msg)
+        }else{
+            toast.error(response.data.msg)
+        }
+        return { id };
+      } catch (err: any) {
+        if (!err.response) {
+          throw err;
+        }
+        return rejectWithValue(err.response.data);
+      }
+    }
+  );
+
 const messageSlice = createSlice({
   name: "message",
   initialState,
@@ -154,13 +174,13 @@ const messageSlice = createSlice({
             )
         };
     },
-    deleteConversation: (state, action) => {
-        return {
-            ...state,
-            users: DeleteData(state.users, action.payload),
-            data: DeleteData(state.data, action.payload)
-        };
-    },
+    // deleteConversation: (state, action) => {
+    //     return {
+    //         ...state,
+    //         users: DeleteData(state.users, action.payload),
+    //         data: DeleteData(state.data, action.payload)
+    //     };
+    // },
     checkOnlineOffline: (state, action) => {
         return {
             ...state,
@@ -175,14 +195,13 @@ const messageSlice = createSlice({
   extraReducers(builder) {
     builder
     .addCase(getMessagesAsync.fulfilled, (state, action) => {
-        console.log("action", action.payload)
+       const newMessage = state.data.every(item => item._id !== action.payload._id)
         return {
             ...state,
-            data: [...state.data, action.payload]
+            data: newMessage ? [...state.data, action.payload] : state.data
         };
     })
     .addCase(getMessagesAsync.rejected, (state, action) => {
-      console.log("getMessages rejected", action.payload)
       return state
     })
     .addCase(getConversationsAsync.fulfilled, (state, action) => {
@@ -231,10 +250,17 @@ const messageSlice = createSlice({
         data: EditData(state.data, action.payload._id, action.payload)
     }
     })
+    .addCase(deleteConversationAsync.fulfilled, (state, action) => {
+      return {
+          ...state,
+          users: DeleteData(state.users, action.payload as any),
+          data: DeleteData(state.data, action.payload as any)
+      };
+  })
   },
 });
 
 export const selectMessage = (state: RootState) => state.message;
 
-export const { addUser, deleteMessage, deleteConversation, checkOnlineOffline, addMessage } = messageSlice.actions;
+export const { addUser, deleteMessage, checkOnlineOffline, addMessage } = messageSlice.actions;
 export default messageSlice.reducer;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import Avatar from '../Avatar'
 import { selectAuth } from '@/redux/reducers/authReducers'
 import { addMessageAsync } from '@/redux/reducers/messageReducers'
@@ -42,8 +42,8 @@ const CallModal = () => {
 
     useEffect(() => {
         setSecond(total%60)
-        setMins(total/60)
-        setHours(total/3600)
+        setMins(parseInt((total / 60) as unknown as string))
+        setHours(parseInt((total/3600) as unknown as string))
     },[total])
 
 
@@ -184,16 +184,16 @@ const CallModal = () => {
         newAudio.currentTime = 0
     }
 
-    // useEffect(() => {
-    //     let newAudio = new Audio(RingRing)
-    //     if(answer){
-    //         pauseAudio(newAudio)
-    //     }else{
-    //         playAudio(newAudio)
-    //     }
+    useEffect(() => {
+        let newAudio = new Audio("/assets/audio/ringring.mp3")
+        if(answer){
+            pauseAudio(newAudio)
+        }else{
+            playAudio(newAudio)
+        }
 
-    //     return () => pauseAudio(newAudio)
-    // },[answer])
+        return () => pauseAudio(newAudio)
+    },[answer])
 
 
     return (
@@ -201,12 +201,10 @@ const CallModal = () => {
             <div className="call_box" style={{
                 display: (answer && call.video) ? 'none' : 'flex'
             }} >
-
                 <div className="text-center" style={{padding: '40px 0'}} >
                     <Avatar src={call.avatar} size="supper-avatar" />
                     <h4>{call.username}</h4>
                     <h6>{call.fullName}</h6>
-
                     {
                         answer 
                         ? <div>
