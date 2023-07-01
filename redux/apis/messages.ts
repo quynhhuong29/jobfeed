@@ -16,10 +16,15 @@ async function deleteConversationApi(id : string): Promise<any> {
   return (await api.delete(`conversation/${id}`));
 }
 
+async function deleteMessageApi(id : string): Promise<any> {
+  return (await api.delete(`message/${id}`));
+}
+
 
 export {
     getMessagesApi,
     messageApi,
     getConversationsApi,
-    deleteConversationApi
+    deleteConversationApi,
+    deleteMessageApi
 }

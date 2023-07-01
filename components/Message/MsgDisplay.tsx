@@ -6,7 +6,7 @@ import { selectAuth } from '@/redux/reducers/authReducers'
 import Avatar from '../Avatar'
 import { imageShow } from '@/utils/mediaShow'
 import VideoShow from '../MediaShow/VideoShow'
-import { deleteMessage } from '@/redux/reducers/messageReducers'
+import {  deleteMessageAsync } from '@/redux/reducers/messageReducers'
 import { useAppDispatch } from '@/redux/store'
 
 interface MsgProps {
@@ -24,8 +24,7 @@ const MsgDisplay = ({ user, msg, theme, data }: MsgProps) => {
         if (!data) return;
 
         if (window.confirm('Do you want to delete?')) {
-            dispatch(deleteMessage({ msg, data, auth }))
-            console.log('deleteMessages')
+            dispatch(deleteMessageAsync({ msg, data }))
         }
     }
 

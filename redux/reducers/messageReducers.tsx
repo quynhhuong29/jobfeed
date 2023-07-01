@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 import { DeleteData, EditData } from "@/utils/handleData";
-import { getConversationsApi, getMessagesApi, messageApi, deleteConversationApi } from "../apis/messages";
+import { getConversationsApi, getMessagesApi, messageApi, deleteConversationApi, deleteMessageApi } from "../apis/messages";
 import { toast } from "react-toastify";
 
 type MessageState = {
@@ -45,7 +45,6 @@ export const getMessagesAsync = createAsyncThunk(
       try {
         const data  = page || 1
         const response = await getConversationsApi(data);
-        console.log("getConversationsAsync", response)
         let newArr = [] as any;
         response.conversations.forEach((item: any) => {
             item.recipients.forEach((cv:any) => {
@@ -69,7 +68,6 @@ export const getMessagesAsync = createAsyncThunk(
     async ({ msg, auth, socket }: any, { rejectWithValue }) => {
       try {
         const response = await messageApi(msg);
-        console.log("AddMessageAsync", response)
         return {data: response, auth, socket, msg};
       } catch (err: any) {
         if (!err.response) {
@@ -86,7 +84,6 @@ export const getMessagesAsync = createAsyncThunk(
       try {
         const data  = page || 1
         const response = await getMessagesApi(id, data);
-        console.log("loadMoreMessagesAsync", response)
         const newData = {...response.data, messages: response.data.messages.reverse()}
         return {...newData, _id:id };
       } catch (err: any) {
@@ -108,7 +105,28 @@ export const getMessagesAsync = createAsyncThunk(
         }else{
             toast.error(response.data.msg)
         }
-        return { id };
+        return id;
+      } catch (err: any) {
+        if (!err.response) {
+          throw err;
+        }
+        return rejectWithValue(err.response.data);
+      }
+    }
+  );
+
+  export const deleteMessageAsync = createAsyncThunk(
+    "message/deleteMessage",
+    async ({ msg, data }: any, { rejectWithValue }) => {
+      try {
+        const response = await deleteMessageApi(msg._id as string);
+        if(response.status === 200){
+          toast.success(response.data.msg)
+        }else{
+          toast.error(response.data.msg)
+        }
+        const newData = DeleteData(data, msg._id)
+        return {newData, _id: msg.recipient};
       } catch (err: any) {
         if (!err.response) {
           throw err;
@@ -123,7 +141,6 @@ const messageSlice = createSlice({
   initialState,
   reducers: {
     addUser: (state, action) => {
-        console.log("log", state.users)
         if(state.users?.every(item => item._id !== action.payload._id)){
             return {
                 ...state,
@@ -217,7 +234,6 @@ const messageSlice = createSlice({
 
         const { _id, avatar, firstName, lastName } = auth.user
         socket.emit('addMessage', {...msg, user: { _id, avatar, firstName, lastName } })
-        console.log("state users", state.users)
         return {
             ...state,
             data: state.data.map(item => {
@@ -256,7 +272,17 @@ const messageSlice = createSlice({
           users: DeleteData(state.users, action.payload as any),
           data: DeleteData(state.data, action.payload as any)
       };
-  })
+    })
+    .addCase(deleteMessageAsync.fulfilled, (state, action) => {
+      return {
+        ...state,
+        data: state.data.map(item => 
+            item._id === action.payload._id
+            ? {...item, messages: action.payload.newData}
+            : item
+        )
+    };
+    })
   },
 });
 

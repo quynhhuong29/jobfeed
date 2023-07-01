@@ -53,7 +53,7 @@ function SocketClient() {
     if (typeof navigator !== "undefined") {
       const Peer = require("peerjs").default
 
-      const peer = new Peer("", {
+      const peer = new Peer({
         path: "/",
         secure: true
       })
@@ -116,7 +116,6 @@ function SocketClient() {
 
   // Check User Online / Offline
   useEffect(() => {
-    console.log("checkUserOnline", auth.user);
     if(socket && socket.emit)
       socket.emit('checkUserOnline', auth.user)
   },[socket, auth.user])
@@ -124,7 +123,6 @@ function SocketClient() {
   useEffect(() => {
     if(socket && socket.on)
       socket.on('checkUserOnlineToMe', (data : any) =>{
-          console.log("checkUserOnlineToMe", data);
           data.forEach((item : any) => {
               if(!online.includes(item.id)){
                   dispatch(setOnline(item.id))

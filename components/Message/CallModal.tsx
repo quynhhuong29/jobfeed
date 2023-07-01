@@ -8,6 +8,7 @@ import { selectPeer } from '@/redux/reducers/peerReducers'
 import { selectCall } from '@/redux/reducers/callReducers'
 import { setCall } from '@/redux/reducers/callReducers'
 import { useAppDispatch } from '@/redux/store'
+import { toast } from 'react-toastify'
 
 const CallModal = () => {
     // const { call, auth, peer, socket, theme } = useSelector(state => state)
@@ -168,7 +169,7 @@ const CallModal = () => {
             //     type: GLOBALTYPES.ALERT, 
             //     payload: {error: `The ${call.username} disconnect`} 
             // })
-            console.log(`The ${call.username} disconnect`)
+            toast.error(`The ${call.username} disconnect`)
         })
 
         return () => socket.off('callerDisconnect')
@@ -264,7 +265,7 @@ const CallModal = () => {
 
             <div className="show_video" style={{
                 opacity: (answer && call.video) ? '1' : '0',
-                filter:'invert(1)' //'invert(0)'
+                filter: 'invert(0)' //'invert(1)'
             }} >
 
                 <video ref={youVideo} className="you_video" playsInline muted />

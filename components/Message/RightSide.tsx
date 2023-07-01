@@ -12,6 +12,7 @@ import {  addMessageAsync,  deleteConversationAsync,  getMessagesAsync, loadMore
 import { selectSocket } from '@/redux/reducers/socketReducers'
 import { selectPeer } from '@/redux/reducers/peerReducers'
 import { setCall } from '@/redux/reducers/callReducers'
+import { toast } from 'react-toastify'
 
 const RightSide = () => {
     // const { auth, message, theme, socket, peer } = useSelector(state => state)
@@ -75,7 +76,7 @@ const RightSide = () => {
         })
 
         // if(err) dispatch({ type: GLOBALTYPES.ALERT, payload: {error: err} })
-        console.log(err)
+        toast.error(err)
         setMedia([...media, ...newMedia])
     }
 
@@ -150,7 +151,6 @@ const RightSide = () => {
 
     const handleDeleteConversation = () => {
         if(window.confirm('Do you want to delete?')){
-            console.log('deleteConversation', id)
             dispatch(deleteConversationAsync(id))
             return history.push('/message')
         }

@@ -7,6 +7,7 @@ import { addUser, checkOnlineOffline, getConversationsAsync, selectMessage } fro
 import UserCard from '../UserCard'
 import { searchUser } from '@/redux/apis/userAPI'
 import { useAppDispatch } from '@/redux/store'
+import { toast } from 'react-toastify'
 // import { getDataAPI } from '../../utils/fetchData'
 // import { GLOBALTYPES } from '../../redux/actions/globalTypes'
 // import { useHistory, useParams } from 'react-router-dom'
@@ -39,9 +40,7 @@ const LeftSide = () => {
             console.log({res})
             setSearchUsers(res.users)
         } catch (err) {
-            // dispatch({
-            //     type: GLOBALTYPES.ALERT, payload: {error: err.response.data.msg}
-            // })
+            toast.error("Server Error")
         }
     }
 

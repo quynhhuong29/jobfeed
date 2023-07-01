@@ -9,18 +9,18 @@ const Times = ({total}: TimesProps) => {
         <div>
             <span>
                 {
-                    (total/3600).toString().length < 2
-                    ? '0' + total/3600
-                    : total/3600
+                    (parseInt((total/3600) as unknown as string)).toString().length < 2
+                    ? '0' + parseInt((total/3600) as unknown as string)
+                    : parseInt((total/3600) as unknown as string)
                 }
             </span>
             <span>:</span>
 
             <span>
                 {
-                    (total/60).toString().length < 2
-                    ? '0' + total/60
-                    : total/60
+                    parseInt((total/60) as unknown as string).toString().length < 2
+                    ? '0' + parseInt((total/60) as unknown as string)
+                    : parseInt((total/60) as unknown as string)
                 }
             </span>
             <span>:</span>

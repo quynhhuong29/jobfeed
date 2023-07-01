@@ -66,7 +66,7 @@ const UserCard = ({children, user, border, handleClose, setShowFollowers, setSho
                             {
                                 msg 
                                 ? showMsg(user)
-                                : user.username
+                                : '' // `${user.firstName} ${user.lastName}`
                             }
                         </small>
                     </div>
