@@ -64,7 +64,7 @@ const NewsFeed = ({ userId, isPostDetails = false }: Props) => {
       )}
       <div className={`${isPostDetails ? "col-span-7" : "col-span-3"}`}>
         {isPostDetails && userId && userId === userAuth?._id ? (
-          <div className="flex gap-2 mb-4 p-5 rounded-lg bg-white w-full border border-[rgba(0, 0, 0, 0.125)]">
+          <div className="flex gap-2 mb-4 p-4 rounded-lg bg-white w-full border border-[rgba(0, 0, 0, 0.125)]">
             <WrapItem>
               <Avatar size="md" name="Avatar" src={userAuth?.avatar || ""} />
             </WrapItem>
@@ -94,7 +94,7 @@ const NewsFeed = ({ userId, isPostDetails = false }: Props) => {
           </div>
         ) : (
           !isPostDetails && (
-            <div className="flex gap-2 mb-4 p-5 rounded-lg bg-white w-full border border-[rgba(0, 0, 0, 0.125)]">
+            <div className="flex gap-2 mb-4 p-4 rounded-lg bg-white w-full border border-[rgba(0, 0, 0, 0.125)]">
               <WrapItem>
                 <Avatar size="md" name="Avatar" src={userAuth?.avatar || ""} />
               </WrapItem>

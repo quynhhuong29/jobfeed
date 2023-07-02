@@ -713,7 +713,7 @@ const jobPost = () => {
                 colorScheme={"green"}
                 isLoading={job?.isLoading}
               >
-                Update
+                Submit
               </Button>
             </div>
           </form>

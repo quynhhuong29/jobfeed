@@ -413,7 +413,9 @@ const manageJob = () => {
                                     icon={<ViewIcon />}
                                     variant="ghost"
                                     onClick={() => {
-                                      router.push(`/manageJob/listCV/${item._id}`)
+                                      router.push(
+                                        `/manageJob/listCV/${item._id}`
+                                      );
                                     }}
                                   />
                                 </Td>
