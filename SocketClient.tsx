@@ -79,8 +79,29 @@ function SocketClient() {
     ) {
       return;
     }
+    const isLocalDevelopment: boolean =
+      typeof window !== "undefined" && window.location.hostname === "localhost";
+    const isProduction =
+      typeof window !== "undefined" &&
+      window.location.hostname === "jobvia.vercel.app";
 
-    const socket = io("http://localhost:5001");
+    function getApiRootUrl(): string {
+      const { port, origin } = window.location;
+
+      if (isProduction) {
+        return "https://jobfeed-server.onrender.com";
+      }
+      if (isLocalDevelopment && port === "3000") {
+        return "http://localhost:5000";
+      }
+      if (isLocalDevelopment && port === "3005") {
+        return "http://localhost:5001";
+      }
+
+      return origin;
+    }
+
+    const socket = io(getApiRootUrl());
 
     socket.on("connect", () => {
       // Wait for the next tick to dispatch the action
