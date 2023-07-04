@@ -47,23 +47,23 @@ export default function App({ Component, pageProps }: AppProps) {
       console.log(err);
     }
   };
-  useEffect(() => {
-    const pathname = window.location.pathname;
-    if (
-      pathname.includes("/login") ||
-      pathname.includes("/signup") ||
-      pathname.includes("/resetpassword") ||
-      pathname.includes("/signout") ||
-      pathname.includes("/verify")
-    )
-      return;
+  // useEffect(() => {
+  //   const pathname = window.location.pathname;
+  //   if (
+  //     pathname.includes("/login") ||
+  //     pathname.includes("/signup") ||
+  //     pathname.includes("/resetpassword") ||
+  //     pathname.includes("/signout") ||
+  //     pathname.includes("/verify")
+  //   )
+  //     return;
 
-    if (isTokenExpired()) {
-      getRefreshToken();
-    } else {
-      updateUserAuth();
-    }
-  }, []);
+  //   if (isTokenExpired()) {
+  //     getRefreshToken();
+  //   } else {
+  //     updateUserAuth();
+  //   }
+  // }, []);
 
   useEffect(() => {
     if (!("Notification" in window)) {

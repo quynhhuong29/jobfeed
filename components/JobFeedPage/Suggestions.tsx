@@ -1,4 +1,5 @@
 import { suggestionUsers } from "@/redux/apis/userAPI";
+import { selectIsLoggedIn } from "@/redux/reducers/authReducers";
 import {
   getUsersSuggestionAsync,
   selectSuggestionUsers,
@@ -15,6 +16,8 @@ const Suggestions = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [userAuth, setUserAuth] = useState<User>();
   const [isLoading, setIsLoading] = useState(false);
+
+  const isAuthenticated = useSelector(selectIsLoggedIn);
 
   let userLocal: string | null = "";
   if (typeof window !== "undefined") {
@@ -39,8 +42,8 @@ const Suggestions = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (isAuthenticated) fetchData();
+  }, [isAuthenticated]);
 
   return (
     <div className="fixed">

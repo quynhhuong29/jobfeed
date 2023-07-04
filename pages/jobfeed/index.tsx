@@ -10,6 +10,7 @@ import HomeIcon from "@/components/icons/HomeIcon";
 import NewsFeed from "@/components/JobFeedPage/NewsFeed";
 import { useDebounce } from "@/hooks/debounceHook";
 import { getPosts } from "@/redux/apis/postApi";
+import { selectIsLoggedIn } from "@/redux/reducers/authReducers";
 import { getNotifiesAsync } from "@/redux/reducers/notifyReducers";
 import { getPostsAsync } from "@/redux/reducers/postReducers";
 import {
@@ -46,6 +47,7 @@ function JobFeed() {
   const [open, setOpen] = useState(false);
 
   const searchUserData = useSelector(selectSearchUser);
+  const isAuthenticated = useSelector(selectIsLoggedIn);
 
   const modalRef = useRef<any>(null);
 
@@ -84,9 +86,9 @@ function JobFeed() {
   }, []);
 
   useEffect(() => {
-    dispatch(getPostsAsync());
+    if (isAuthenticated) dispatch(getPostsAsync());
     // dispatch(getNotifiesAsync());
-  }, [dispatch]);
+  }, [dispatch, isAuthenticated]);
 
   return (
     <LayoutMain>
@@ -162,7 +164,7 @@ function JobFeed() {
             </Button>
             <Button
               variant={"unstyled"}
-              onClick={() => router.push("/jobfeed")}
+              onClick={() => router.push("/message")}
             >
               <MessengerIcon />
             </Button>

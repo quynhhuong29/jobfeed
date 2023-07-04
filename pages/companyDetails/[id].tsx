@@ -119,4 +119,4 @@ function companyDetails() {
   );
 }
 
-export default withAuth(companyDetails);
+export default companyDetails;

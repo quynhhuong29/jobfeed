@@ -11,6 +11,7 @@ import { selectCall } from "@/redux/reducers/callReducers";
 import CallModal from "../Message/CallModal";
 import { useAppDispatch } from "@/redux/store";
 import { getNotifiesAsync } from "@/redux/reducers/notifyReducers";
+import { selectAuth } from "@/redux/reducers/authReducers";
 
 const inter = Inter({
   weight: ["400", "500", "600", "700"],
@@ -25,10 +26,11 @@ const LayoutMain = ({ children }: ILayoutMainProps) => {
   const dispatch = useAppDispatch();
 
   const call = useSelector(selectCall);
+  const auth = useSelector(selectAuth);
 
   useEffect(() => {
-    dispatch(getNotifiesAsync());
-  }, [dispatch]);
+    if (auth?.isLoggedIn) dispatch(getNotifiesAsync());
+  }, [auth?.isLoggedIn, dispatch]);
 
   return (
     <div className={inter.className}>

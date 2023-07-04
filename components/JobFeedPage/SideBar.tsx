@@ -21,7 +21,16 @@ const SideBar = ({ user }: Props) => {
         <WrapItem>
           <Avatar size="sm" name="Avatar" src={user?.avatar || ""} />
         </WrapItem>
-        <p className="text-base text-black font-semibold">{`${user?.firstName} ${user?.lastName}`}</p>
+        <p className="text-base text-black font-semibold">
+          {`${
+            user?.role === "company"
+              ? user?.firstName
+              : user?.firstName + " " + user?.lastName
+          }`}
+          {user?.role === "company" && (
+            <i className="ml-1 fas fa-check-circle text-[#007BFF]"></i>
+          )}
+        </p>
       </div>
       <div
         className="flex items-center gap-3 hover:bg-gray-300 cursor-pointer rounded-lg p-2 pl-3"

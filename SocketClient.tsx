@@ -306,4 +306,4 @@ function SocketClient() {
   );
 }
 
-export default withAuth(SocketClient);
+export default SocketClient;

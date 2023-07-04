@@ -14,13 +14,14 @@ import { jobCard, jobListData } from "@/data/homePageData";
 import { useDataFetching } from "@/hooks/dataFetchingHook";
 import { searchJobs } from "@/redux/apis/jobApi";
 import { getListResumes } from "@/redux/apis/resumeAPI";
+import { selectIsLoggedIn } from "@/redux/reducers/authReducers";
 import {
   getAllIndustryAsync,
   selectIndustry,
 } from "@/redux/reducers/industryReducers";
 import { useAppDispatch } from "@/redux/store";
 import { Industry } from "@/types/Industry";
-import { ChevronRightIcon, SearchIcon } from "@chakra-ui/icons";
+import { SearchIcon } from "@chakra-ui/icons";
 import {
   Button,
   Input,
@@ -43,9 +44,11 @@ const jobList = () => {
   const [selectedIndustry, setSelectedIndustry] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [listResumes, setListResumes] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [dataSearch, setDataSearch] = useState([]);
   const industry = useSelector(selectIndustry);
+  const isAuthenticated = useSelector(selectIsLoggedIn);
 
   useEffect(() => {
     dispatch(getAllIndustryAsync());
@@ -53,6 +56,7 @@ const jobList = () => {
 
   const handleSearchJob = async () => {
     setDataSearch([]);
+    setIsLoading(true);
     const result = await searchJobs(
       searchValue || "",
       selectedWorkingLocation || "",
@@ -61,6 +65,7 @@ const jobList = () => {
     if (result) {
       setDataSearch(result);
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -72,8 +77,8 @@ const jobList = () => {
       }
     };
 
-    fetchData();
-  }, []);
+    if (isAuthenticated) fetchData();
+  }, [isAuthenticated]);
 
   return (
     <LayoutMain>
@@ -159,6 +164,7 @@ const jobList = () => {
                 backgroundColor: "#028c5d",
               }}
               onClick={handleSearchJob}
+              isLoading={isLoading}
             >
               Find Job
             </Button>
@@ -183,11 +189,19 @@ const jobList = () => {
                 <div className="grid grid-cols-2 grid-flow-row gap-5 mt-6">
                   {dataSearch.length <= 0
                     ? pages?.map((ele: any, index: number) => (
-                        <JobCard data={ele} key={ele?._id || index} listResumes={listResumes} />
+                        <JobCard
+                          data={ele}
+                          key={ele?._id || index}
+                          listResumes={listResumes}
+                        />
                       ))
                     : Array.isArray(dataSearch) &&
                       dataSearch?.map((ele: any, index: number) => (
-                        <JobCard data={ele} key={ele?._id || index} listResumes={listResumes} />
+                        <JobCard
+                          data={ele}
+                          key={ele?._id || index}
+                          listResumes={listResumes}
+                        />
                       ))}
                 </div>
                 {dataSearch.length <= 0 && (

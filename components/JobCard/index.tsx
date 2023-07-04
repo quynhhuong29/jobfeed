@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { submitCV } from "@/redux/apis/submitCvAPI";
+import { selectIsLoggedIn } from "@/redux/reducers/authReducers";
 import { formatMoney } from "@/utils/number.util";
 import { filePdfUpload } from "@/utils/upload.util";
 import { ArrowRightIcon } from "@chakra-ui/icons";
@@ -27,6 +28,7 @@ import {
 import Link from "next/link";
 import { memo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import CustomBadge from "../CustomBadge";
 import { HeartIcon, MapPinIcon } from "../icons";
@@ -53,6 +55,8 @@ function JobCard({ data, listResumes }: Props) {
   const { handleSubmit, register } = useForm<FormData>({
     mode: "onChange",
   });
+
+  const isAuthenticated = useSelector(selectIsLoggedIn);
 
   const handleSendResume = async (dataForm: FormData) => {
     let file: any = "";
@@ -280,134 +284,150 @@ function JobCard({ data, listResumes }: Props) {
             <ModalHeader>Apply For This Job</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Tabs variant="enclosed">
-                <TabList>
-                  <Tab>Upload Resume</Tab>
-                  <Tab>Your list resumes</Tab>
-                </TabList>
-                <TabPanels>
-                  <TabPanel>
-                    <div className=" mb-3">
-                      <label className="text-gray-700">Name</label>
-                      <Input
-                        type="text"
-                        autoComplete="off"
-                        sx={{
-                          backgroundColor: "#fff",
-                          border: "1px solid #dbdfe2",
-                          color: "#495057",
-                          padding: "10px",
-                          fontSize: "14px",
-                          fontWeight: "500",
-                          "&:focus-visible": {
-                            outline: "0",
+              {isAuthenticated ? (
+                <Tabs variant="enclosed">
+                  <TabList>
+                    <Tab>Upload Resume</Tab>
+                    <Tab>Your list resumes</Tab>
+                  </TabList>
+                  <TabPanels>
+                    <TabPanel>
+                      <div className=" mb-3">
+                        <label className="text-gray-700">Name</label>
+                        <Input
+                          type="text"
+                          autoComplete="off"
+                          sx={{
+                            backgroundColor: "#fff",
                             border: "1px solid #dbdfe2",
-                            boxShadow: "none",
-                          },
-                        }}
-                        {...register("name")}
-                      />
-                    </div>
-                    <div className=" mb-3">
-                      <label className="text-gray-700">Email</label>
-                      <Input
-                        type="email"
-                        autoComplete="off"
-                        sx={{
-                          backgroundColor: "#fff",
-                          border: "1px solid #dbdfe2",
-                          color: "#495057",
-                          padding: "10px",
-                          fontSize: "14px",
-                          fontWeight: "500",
-                          "&:focus-visible": {
-                            outline: "0",
+                            color: "#495057",
+                            padding: "10px",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            "&:focus-visible": {
+                              outline: "0",
+                              border: "1px solid #dbdfe2",
+                              boxShadow: "none",
+                            },
+                          }}
+                          {...register("name")}
+                        />
+                      </div>
+                      <div className=" mb-3">
+                        <label className="text-gray-700">Email</label>
+                        <Input
+                          type="email"
+                          autoComplete="off"
+                          sx={{
+                            backgroundColor: "#fff",
                             border: "1px solid #dbdfe2",
-                            boxShadow: "none",
-                          },
-                        }}
-                        {...register("email")}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="text-base mb-2 inline-block">
-                        Resume Upload
-                      </label>
-                      <input
-                        type="file"
-                        accept=".pdf"
-                        onChange={(event: any) => setResume(event.target.files)}
-                      />
-                    </div>
-                    <div className="mb-5">
-                      <label className="text-base mb-2 inline-block">
-                        Document
-                      </label>
-                      <input
-                        type="file"
-                        accept=".pdf"
-                        onChange={(event: any) =>
-                          setDocument(event.target.files)
-                        }
-                      />
-                    </div>
-                    <Button
-                      colorScheme="green"
-                      onClick={handleSubmit(handleSendResume)}
-                      isLoading={isLoading}
-                      float="right"
-                    >
-                      Send Application
-                    </Button>
-                  </TabPanel>
-                  <TabPanel>
-                    <p className="text-gray-600 text-base">
-                      You have {listResumes?.length || 0} resume on Job Library.
-                      Please select a resume to apply for
-                    </p>
-                    <RadioGroup
-                      onChange={setValueResume}
-                      value={valueResume}
-                      mt={3}
-                    >
-                      <Stack spacing={5} direction="column">
-                        {listResumes?.map((ele: any) => {
-                          return (
-                            <Radio
-                              colorScheme="green"
-                              key={ele._id}
-                              value={ele._id}
-                              size="lg"
-                            >
-                              {ele.title}
-                            </Radio>
-                          );
-                        })}
-                      </Stack>
-                    </RadioGroup>
-                    <div className="mb-5">
-                      <label className="text-base mb-2 inline-block">
-                        Document
-                      </label>
-                      <input
-                        type="file"
-                        accept=".pdf"
-                        onChange={(event: any) =>
-                          setDocument(event.target.files)
-                        }
-                      />
-                    </div>
-                    <Button
-                      colorScheme="green"
-                      onClick={handleSendCV}
-                      isLoading={isLoadingCV}
-                      float="right"
-                    >
-                      Send Application
-                    </Button>
-                  </TabPanel>
-                </TabPanels>
-              </Tabs>
+                            color: "#495057",
+                            padding: "10px",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            "&:focus-visible": {
+                              outline: "0",
+                              border: "1px solid #dbdfe2",
+                              boxShadow: "none",
+                            },
+                          }}
+                          {...register("email")}
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="text-base mb-2 inline-block">
+                          Resume Upload
+                        </label>
+                        <input
+                          type="file"
+                          accept=".pdf"
+                          onChange={(event: any) =>
+                            setResume(event.target.files)
+                          }
+                        />
+                      </div>
+                      <div className="mb-5">
+                        <label className="text-base mb-2 inline-block">
+                          Document
+                        </label>
+                        <input
+                          type="file"
+                          accept=".pdf"
+                          onChange={(event: any) =>
+                            setDocument(event.target.files)
+                          }
+                        />
+                      </div>
+                      <Button
+                        colorScheme="green"
+                        onClick={handleSubmit(handleSendResume)}
+                        isLoading={isLoading}
+                        float="right"
+                      >
+                        Send Application
+                      </Button>
+                    </TabPanel>
+                    <TabPanel>
+                      <p className="text-gray-600 text-base">
+                        You have {listResumes?.length || 0} resume on Job
+                        Library. Please select a resume to apply for
+                      </p>
+                      <RadioGroup
+                        onChange={setValueResume}
+                        value={valueResume}
+                        mt={3}
+                      >
+                        <Stack spacing={5} direction="column">
+                          {listResumes?.map((ele: any) => {
+                            return (
+                              <Radio
+                                colorScheme="green"
+                                key={ele._id}
+                                value={ele._id}
+                                size="lg"
+                              >
+                                {ele.title}
+                              </Radio>
+                            );
+                          })}
+                        </Stack>
+                      </RadioGroup>
+                      <div className="mb-5">
+                        <label className="text-base mb-2 inline-block">
+                          Document
+                        </label>
+                        <input
+                          type="file"
+                          accept=".pdf"
+                          onChange={(event: any) =>
+                            setDocument(event.target.files)
+                          }
+                        />
+                      </div>
+                      <Button
+                        colorScheme="green"
+                        onClick={handleSendCV}
+                        isLoading={isLoadingCV}
+                        float="right"
+                      >
+                        Send Application
+                      </Button>
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
+              ) : (
+                <div className="flex">
+                  Please&nbsp;
+                  <Link href="/login" className="text-blue hover:underline">
+                    Login
+                  </Link>
+                  &nbsp;or&nbsp;
+                  <Link href="/signup" className="text-blue hover:underline">
+                    Register
+                  </Link>
+                  &nbsp;to apply for this job
+                </div>
+              )}
             </ModalBody>
 
             <ModalFooter></ModalFooter>

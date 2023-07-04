@@ -139,12 +139,14 @@ const Topbar = () => {
           (item) => item.auth === "notAuth" || item.auth === "candidate"
         )
       );
-    } else {
+    } else if (userAuth?.role === "company") {
       setListMenu(
         menu.filter(
           (item) => item.auth === "notAuth" || item.auth === "company"
         )
       );
+    } else {
+      setListMenu(menu.filter((item) => item.auth === "notAuth"));
     }
   }, [userAuth]);
 
