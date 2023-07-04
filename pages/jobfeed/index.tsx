@@ -85,7 +85,7 @@ function JobFeed() {
 
   useEffect(() => {
     dispatch(getPostsAsync());
-    dispatch(getNotifiesAsync());
+    // dispatch(getNotifiesAsync());
   }, [dispatch]);
 
   return (

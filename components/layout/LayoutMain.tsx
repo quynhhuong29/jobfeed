@@ -6,9 +6,11 @@ import FooterAlt from "../FooterAlt";
 import { ChevronRightIcon } from "@chakra-ui/icons";
 import Link from "next/link";
 import { FacebookIcon, LinkedInIcon, TwitterIcon } from "../icons";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectCall } from "@/redux/reducers/callReducers";
 import CallModal from "../Message/CallModal";
+import { useAppDispatch } from "@/redux/store";
+import { getNotifiesAsync } from "@/redux/reducers/notifyReducers";
 
 const inter = Inter({
   weight: ["400", "500", "600", "700"],
@@ -20,13 +22,17 @@ interface ILayoutMainProps {
 }
 
 const LayoutMain = ({ children }: ILayoutMainProps) => {
+  const dispatch = useAppDispatch();
 
-  const call = useSelector(selectCall)
+  const call = useSelector(selectCall);
+
+  useEffect(() => {
+    dispatch(getNotifiesAsync());
+  }, [dispatch]);
+
   return (
     <div className={inter.className}>
-      {
-        call && <CallModal />
-      }
+      {call && <CallModal />}
       <Topbar />
       {children}
       <footer className="w-full py-[60px] bg-[#2e3538] text-sm">

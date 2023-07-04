@@ -1,7 +1,7 @@
 import "@/styles/globals.scss";
 import { ChakraProvider } from "@chakra-ui/react";
 import type { AppProps } from "next/app";
-import { Provider, useDispatch } from "react-redux";
+import { Provider } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import store from "@/redux/store";
@@ -11,7 +11,6 @@ import { refreshToken } from "@/redux/apis/authAPI";
 import jwt_decode from "jwt-decode";
 import { getUserInfoById } from "@/redux/apis/userAPI";
 import SocketClient from "@/SocketClient";
-
 
 export default function App({ Component, pageProps }: AppProps) {
   const isTokenExpired = () => {
@@ -49,6 +48,16 @@ export default function App({ Component, pageProps }: AppProps) {
     }
   };
   useEffect(() => {
+    const pathname = window.location.pathname;
+    if (
+      pathname.includes("/login") ||
+      pathname.includes("/signup") ||
+      pathname.includes("/resetpassword") ||
+      pathname.includes("/signout") ||
+      pathname.includes("/verify")
+    )
+      return;
+
     if (isTokenExpired()) {
       getRefreshToken();
     } else {

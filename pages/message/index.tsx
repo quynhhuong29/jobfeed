@@ -1,24 +1,22 @@
 import React from "react";
 import LeftSide from "../../components/Message/LeftSide";
 import { LayoutMain } from "@/components/layout";
+import { MessengerIcon } from "@/components/icons";
 
 const Message = () => {
   return (
     <LayoutMain>
-      <div className="message d-flex">
-        <div className="col-md-4 border-right px-0">
+      <div className="message flex my-5">
+        <div className="border-right px-0 h-full">
           <LeftSide />
         </div>
 
-        <div className="col-md-8 px-0 right_mess">
+        <div className="w-full px-0 right_mess">
           <div
-            className="d-flex justify-content-center 
-                align-items-center flex-column h-100"
+            className="flex justify-center 
+                items-center flex-col h-full"
           >
-            <i
-              className="fab fa-facebook-messenger text-primary"
-              style={{ fontSize: "5rem" }}
-            />
+            <MessengerIcon width="80px" height="80px" />
             <h4>Messenger</h4>
           </div>
         </div>

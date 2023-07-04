@@ -246,13 +246,21 @@ const Topbar = () => {
                   _hover={{
                     bg: "transparent",
                   }}
+                  _focus={{
+                    outline: 0,
+                  }}
                   className="!text-gray-800 !font-sans !font-medium"
                 >
                   Hi, {username}
                 </MenuButton>
 
                 <MenuList>
-                  <MenuItem sx={{ padding: "10px 12px" }}>
+                  <MenuItem
+                    sx={{ padding: "10px 12px", outline: 0 }}
+                    _hover={{ outline: 0 }}
+                    _focus={{ outline: 0 }}
+                    _active={{ outline: 0 }}
+                  >
                     <Link
                       href={`/profile/${userAuth?._id}`}
                       className="flex items-center gap-2 text-gray-700 text-base font-medium"
@@ -261,7 +269,12 @@ const Topbar = () => {
                       Profile
                     </Link>
                   </MenuItem>
-                  <MenuItem sx={{ padding: "10px 12px" }}>
+                  <MenuItem
+                    sx={{ padding: "10px 12px", outline: 0 }}
+                    _hover={{ outline: 0 }}
+                    _focus={{ outline: 0 }}
+                    _active={{ outline: 0 }}
+                  >
                     <Link
                       href={`/savedJobs/${userAuth?._id}`}
                       className="flex items-center gap-2 text-gray-700 text-base font-medium"
@@ -270,9 +283,14 @@ const Topbar = () => {
                       Saved Jobs
                     </Link>
                   </MenuItem>
-                  <MenuItem sx={{ padding: "10px 12px" }}>
+                  <MenuItem
+                    sx={{ padding: "10px 12px", outline: 0 }}
+                    _hover={{ outline: 0 }}
+                    _focus={{ outline: 0 }}
+                    _active={{ outline: 0 }}
+                  >
                     <Link
-                      href={`/appliedJobs`}
+                      href="/appliedJobs"
                       className="flex items-center gap-2 text-gray-700 text-base font-medium"
                     >
                       <BriefcaseIcon
@@ -283,7 +301,12 @@ const Topbar = () => {
                       Applied Jobs
                     </Link>
                   </MenuItem>
-                  <MenuItem sx={{ padding: "10px 12px" }}>
+                  <MenuItem
+                    sx={{ padding: "10px 12px", outline: 0 }}
+                    _hover={{ outline: 0 }}
+                    _focus={{ outline: 0 }}
+                    _active={{ outline: 0 }}
+                  >
                     <Link
                       href={`/manageCV`}
                       className="flex items-center gap-2 text-gray-700 text-base font-medium"
@@ -293,7 +316,10 @@ const Topbar = () => {
                     </Link>
                   </MenuItem>
                   <MenuItem
-                    sx={{ padding: "10px 12px" }}
+                    sx={{ padding: "10px 12px", outline: 0 }}
+                    _hover={{ outline: 0 }}
+                    _focus={{ outline: 0 }}
+                    _active={{ outline: 0 }}
                     className="flex items-center gap-2 text-base font-medium"
                   >
                     <LogoutIcon

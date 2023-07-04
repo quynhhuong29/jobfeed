@@ -241,7 +241,7 @@ const CallModal = () => {
 
         <div className="call_menu">
           <button
-            className="material-icons text-danger"
+            className="material-icons text-[#dc3545]"
             onClick={handleEndCall}
           >
             call_end
@@ -251,14 +251,14 @@ const CallModal = () => {
             <>
               {call.video ? (
                 <button
-                  className="material-icons text-success"
+                  className="material-icons text-[#28a745]"
                   onClick={handleAnswer}
                 >
                   videocam
                 </button>
               ) : (
                 <button
-                  className="material-icons text-success"
+                  className="material-icons text-[#28a745]"
                   onClick={handleAnswer}
                 >
                   call
@@ -288,7 +288,7 @@ const CallModal = () => {
         </div>
 
         <button
-          className="material-icons text-danger end_call"
+          className="material-icons text-[#dc3545] end_call"
           onClick={handleEndCall}
         >
           call_end
