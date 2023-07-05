@@ -31,6 +31,7 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -38,6 +39,7 @@ const jobList = () => {
   const { loading, pages, currentPage, setCurrentPage, totalPages } =
     useDataFetching("/jobPost/getAllJob");
 
+  const router = useRouter();
   const dispatch = useAppDispatch();
 
   const [selectedWorkingLocation, setSelectedWorkingLocation] = useState("");

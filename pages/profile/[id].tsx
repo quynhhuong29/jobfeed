@@ -76,6 +76,7 @@ import {
 } from "@/redux/reducers/postReducers";
 import PostCard from "@/components/PostCard";
 import { PostData } from "@/types/Posts";
+import { userInfo } from "os";
 
 const schema = yup.object().shape({
   firstName: yup.string(),
@@ -327,6 +328,7 @@ function Profile() {
     dispatch(getSavedPostsAsync());
   }, [dispatch]);
 
+  console.log(userInfoData?.data?.followers);
   return (
     <LayoutMain>
       <section className="w-full bg-white shadow-[0_3px_10px_0_rgba(49,64,71,.08)] relative py-4">
@@ -430,9 +432,14 @@ function Profile() {
               </div>
 
               <h5 className="mt-6 text-gray-700 font-semibold text-lg capitalize">
-                {`${userInfoData?.data?.firstName || ""} ${
-                  userInfoData?.data?.lastName || ""
-                }`}
+                {userInfoData?.data?.role === "company"
+                  ? userInfoData?.data?.firstName || " "
+                  : userInfoData?.data?.firstName ||
+                    " " + " " + userInfoData?.data?.lastName ||
+                    " "}
+                {userInfoData?.data?.role === "company" && (
+                  <i className="ml-1 fas fa-check-circle text-[#007BFF]"></i>
+                )}
               </h5>
               <p className="text-gray-600 mb-4">Developer</p>
               <div className="flex items-center gap-8 text-gray-600 mb-4">
