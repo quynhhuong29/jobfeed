@@ -328,7 +328,6 @@ function Profile() {
     dispatch(getSavedPostsAsync());
   }, [dispatch]);
 
-  console.log(userInfoData?.data?.followers);
   return (
     <LayoutMain>
       <section className="w-full bg-white shadow-[0_3px_10px_0_rgba(49,64,71,.08)] relative py-4">
@@ -434,9 +433,9 @@ function Profile() {
               <h5 className="mt-6 text-gray-700 font-semibold text-lg capitalize">
                 {userInfoData?.data?.role === "company"
                   ? userInfoData?.data?.firstName || " "
-                  : userInfoData?.data?.firstName ||
-                    " " + " " + userInfoData?.data?.lastName ||
-                    " "}
+                  : userInfoData?.data?.firstName +
+                    " " +
+                    userInfoData?.data?.lastName}
                 {userInfoData?.data?.role === "company" && (
                   <i className="ml-1 fas fa-check-circle text-[#007BFF]"></i>
                 )}
