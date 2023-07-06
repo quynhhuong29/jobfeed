@@ -1,8 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
+  countJobsByIndustry,
   createJob,
   getInfoJob,
   getJobsByCompany,
+  getJobsLatest,
   updateJob,
 } from "../apis/jobApi";
 import { RootState } from "../store";
@@ -41,6 +43,8 @@ const initialState: JobState = {
     _id: "",
   },
   listJobCompany: [],
+  latestJobPosts: [],
+  countJobsIndustry: [],
   error: "",
   isLoading: false,
 };
@@ -189,6 +193,34 @@ export const updateJobAsync = createAsyncThunk(
   }
 );
 
+export const getJobsLatestAsync = createAsyncThunk(
+  "job/getJobsLatest",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await getJobsLatest();
+    } catch (error: any) {
+      if (!error.response) {
+        throw error;
+      }
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const countJobsIndustryAsync = createAsyncThunk(
+  "job/countJobsIndustry",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await countJobsByIndustry();
+    } catch (error: any) {
+      if (!error.response) {
+        throw error;
+      }
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const jobSlice = createSlice({
   name: "job",
   initialState,
@@ -256,10 +288,37 @@ const jobSlice = createSlice({
         state.isLoading = false;
 
         state.error = action.payload?.message ?? "";
+      })
+      .addCase(getJobsLatestAsync.pending, (state) => {
+        state.isLoading = true;
+        state.error = "";
+      })
+      .addCase(getJobsLatestAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.latestJobPosts = action.payload;
+      })
+      .addCase(getJobsLatestAsync.rejected, (state, action: any) => {
+        state.isLoading = false;
+        state.error = action.payload?.message ?? "";
+      })
+      .addCase(countJobsIndustryAsync.pending, (state) => {
+        state.isLoading = true;
+        state.error = "";
+      })
+      .addCase(countJobsIndustryAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.countJobsIndustry = action.payload;
+      })
+      .addCase(countJobsIndustryAsync.rejected, (state, action: any) => {
+        state.isLoading = false;
+        state.error = action.payload?.message ?? "";
       });
   },
 });
 
 export const selectJob = (state: RootState) => state.job;
+export const selectJobsLatest = (state: RootState) => state.job.latestJobPosts;
+export const selectCountsJobIndustry = (state: RootState) =>
+  state.job.countJobsIndustry;
 
 export default jobSlice.reducer;

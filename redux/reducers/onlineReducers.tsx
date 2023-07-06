@@ -19,9 +19,9 @@ const onlineSlice = createSlice({
     },
     setOffline: (state, action) => {
       if (state.online && state.online.length)
-        state.online = state.online?.filter(
-          (user) => user._id !== action.payload
-        );
+        state.online = Array.isArray(state.online)
+          ? state.online?.filter((user) => user._id !== action.payload)
+          : [state.online];
     },
   },
   extraReducers(builder) {},

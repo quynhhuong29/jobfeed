@@ -19,7 +19,15 @@ import {
 import { LayoutMain } from "@/components/layout";
 import { PROVINCE_CITY } from "@/constants/jobPost";
 import withAuth from "@/hocs/withAuth";
-import { selectAuth } from "@/redux/reducers/authReducers";
+import { getListResumes } from "@/redux/apis/resumeAPI";
+import { selectAuth, selectIsLoggedIn } from "@/redux/reducers/authReducers";
+import {
+  countJobsIndustryAsync,
+  getJobsLatestAsync,
+  selectCountsJobIndustry,
+  selectJobsLatest,
+} from "@/redux/reducers/jobReducers";
+import { useAppDispatch } from "@/redux/store";
 import {
   ArrowForwardIcon,
   ChevronRightIcon,
@@ -38,7 +46,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { jobCard } from "../data/homePageData";
 
-const dataCards: DataCardProps[] = [
+let dataCards: DataCardProps[] = [
   {
     icon: <PopupCategoryIcon />,
     title: "IT & Software",
@@ -83,15 +91,46 @@ const dataCards: DataCardProps[] = [
 
 function Home() {
   const router = useRouter();
-  const auth = useSelector(selectAuth);
+  const dispatch = useAppDispatch();
   const [content, setContent] = useState("");
   const [selectedWorkingLocation, setSelectedWorkingLocation] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+  const [listResumes, setListResumes] = useState<any[]>([]);
+
+  const auth = useSelector(selectAuth);
+  const jobsLatest = useSelector(selectJobsLatest);
+  const isAuthenticated = useSelector(selectIsLoggedIn);
+  const countJobsIndustry = useSelector(selectCountsJobIndustry);
 
   useEffect(() => {
     auth?.role === "company"
       ? setContent("candidates")
       : setContent("dream jobs");
   }, [auth?.role]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await getListResumes().then((res) => setListResumes(res));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (isAuthenticated) fetchData();
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    dispatch(getJobsLatestAsync());
+    dispatch(countJobsIndustryAsync());
+  }, [dispatch]);
+
+  const handleSearchJob = () => {
+    router.push({
+      pathname: "/jobList",
+      query: { search: searchValue, location: selectedWorkingLocation },
+    });
+  };
 
   return (
     <LayoutMain>
@@ -131,6 +170,10 @@ function Home() {
                         fontSize: "14px",
                       }}
                       _focusVisible={{ border: "none" }}
+                      value={searchValue || ""}
+                      onChange={(event) => {
+                        setSearchValue(event.target.value);
+                      }}
                     />
                   </InputGroup>
                 </div>
@@ -175,6 +218,7 @@ function Home() {
                     _hover={{
                       backgroundColor: "#028c5d",
                     }}
+                    onClick={handleSearchJob}
                   >
                     Find Job
                   </Button>
@@ -208,14 +252,34 @@ function Home() {
               </p>
             </div>
             <div className="grid grid-cols-4">
-              {dataCards.map((item: DataCardProps, index: number) => (
-                <DataCard
-                  key={index}
-                  icon={item.icon}
-                  title={item.title}
-                  subtitle={item.subtitle}
-                />
-              ))}
+              {countJobsIndustry
+                ?.slice(0, 6)
+                ?.map((item: any, index: number) => {
+                  let icon = <PopupCategoryIcon />;
+                  if (item?.industry_info?.title === "It / Software Jobs") {
+                    icon = <TechnologyIcon />;
+                  }
+                  if (item?.industry_info?.title === "Design") {
+                    icon = <PictureIcon />;
+                  }
+                  if (
+                    item?.industry_info?.title === "Accounting & Finance" ||
+                    item?.industry_info?.title === "Teaching Jobs"
+                  ) {
+                    icon = <PersonIcon />;
+                  }
+                  if (item?.industry_info?.title === "Government Jobs") {
+                    icon = <ValiIcon />;
+                  }
+                  return (
+                    <DataCard
+                      key={index}
+                      icon={icon}
+                      title={item?.industry_info?.title}
+                      subtitle={`${item?.count} Jobs`}
+                    />
+                  );
+                })}
             </div>
             <Button
               rightIcon={<ArrowForwardIcon />}
@@ -231,6 +295,9 @@ function Home() {
               }}
               _hover={{
                 backgroundColor: "#028c5d",
+              }}
+              onClick={() => {
+                router.push("/jobsCategories");
               }}
             >
               Browse All Categories
@@ -250,8 +317,12 @@ function Home() {
                 match you with the right freelancers.
               </p>
             </div>
-            {jobCard?.map((ele: any, index: number) => (
-              <CardHorizontal data={ele} key={index} />
+            {jobsLatest?.map((ele: any, index: number) => (
+              <CardHorizontal
+                data={ele}
+                listResumes={listResumes}
+                key={index}
+              />
             ))}
             <Button
               rightIcon={<ArrowForwardIcon />}

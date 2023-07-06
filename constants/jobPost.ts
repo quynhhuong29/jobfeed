@@ -1,12 +1,21 @@
 export const EMPLOYMENT_TYPE = [
   "Full-time",
   "Part-time",
+  // "Casual",
+  // "Contract",
+  // "Apprenticeship",
+  // "Traineeship",
+  // "Employment on commission",
+  // "Probation",
+
+  "Temporary/Contract",
+  "Remote/Work from home",
+  "Internship",
+  "Freelance",
+  "Fixed-term",
+  "Self-employed",
+  "Direct hire",
   "Casual",
-  "Contract",
-  "Apprenticeship",
-  "Traineeship",
-  "Employment on commission",
-  "Probation",
 ];
 
 export const CAREER_LEVEL = [

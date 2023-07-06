@@ -257,12 +257,7 @@ const Topbar = () => {
                 </MenuButton>
 
                 <MenuList>
-                  <MenuItem
-                    sx={{ padding: "10px 12px", outline: 0 }}
-                    _hover={{ outline: 0 }}
-                    _focus={{ outline: 0 }}
-                    _active={{ outline: 0 }}
-                  >
+                  <MenuItem sx={{ padding: "10px 12px" }}>
                     <Link
                       href={`/profile/${userAuth?._id}`}
                       className="flex items-center gap-2 text-gray-700 text-base font-medium"
@@ -271,12 +266,7 @@ const Topbar = () => {
                       Profile
                     </Link>
                   </MenuItem>
-                  <MenuItem
-                    sx={{ padding: "10px 12px", outline: 0 }}
-                    _hover={{ outline: 0 }}
-                    _focus={{ outline: 0 }}
-                    _active={{ outline: 0 }}
-                  >
+                  <MenuItem sx={{ padding: "10px 12px" }}>
                     <Link
                       href={`/savedJobs/${userAuth?._id}`}
                       className="flex items-center gap-2 text-gray-700 text-base font-medium"
@@ -285,12 +275,7 @@ const Topbar = () => {
                       Saved Jobs
                     </Link>
                   </MenuItem>
-                  <MenuItem
-                    sx={{ padding: "10px 12px", outline: 0 }}
-                    _hover={{ outline: 0 }}
-                    _focus={{ outline: 0 }}
-                    _active={{ outline: 0 }}
-                  >
+                  <MenuItem sx={{ padding: "10px 12px" }}>
                     <Link
                       href="/appliedJobs"
                       className="flex items-center gap-2 text-gray-700 text-base font-medium"
@@ -303,12 +288,7 @@ const Topbar = () => {
                       Applied Jobs
                     </Link>
                   </MenuItem>
-                  <MenuItem
-                    sx={{ padding: "10px 12px", outline: 0 }}
-                    _hover={{ outline: 0 }}
-                    _focus={{ outline: 0 }}
-                    _active={{ outline: 0 }}
-                  >
+                  <MenuItem sx={{ padding: "10px 12px" }}>
                     <Link
                       href={`/manageCV`}
                       className="flex items-center gap-2 text-gray-700 text-base font-medium"
@@ -318,10 +298,7 @@ const Topbar = () => {
                     </Link>
                   </MenuItem>
                   <MenuItem
-                    sx={{ padding: "10px 12px", outline: 0 }}
-                    _hover={{ outline: 0 }}
-                    _focus={{ outline: 0 }}
-                    _active={{ outline: 0 }}
+                    sx={{ padding: "10px 12px" }}
                     className="flex items-center gap-2 text-base font-medium"
                   >
                     <LogoutIcon

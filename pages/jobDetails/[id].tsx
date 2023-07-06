@@ -280,9 +280,23 @@ function jobDetails() {
                 <h5 className="mb-4 text-gray-700 font-bold text-lg">
                   Job Description
                 </h5>
-                <p className="mt-6 mb-4 text-gray-600 text-base">
-                  {job?.infoJob?.job_description}
-                </p>
+                <div className="mt-6 mb-4 text-gray-600 text-base">
+                  {job?.infoJob?.job_description?.split("\n").length > 1
+                    ? job?.infoJob?.job_description
+                        ?.split("\n")
+                        ?.map((ele, index) => (
+                          <div
+                            className="flex items-center gap-2 mt-6 mb-4"
+                            key={index}
+                          >
+                            <p className="w-2 h-2 border border-green-50 rounded-full">
+                              &nbsp;
+                            </p>
+                            <p className=" text-gray-600 text-base">{ele}</p>
+                          </div>
+                        ))
+                    : job?.infoJob?.job_description}
+                </div>
               </div>
               <div className="mt-6">
                 <h5 className="mb-4 text-gray-700 font-bold text-lg">

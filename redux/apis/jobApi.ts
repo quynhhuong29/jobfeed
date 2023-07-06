@@ -107,7 +107,7 @@ async function searchJobs(
   working_location?: string,
   industry?: string
 ): Promise<any> {
-  const  response = await api.get(`/jobPost/searchJobPost`, {
+  const response = await api.get(`/jobPost/searchJobPost`, {
     params: {
       search,
       workingLocation: working_location,
@@ -117,6 +117,14 @@ async function searchJobs(
   return response.data;
 }
 
+async function getJobsLatest(): Promise<any> {
+  return (await api.get("/jobPost/latest")).data;
+}
+
+async function countJobsByIndustry(): Promise<any> {
+  return (await api.get("/jobPost/countJobsByIndustry")).data;
+}
+
 export {
   createJob,
   getInfoJob,
@@ -124,4 +132,6 @@ export {
   deleteJob,
   updateJob,
   searchJobs,
+  getJobsLatest,
+  countJobsByIndustry,
 };

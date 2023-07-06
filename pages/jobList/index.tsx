@@ -40,6 +40,7 @@ const jobList = () => {
     useDataFetching("/jobPost/getAllJob");
 
   const router = useRouter();
+  const { search, location } = router.query;
   const dispatch = useAppDispatch();
 
   const [selectedWorkingLocation, setSelectedWorkingLocation] = useState("");
@@ -81,6 +82,48 @@ const jobList = () => {
 
     if (isAuthenticated) fetchData();
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (router.query.search) {
+          setSearchValue(
+            Array.isArray(router.query.search)
+              ? router.query.search[0].toString()
+              : router.query.search.toString()
+          );
+        }
+        if (router.query.location) {
+          setSelectedWorkingLocation(
+            Array.isArray(router.query.location)
+              ? router.query.location[0].toString()
+              : router.query.location.toString()
+          );
+        }
+
+        const result = await searchJobs(
+          router.query.search
+            ? Array.isArray(router.query.search)
+              ? router.query.search[0].toString()
+              : router.query.search.toString()
+            : "",
+          router.query.location
+            ? Array.isArray(router.query.location)
+              ? router.query.location[0].toString()
+              : router.query.location.toString()
+            : "",
+          ""
+        );
+        if (result) {
+          setDataSearch(result);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tìm kiếm công việc:", error);
+      }
+    };
+
+    fetchData();
+  }, [router.query.search, router.query.location]);
 
   return (
     <LayoutMain>

@@ -1,20 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 import { User } from "@/types/User";
 import {
-  Button,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Spinner,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import FollowButton from "../FollowButton";
 import UserCard from "../UserCard";
-import { getUserInfoById } from "@/redux/apis/userAPI";
-import { cloneDeep } from "lodash";
 
 interface Props {
   isOpen: boolean;

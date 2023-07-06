@@ -26,8 +26,6 @@ const UserCard = ({
   userAuth,
   type,
 }: Props) => {
-  // const { theme } = useSelector(state => state)
-
   const handleCloseAll = () => {
     if (handleClose) handleClose();
     if (setShowFollowers) setShowFollowers(false);
