@@ -34,6 +34,7 @@ const jobsCategories = () => {
                 value={item.count}
                 name={item?.industry_info?.title}
                 key={index}
+                id={item?.industry_info?._id}
               />
             ))}
           </div>
@@ -43,6 +44,7 @@ const jobsCategories = () => {
                 value={item.count}
                 name={item?.industry_info?.title}
                 key={index}
+                id={item?.industry_info?._id}
               />
             ))}
           </div>
@@ -52,6 +54,7 @@ const jobsCategories = () => {
                 value={item.count}
                 name={item?.industry_info?.title}
                 key={index}
+                id={item?.industry_info?._id}
               />
             ))}
           </div>

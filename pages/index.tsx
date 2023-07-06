@@ -253,7 +253,7 @@ function Home() {
             </div>
             <div className="grid grid-cols-4">
               {countJobsIndustry
-                ?.slice(0, 6)
+                ?.slice(0, 8)
                 ?.map((item: any, index: number) => {
                   let icon = <PopupCategoryIcon />;
                   if (item?.industry_info?.title === "It / Software Jobs") {

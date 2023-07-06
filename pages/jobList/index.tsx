@@ -100,6 +100,13 @@ const jobList = () => {
               : router.query.location.toString()
           );
         }
+        if (router.query.industry) {
+          setSelectedIndustry(
+            Array.isArray(router.query.industry)
+              ? router.query.industry[0].toString()
+              : router.query.industry.toString()
+          );
+        }
 
         const result = await searchJobs(
           router.query.search
@@ -112,7 +119,11 @@ const jobList = () => {
               ? router.query.location[0].toString()
               : router.query.location.toString()
             : "",
-          ""
+          router.query.industry
+            ? Array.isArray(router.query.industry)
+              ? router.query.industry[0].toString()
+              : router.query.industry.toString()
+            : ""
         );
         if (result) {
           setDataSearch(result);
@@ -123,7 +134,7 @@ const jobList = () => {
     };
 
     fetchData();
-  }, [router.query.search, router.query.location]);
+  }, [router.query.search, router.query.location, router.query.industry]);
 
   return (
     <LayoutMain>
