@@ -20,6 +20,10 @@ async function unFollowUser(id: string, userInfo: any): Promise<any> {
   return (await api.patch(`/user/${id}/unFollow`, userInfo)).data;
 }
 
+async function followJob(id: string): Promise<any> {
+  return (await api.patch(`/user/${id}/followJob`)).data;
+}
+
 async function suggestionUsers(): Promise<any> {
   return (await api.get("/suggestionsUser")).data;
 }

@@ -108,25 +108,31 @@ const jobList = () => {
           );
         }
 
-        const result = await searchJobs(
+        if (
+          router.query.industry ||
+          router.query.location ||
           router.query.search
-            ? Array.isArray(router.query.search)
-              ? router.query.search[0].toString()
-              : router.query.search.toString()
-            : "",
-          router.query.location
-            ? Array.isArray(router.query.location)
-              ? router.query.location[0].toString()
-              : router.query.location.toString()
-            : "",
-          router.query.industry
-            ? Array.isArray(router.query.industry)
-              ? router.query.industry[0].toString()
-              : router.query.industry.toString()
-            : ""
-        );
-        if (result) {
-          setDataSearch(result);
+        ) {
+          const result = await searchJobs(
+            router.query.search
+              ? Array.isArray(router.query.search)
+                ? router.query.search[0].toString()
+                : router.query.search.toString()
+              : "",
+            router.query.location
+              ? Array.isArray(router.query.location)
+                ? router.query.location[0].toString()
+                : router.query.location.toString()
+              : "",
+            router.query.industry
+              ? Array.isArray(router.query.industry)
+                ? router.query.industry[0].toString()
+                : router.query.industry.toString()
+              : ""
+          );
+          if (result) {
+            setDataSearch(result);
+          }
         }
       } catch (error) {
         console.error("Lỗi khi tìm kiếm công việc:", error);

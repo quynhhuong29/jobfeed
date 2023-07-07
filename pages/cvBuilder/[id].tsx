@@ -254,7 +254,7 @@ function CVBuilder() {
         phone: data.phone || "",
         DOB: data.DOB || "",
         country: data.country || "",
-        language: formLanguage.reduce((ele) => ele),
+        language: formLanguage,
         city: data.city || "",
         workExperience: formExperience,
         skill: formSkill,

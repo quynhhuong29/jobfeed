@@ -22,8 +22,8 @@ async function createJob({
   company_id,
   idUser,
 }: any): Promise<any> {
-  return (
-    await api.post(`jobPost/createJob`, {
+  try {
+    const response = await api.post(`jobPost/createJob`, {
       job_title,
       job_description,
       job_requirement,
@@ -44,8 +44,15 @@ async function createJob({
       contact_phone,
       company_id,
       idUser,
-    })
-  ).data;
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      throw new Error(error.response.data.msg); // Throw an error with the response data
+    } else {
+      throw error; // Throw the original error if there is no response
+    }
+  }
 }
 
 async function getInfoJob(id: string): Promise<any> {

@@ -100,11 +100,12 @@ export const createJobAsync = createAsyncThunk(
         idUser,
       });
       return response;
-    } catch (err: any) {
-      if (!err.response) {
-        throw err;
+    } catch (error: any) {
+      if (error.message) {
+        return rejectWithValue(error.message);
+      } else {
+        return rejectWithValue("Something went wrong. Please try again.");
       }
-      return rejectWithValue(err.response.data);
     }
   }
 );

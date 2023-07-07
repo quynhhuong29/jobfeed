@@ -52,26 +52,42 @@ import {
   PROVINCE_CITY,
 } from "@/constants/jobPost";
 
-type FormData = {
-  jobTitle: string;
-  jobRequirement: string;
-  jobDescription: string;
-  industry: string;
-  workingLocation: string;
-  benefit: string;
-  contactName: string;
-  contactPhone: string;
-  contactAddress: string;
-  contactEmail: string;
-  expiringDate: string;
-  address: string;
-  minSalary: number;
-  maxSalary: number;
-  experienceFrom: number;
-  experienceTo: number;
-  employmentType: string;
-  careerLevel: string;
-};
+const schema = yup.object().shape({
+  jobTitle: yup.string().required("jobTitle is required"),
+  jobRequirement: yup.string(),
+  jobDescription: yup.string(),
+  industry: yup.string(),
+  workingLocation: yup.string(),
+  benefit: yup.string(),
+  contactName: yup.string(),
+  contactPhone: yup.string(),
+  contactAddress: yup.string(),
+  contactEmail: yup.string().email(),
+  expiringDate: yup.string().required(),
+  address: yup.string(),
+  minSalary: yup.number(),
+  maxSalary: yup.number(),
+  isExperience: yup.string(),
+  experienceFrom: yup
+    .number()
+    .transform((value) => (isNaN(value) ? undefined : Number(value)))
+    .when("isExperience", (isExperience, schema) => {
+      if (isExperience.toString() === "Experience")
+        return schema.required("experienceFrom is required");
+      return schema;
+    }),
+  experienceTo: yup
+    .number()
+    .transform((value) => (isNaN(value) ? undefined : Number(value)))
+    .when("isExperience", (isExperience, schema) => {
+      if (isExperience.toString() === "Experience")
+        return schema.required("experienceTo is required");
+      return schema;
+    }),
+  employmentType: yup.string(),
+  careerLevel: yup.string(),
+});
+type FormData = yup.InferType<typeof schema>;
 
 const jobPost = () => {
   const router = useRouter();
@@ -93,8 +109,16 @@ const jobPost = () => {
   const company = useSelector(selectCompany);
   const job = useSelector(selectJob);
 
-  const { handleSubmit, register, setValue, reset } = useForm<FormData>({
+  const {
+    handleSubmit,
+    register,
+    setValue,
+    reset,
+    getValues,
+    formState: { errors },
+  } = useForm<FormData>({
     mode: "onChange",
+    resolver: yupResolver(schema),
   });
 
   let userLocal: string | null = "";
@@ -118,13 +142,6 @@ const jobPost = () => {
     }
   };
 
-  const handleExperienceChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    if (event.target.value === "Experience") setIsExperience(true);
-    else setIsExperience(false);
-  };
-
   const handleSalaryChange = (value: any, name: any) => {
     if (value && name) {
       setSalary((prevSalary) => ({
@@ -146,9 +163,9 @@ const jobPost = () => {
       expiring_date: data.expiringDate,
       benefit: data.benefit,
       experience: {
-        isRequired: isExperience,
-        from: isExperience ? data.experienceFrom : 0,
-        to: isExperience ? data.experienceTo : 0,
+        isRequired: !!(data.isExperience === "Experience"),
+        from: data.isExperience === "Experience" ? data.experienceFrom : 0,
+        to: data.isExperience === "Experience" ? data.experienceTo : 0,
       },
       level: data.careerLevel,
       salary: {
@@ -165,32 +182,40 @@ const jobPost = () => {
     };
 
     try {
-      await dispatch(createJobAsync(request));
-      toast.success("Create a job success!!!");
-      reset((formValues) => ({
-        ...formValues,
-        jobTitle: "",
-        jobRequirement: "",
-        jobDescription: "",
-        industry: "",
-        workingLocation: "",
-        benefit: "",
-        contactName: "",
-        contactPhone: "",
-        contactAddress: "",
-        contactEmail: "",
-        expiringDate: "",
-        address: "",
-        minSalary: 0,
-        maxSalary: 1,
-        experienceFrom: 0,
-        experienceTo: 1,
-        employmentType: "",
-        careerLevel: "",
-      }));
-    } catch (err: any) {
-      if (err.message) toast.error(err.message);
-      else toast.error("Something went wrong. Please try again.");
+      const response: any = await dispatch(createJobAsync(request));
+      if (response.error) {
+        if (response.payload) toast.error(response.payload);
+        else toast.error("Something went wrong. Please try again.");
+      } else {
+        toast.success("Create a job success!!!");
+        reset((formValues) => ({
+          ...formValues,
+          jobTitle: "",
+          jobRequirement: "",
+          jobDescription: "",
+          industry: "",
+          workingLocation: "",
+          benefit: "",
+          contactName: "",
+          contactPhone: "",
+          contactAddress: "",
+          contactEmail: "",
+          expiringDate: "",
+          address: "",
+          minSalary: 0,
+          maxSalary: 1,
+          experienceFrom: 0,
+          experienceTo: 1,
+          employmentType: "",
+          careerLevel: "",
+        }));
+      }
+    } catch (error: any) {
+      if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
     }
   };
 
@@ -215,6 +240,7 @@ const jobPost = () => {
     if (userAuth?.email) setValue("contactEmail", userAuth?.email);
   }, [company?.infoCompany, setValue, userAuth?.email]);
 
+  console.log(getValues("isExperience"));
   return (
     <LayoutMain>
       <section className="w-full bg-[url('/assets/images/page-title.png')] bg-cover bg-[#029663] bg-center border-radius-custom relative pt-14 pb-16">
@@ -262,6 +288,9 @@ const jobPost = () => {
                     }}
                     {...register("jobTitle")}
                   />
+                  {errors.jobTitle && (
+                    <ErrorMessage message={errors.jobTitle.message} />
+                  )}
                 </div>
                 <div className="mb-4">
                   <label
@@ -470,6 +499,9 @@ const jobPost = () => {
                       }}
                       {...register("expiringDate")}
                     />
+                    {errors.expiringDate && (
+                      <ErrorMessage message={errors.expiringDate.message} />
+                    )}
                   </div>
                   <div className="mb-4">
                     <label
@@ -545,60 +577,80 @@ const jobPost = () => {
                   <label className="text-base mb-2 inline-block">
                     Experience
                   </label>
-                  <div className="flex items-center gap-5">
+                  <div className="flex items-start gap-5">
                     <div className="max-w-[200px]">
-                      <Select onChange={handleExperienceChange}>
+                      <Select
+                        {...register("isExperience")}
+                        onChange={(event) => {
+                          setValue("isExperience", event.target.value);
+                          setIsExperience(
+                            !!(event.target.value === "Experience")
+                          );
+                        }}
+                      >
                         <option value={"Experience"}>Experience</option>
                         <option value={"No Experience"}>No Experience</option>
                       </Select>
                     </div>
                     {isExperience && (
-                      <Input
-                        type="number"
-                        placeholder="From"
-                        autoComplete="off"
-                        min={0}
-                        max={100}
-                        sx={{
-                          backgroundColor: "#fff",
-                          border: "1px solid #dbdfe2",
-                          color: "#495057",
-                          padding: "10px",
-                          fontSize: "14px",
-                          fontWeight: "500",
-                          "&:focus-visible": {
-                            outline: "0",
+                      <div className="flex flex-col">
+                        <Input
+                          type="number"
+                          placeholder="From"
+                          autoComplete="off"
+                          min={0}
+                          max={100}
+                          sx={{
+                            backgroundColor: "#fff",
                             border: "1px solid #dbdfe2",
-                            boxShadow: "none",
-                          },
-                          maxWidth: "160px",
-                        }}
-                        {...register("experienceFrom")}
-                      />
+                            color: "#495057",
+                            padding: "10px",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            "&:focus-visible": {
+                              outline: "0",
+                              border: "1px solid #dbdfe2",
+                              boxShadow: "none",
+                            },
+                            maxWidth: "160px",
+                          }}
+                          {...register("experienceFrom")}
+                        />
+                        {errors.experienceFrom && (
+                          <ErrorMessage
+                            message={errors.experienceFrom.message}
+                          />
+                        )}
+                      </div>
                     )}
                     {isExperience && (
-                      <Input
-                        type="number"
-                        placeholder="To"
-                        autoComplete="off"
-                        min={0}
-                        max={100}
-                        sx={{
-                          backgroundColor: "#fff",
-                          border: "1px solid #dbdfe2",
-                          color: "#495057",
-                          padding: "10px",
-                          fontSize: "14px",
-                          fontWeight: "500",
-                          "&:focus-visible": {
-                            outline: "0",
+                      <div className="flex flex-col">
+                        <Input
+                          type="number"
+                          placeholder="To"
+                          autoComplete="off"
+                          min={0}
+                          max={100}
+                          sx={{
+                            backgroundColor: "#fff",
                             border: "1px solid #dbdfe2",
-                            boxShadow: "none",
-                          },
-                          maxWidth: "160px",
-                        }}
-                        {...register("experienceTo")}
-                      />
+                            color: "#495057",
+                            padding: "10px",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            "&:focus-visible": {
+                              outline: "0",
+                              border: "1px solid #dbdfe2",
+                              boxShadow: "none",
+                            },
+                            maxWidth: "160px",
+                          }}
+                          {...register("experienceTo")}
+                        />
+                        {errors.experienceTo && (
+                          <ErrorMessage message={errors.experienceTo.message} />
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
