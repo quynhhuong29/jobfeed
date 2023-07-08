@@ -1,13 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import CustomBadge from "@/components/CustomBadge";
-import FooterAlt from "@/components/FooterAlt";
-import {
-  FacebookIcon,
-  FileIcon,
-  LinkedInIcon,
-  MessengerIcon,
-  TwitterIcon,
-} from "@/components/icons";
+import { MessengerIcon } from "@/components/icons";
 import HomeIcon from "@/components/icons/HomeIcon";
 import { useDebounce } from "@/hooks/debounceHook";
 import {
@@ -30,6 +23,7 @@ import {
   InputGroup,
   InputLeftElement,
   InputRightElement,
+  Select,
   Spinner,
   Tab,
   TabIndicator,
@@ -77,6 +71,16 @@ import {
 import PostCard from "@/components/PostCard";
 import { PostData } from "@/types/Posts";
 import { userInfo } from "os";
+import {
+  getInfoCompanyAsync,
+  selectCompany,
+} from "@/redux/reducers/companyReducers";
+import {
+  getAllIndustryAsync,
+  selectIndustry,
+} from "@/redux/reducers/industryReducers";
+import { Industry } from "@/types/Industry";
+import { updateInfoCompany } from "@/redux/apis/companyAPI";
 
 const schema = yup.object().shape({
   firstName: yup.string(),
@@ -113,8 +117,23 @@ const schemaPassword = yup.object().shape({
     .oneOf([yup.ref("newPassword"), ""], "Passwords must match"),
 });
 
+const schemaCompany = yup.object().shape({
+  industry: yup.string(),
+  website: yup.string(),
+  info: yup.string(),
+  city: yup.string(),
+  address: yup.string(),
+  contactName: yup.string(),
+  companyName: yup.string(),
+  email: yup.string().email("Email is invalid"),
+  phone: yup.string(),
+  size: yup.string(),
+  taxCode: yup.number(),
+});
+
 type FormData = yup.InferType<typeof schema>;
 type FormDataPassword = yup.InferType<typeof schemaPassword>;
+type FormDataCompany = yup.InferType<typeof schemaCompany>;
 
 const url = "https://api.cloudinary.com/v1_1/davidchoi15052000/image/upload";
 
@@ -126,6 +145,7 @@ function Profile() {
   const [searchValue, setSearchValue] = useState<any>();
   const [open, setOpen] = useState(false);
   const [avatar, setAvatar] = useState<Blob | MediaSource>();
+  const [logo, setLogo] = useState<Blob | MediaSource>();
   const [errorAvatar, setErrorAvatar] = useState<string>("");
   const [userData, setUserData] = useState<User>();
   const [userAuth, setUserAuth] = useState<User>();
@@ -139,6 +159,8 @@ function Profile() {
   const loadingAuth = useSelector(selectAuth)?.isLoading;
   const savedPosts = useSelector(selectSavedPosts);
   const loadingSavedPosts = useSelector(selectLoadingPost);
+  const companyInfo = useSelector(selectCompany)?.infoCompany;
+  const industry = useSelector(selectIndustry);
 
   const modalRef = useRef<any>(null);
   const {
@@ -159,6 +181,16 @@ function Profile() {
   } = useForm<FormDataPassword>({
     mode: "onChange",
     resolver: yupResolver(schemaPassword),
+  });
+
+  const {
+    handleSubmit: handleSubmitCompany,
+    register: registerCompany,
+    formState: { errors: errorsCompany },
+    setValue: setValueCompany,
+  } = useForm<FormDataCompany>({
+    mode: "onChange",
+    resolver: yupResolver(schemaCompany),
   });
 
   let userLocal: string | null = "";
@@ -232,6 +264,48 @@ function Profile() {
     }
   };
 
+  const handleUpdateCompanyInfo = async (data: any) => {
+    setIsLoading(true);
+    if (!companyInfo) return;
+
+    let dataRequest = companyInfo;
+    let img: any = [];
+    if (logo) {
+      img = await imageUpload([logo]);
+    }
+
+    if (data) {
+      dataRequest = {
+        ...companyInfo,
+        companyName: data.companyName,
+        email: data.email,
+        info: data.info,
+        address: data.address,
+        city: data.city,
+        logo: img[0]?.url || companyInfo.logo,
+        phone: data.phone,
+        website: data.website,
+        taxCode: data.taxCode,
+        companySize: data.companySize,
+        industry: data.industry,
+      };
+    }
+
+    try {
+      const response = await updateInfoCompany(dataRequest);
+      dispatch(getInfoCompanyAsync(userInfoData?.data?._id));
+      toast.success("Update information success!");
+      setIsLoading(false);
+    } catch (err: any) {
+      if (err?.response?.data?.msg) {
+        toast.error(err?.response?.data?.msg);
+      } else {
+        toast.error("Something went wrong! Please try again");
+      }
+      setIsLoading(false);
+    }
+  };
+
   const handleChangePassword = async (data: any) => {
     if (data) {
       try {
@@ -265,6 +339,18 @@ function Profile() {
     setAvatar(file);
   };
 
+  const handleChangeLogo = (e: any) => {
+    const file = e.target.files[0];
+
+    const err = checkImage(file);
+    if (err) {
+      setErrorAvatar(err);
+      return;
+    }
+    setErrorAvatar("");
+    setLogo(file);
+  };
+
   const handleModalFollower = (type: "followers" | "following") => {
     onOpen();
     if (type === "followers") {
@@ -272,30 +358,6 @@ function Profile() {
     } else {
       setTypeModalFollow("following");
     }
-  };
-
-  const handleFileUpload = async (event: any) => {
-    // const file = event.target?.files[0];
-    const { files } = event.target as HTMLInputElement;
-
-    const file = files?.length ? files[0] : null;
-
-    if (!file) return;
-    const formData = new FormData();
-
-    formData.append("file", file);
-    formData.append("upload_preset", "ml_default");
-
-    fetch(url, {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        return response.text();
-      })
-      .then((data) => {
-        console.log(data);
-      });
   };
 
   useEffect(() => {
@@ -325,8 +387,31 @@ function Profile() {
   }, [userInfoData, setValue, onClose]);
 
   useEffect(() => {
+    dispatch(getAllIndustryAsync());
     dispatch(getSavedPostsAsync());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (userInfoData?.data?.role === "company" && userInfoData?.data?._id) {
+      dispatch(getInfoCompanyAsync(userInfoData?.data?._id));
+    }
+  }, [dispatch, userInfoData?.data?.role, userInfoData?.data?._id]);
+
+  useEffect(() => {
+    if (companyInfo) {
+      setValueCompany("companyName", companyInfo?.companyName);
+      setValueCompany("address", companyInfo?.address);
+      setValueCompany("city", companyInfo?.city);
+      setValueCompany("contactName", companyInfo?.contactName);
+      setValueCompany("industry", companyInfo?.industry);
+      setValueCompany("info", companyInfo?.info);
+      setValueCompany("website", companyInfo?.website);
+      setValueCompany("email", companyInfo?.email);
+      setValueCompany("phone", companyInfo?.phone);
+      setValueCompany("size", companyInfo?.size);
+      setValueCompany("taxCode", Number(companyInfo?.taxCode));
+    }
+  }, [companyInfo, setValueCompany]);
 
   return (
     <LayoutMain>
@@ -425,7 +510,11 @@ function Profile() {
                   <Avatar
                     size="lg"
                     name={userInfoData?.data?.firstName}
-                    src={userInfoData?.data?.avatar}
+                    src={
+                      userInfoData?.data?.role !== "company"
+                        ? userInfoData?.data?.avatar
+                        : companyInfo?.logo
+                    }
                   />
                 </WrapItem>
               </div>
@@ -475,7 +564,7 @@ function Profile() {
                 <FollowButton user={userAuth} id={userInfoData.data._id} />
               )}
             </div>
-            <div className="border-b border-gray-300 pb-4 mt-4">
+            {/* <div className="border-b border-gray-300 pb-4 mt-4">
               <h5 className="mb-4 text-gray-700 font-bold text-base">
                 Documents
               </h5>
@@ -495,7 +584,7 @@ function Profile() {
                   <DownloadIcon />
                 </Button>
               </div>
-            </div>
+            </div> */}
             <div className="mt-4">
               <h5 className="mb-4 text-gray-700 font-bold text-base">
                 Contacts
@@ -513,7 +602,9 @@ function Profile() {
                   Phone Number
                 </p>
                 <span className="break-words text-gray-600 text-[15px]">
-                  {userInfoData?.data?.mobile}
+                  {userInfoData?.data?.role === "company"
+                    ? companyInfo?.phone
+                    : userInfoData?.data?.mobile}
                 </span>
               </div>
               <div className="flex items-center py-2">
@@ -521,7 +612,9 @@ function Profile() {
                   Location
                 </p>
                 <span className="break-words text-gray-600 text-[15px]">
-                  {userInfoData?.data?.address}
+                  {userInfoData?.data?.role === "company"
+                    ? companyInfo?.city
+                    : userInfoData?.data?.address}
                 </span>
               </div>
             </div>
@@ -551,198 +644,272 @@ function Profile() {
                     About
                   </h5>
                   <p className="mt-6 mb-4 text-gray-600 text-base">
-                    {userInfoData?.data?.introduction}
+                    {userInfoData?.data?.role === "company"
+                      ? companyInfo?.info
+                      : userInfoData?.data?.introduction}
                   </p>
 
-                  <div className="mt-4">
-                    <h5 className="text-lg text-gray-700 mb-2 font-bold">
-                      Education
-                    </h5>
-                    <div className="candidate-content relative mt-4 flex gap-7">
-                      <WrapItem>
-                        <Avatar
-                          name="B"
-                          src=""
-                          size="sm"
-                          backgroundColor="rgba(2,175,116,.15)"
-                          color="#02af74"
-                        />
-                      </WrapItem>
-                      <div>
-                        <h6 className="text-base text-gray-700 mb-1 font-semibold">
-                          BCA - Bachelor of Computer Applications
-                        </h6>
-                        <p className="text-[15px] text-gray-600 mb-2">
-                          International University - (2004 - 2010)
-                        </p>
-                        <p className="text-[15px] text-gray-600 mb-4">
-                          There are many variations of passages of available,
-                          but the majority alteration in some form. As a highly
-                          skilled and successfull product development and design
-                          specialist with more than 4 Years of My experience.
-                        </p>
+                  {userInfoData?.data?.role !== "company" ? (
+                    <>
+                      <div className="mt-4">
+                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                          Education
+                        </h5>
+                        <div className="candidate-content relative mt-4 flex gap-7">
+                          <WrapItem>
+                            <Avatar
+                              name="B"
+                              src=""
+                              size="sm"
+                              backgroundColor="rgba(2,175,116,.15)"
+                              color="#02af74"
+                            />
+                          </WrapItem>
+                          <div>
+                            <h6 className="text-base text-gray-700 mb-1 font-semibold">
+                              BCA - Bachelor of Computer Applications
+                            </h6>
+                            <p className="text-[15px] text-gray-600 mb-2">
+                              International University - (2004 - 2010)
+                            </p>
+                            <p className="text-[15px] text-gray-600 mb-4">
+                              There are many variations of passages of
+                              available, but the majority alteration in some
+                              form. As a highly skilled and successfull product
+                              development and design specialist with more than 4
+                              Years of My experience.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="candidate-content relative mt-4 flex gap-7">
+                          <WrapItem>
+                            <Avatar
+                              name="B"
+                              src=""
+                              size="sm"
+                              backgroundColor="rgba(2,175,116,.15)"
+                              color="#02af74"
+                            />
+                          </WrapItem>
+                          <div>
+                            <h6 className="text-base text-gray-700 mb-1 font-semibold">
+                              BCA - Bachelor of Computer Applications
+                            </h6>
+                            <p className="text-[15px] text-gray-600 mb-2">
+                              International University - (2004 - 2010)
+                            </p>
+                            <p className="text-[15px] text-gray-600 mb-4">
+                              There are many variations of passages of
+                              available, but the majority alteration in some
+                              form. As a highly skilled and successfull product
+                              development and design specialist with more than 4
+                              Years of My experience.
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="candidate-content relative mt-4 flex gap-7">
-                      <WrapItem>
-                        <Avatar
-                          name="B"
-                          src=""
-                          size="sm"
-                          backgroundColor="rgba(2,175,116,.15)"
-                          color="#02af74"
-                        />
-                      </WrapItem>
-                      <div>
-                        <h6 className="text-base text-gray-700 mb-1 font-semibold">
-                          BCA - Bachelor of Computer Applications
-                        </h6>
-                        <p className="text-[15px] text-gray-600 mb-2">
-                          International University - (2004 - 2010)
-                        </p>
-                        <p className="text-[15px] text-gray-600 mb-4">
-                          There are many variations of passages of available,
-                          but the majority alteration in some form. As a highly
-                          skilled and successfull product development and design
-                          specialist with more than 4 Years of My experience.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="mt-4">
-                    <h5 className="text-lg text-gray-700 mb-2 font-bold">
-                      Experiences
-                    </h5>
-                    <div className="candidate-content relative mt-4 flex gap-7">
-                      <WrapItem>
-                        <Avatar
-                          name="B"
-                          src=""
-                          size="sm"
-                          backgroundColor="rgba(2,175,116,.15)"
-                          color="#02af74"
-                        />
-                      </WrapItem>
-                      <div>
-                        <h6 className="text-base text-gray-700 mb-1 font-semibold">
-                          BCA - Bachelor of Computer Applications
-                        </h6>
-                        <p className="text-[15px] text-gray-600 mb-2">
-                          International University - (2004 - 2010)
-                        </p>
-                        <p className="text-[15px] text-gray-600 mb-4">
-                          There are many variations of passages of available,
-                          but the majority alteration in some form. As a highly
-                          skilled and successfull product development and design
-                          specialist with more than 4 Years of My experience.
-                        </p>
+                      <div className="mt-4">
+                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                          Experiences
+                        </h5>
+                        <div className="candidate-content relative mt-4 flex gap-7">
+                          <WrapItem>
+                            <Avatar
+                              name="B"
+                              src=""
+                              size="sm"
+                              backgroundColor="rgba(2,175,116,.15)"
+                              color="#02af74"
+                            />
+                          </WrapItem>
+                          <div>
+                            <h6 className="text-base text-gray-700 mb-1 font-semibold">
+                              BCA - Bachelor of Computer Applications
+                            </h6>
+                            <p className="text-[15px] text-gray-600 mb-2">
+                              International University - (2004 - 2010)
+                            </p>
+                            <p className="text-[15px] text-gray-600 mb-4">
+                              There are many variations of passages of
+                              available, but the majority alteration in some
+                              form. As a highly skilled and successfull product
+                              development and design specialist with more than 4
+                              Years of My experience.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="candidate-content relative mt-4 flex gap-7">
+                          <WrapItem>
+                            <Avatar
+                              name="B"
+                              src=""
+                              size="sm"
+                              backgroundColor="rgba(2,175,116,.15)"
+                              color="#02af74"
+                            />
+                          </WrapItem>
+                          <div>
+                            <h6 className="text-base text-gray-700 mb-1 font-semibold">
+                              BCA - Bachelor of Computer Applications
+                            </h6>
+                            <p className="text-[15px] text-gray-600 mb-2">
+                              International University - (2004 - 2010)
+                            </p>
+                            <p className="text-[15px] text-gray-600 mb-4">
+                              There are many variations of passages of
+                              available, but the majority alteration in some
+                              form. As a highly skilled and successfull product
+                              development and design specialist with more than 4
+                              Years of My experience.
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="candidate-content relative mt-4 flex gap-7">
-                      <WrapItem>
-                        <Avatar
-                          name="B"
-                          src=""
-                          size="sm"
-                          backgroundColor="rgba(2,175,116,.15)"
-                          color="#02af74"
-                        />
-                      </WrapItem>
-                      <div>
-                        <h6 className="text-base text-gray-700 mb-1 font-semibold">
-                          BCA - Bachelor of Computer Applications
-                        </h6>
-                        <p className="text-[15px] text-gray-600 mb-2">
-                          International University - (2004 - 2010)
-                        </p>
-                        <p className="text-[15px] text-gray-600 mb-4">
-                          There are many variations of passages of available,
-                          but the majority alteration in some form. As a highly
-                          skilled and successfull product development and design
-                          specialist with more than 4 Years of My experience.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="mt-4">
-                    <h5 className="text-lg text-gray-700 mb-2 font-bold">
-                      Skill
-                    </h5>
-                    <div className="flex items-center gap-1">
-                      <CustomBadge
-                        bgColor="rgba(31,134,239,.15)"
-                        color="#1f86ef"
-                        className="mt-2"
-                      >
-                        Cloud Management
-                      </CustomBadge>
-                      <CustomBadge
-                        bgColor="rgba(31,134,239,.15)"
-                        color="#1f86ef"
-                        className="mt-2"
-                      >
-                        Responsive Design
-                      </CustomBadge>
-                      <CustomBadge
-                        bgColor="rgba(31,134,239,.15)"
-                        color="#1f86ef"
-                        className="mt-2"
-                      >
-                        Network Architecture
-                      </CustomBadge>
-                      <CustomBadge
-                        bgColor="rgba(31,134,239,.15)"
-                        color="#1f86ef"
-                        className="mt-2"
-                      >
-                        PHP
-                      </CustomBadge>
-                      <CustomBadge
-                        bgColor="rgba(31,134,239,.15)"
-                        color="#1f86ef"
-                        className="mt-2"
-                      >
-                        Bootstrap
-                      </CustomBadge>
-                      <CustomBadge
-                        bgColor="rgba(31,134,239,.15)"
-                        color="#1f86ef"
-                        className="mt-2"
-                      >
-                        UI & UX Designer
-                      </CustomBadge>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <h5 className="text-lg text-gray-700 mb-2 font-bold">
-                      Spoken languages
-                    </h5>
-                    <div className="flex items-center gap-1">
-                      <CustomBadge
-                        bgColor="rgba(4,133,101,.15)"
-                        color="#048565"
-                        className="mt-2"
-                      >
-                        English
-                      </CustomBadge>
-                      <CustomBadge
-                        bgColor="rgba(4,133,101,.15)"
-                        color="#048565"
-                        className="mt-2"
-                      >
-                        German
-                      </CustomBadge>
-                      <CustomBadge
-                        bgColor="rgba(4,133,101,.15)"
-                        color="#048565"
-                        className="mt-2"
-                      >
-                        French
-                      </CustomBadge>
-                    </div>
-                  </div>
+                      <div className="mt-4">
+                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                          Skill
+                        </h5>
+                        <div className="flex items-center gap-1">
+                          <CustomBadge
+                            bgColor="rgba(31,134,239,.15)"
+                            color="#1f86ef"
+                            className="mt-2"
+                          >
+                            Cloud Management
+                          </CustomBadge>
+                          <CustomBadge
+                            bgColor="rgba(31,134,239,.15)"
+                            color="#1f86ef"
+                            className="mt-2"
+                          >
+                            Responsive Design
+                          </CustomBadge>
+                          <CustomBadge
+                            bgColor="rgba(31,134,239,.15)"
+                            color="#1f86ef"
+                            className="mt-2"
+                          >
+                            Network Architecture
+                          </CustomBadge>
+                          <CustomBadge
+                            bgColor="rgba(31,134,239,.15)"
+                            color="#1f86ef"
+                            className="mt-2"
+                          >
+                            PHP
+                          </CustomBadge>
+                          <CustomBadge
+                            bgColor="rgba(31,134,239,.15)"
+                            color="#1f86ef"
+                            className="mt-2"
+                          >
+                            Bootstrap
+                          </CustomBadge>
+                          <CustomBadge
+                            bgColor="rgba(31,134,239,.15)"
+                            color="#1f86ef"
+                            className="mt-2"
+                          >
+                            UI & UX Designer
+                          </CustomBadge>
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                          Spoken languages
+                        </h5>
+                        <div className="flex items-center gap-1">
+                          <CustomBadge
+                            bgColor="rgba(4,133,101,.15)"
+                            color="#048565"
+                            className="mt-2"
+                          >
+                            English
+                          </CustomBadge>
+                          <CustomBadge
+                            bgColor="rgba(4,133,101,.15)"
+                            color="#048565"
+                            className="mt-2"
+                          >
+                            German
+                          </CustomBadge>
+                          <CustomBadge
+                            bgColor="rgba(4,133,101,.15)"
+                            color="#048565"
+                            className="mt-2"
+                          >
+                            French
+                          </CustomBadge>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="mt-4">
+                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                          Information
+                        </h5>
+                        <div className="grid grid-cols-2">
+                          {companyInfo?.companyName && (
+                            <div className="flex items-center py-2 gap-1">
+                              <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
+                                Company name:
+                              </p>
+                              <span className="break-words text-gray-600 text-base overflow-hidden">
+                                {companyInfo?.companyName}
+                              </span>
+                            </div>
+                          )}
+                          {companyInfo?.size && (
+                            <div className="flex items-center py-2 gap-1">
+                              <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
+                                Employees:
+                              </p>
+                              <span className="break-words text-gray-600 text-base overflow-hidden">
+                                {companyInfo?.size}
+                              </span>
+                            </div>
+                          )}
+                          {companyInfo?.address && (
+                            <div className="flex items-center py-2 gap-1">
+                              <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
+                                Address:
+                              </p>
+                              <span className="break-words text-gray-600 text-base overflow-hidden">
+                                {companyInfo?.address}
+                              </span>
+                            </div>
+                          )}
+                          {companyInfo?.city && (
+                            <div className="flex items-center py-2 gap-1">
+                              <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
+                                City:
+                              </p>
+                              <span className="break-words text-gray-600 text-base overflow-hidden">
+                                {companyInfo?.city}
+                              </span>
+                            </div>
+                          )}
+                          {companyInfo?.website && (
+                            <div className="flex items-center py-2 gap-1">
+                              <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
+                                Website:
+                              </p>
+                              <a
+                                href={companyInfo?.website}
+                                target="_blank"
+                                className="break-words text-gray-600 text-base overflow-hidden"
+                              >
+                                {companyInfo?.website}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </TabPanel>
                 <TabPanel>
                   <NewsFeed isPostDetails userId={userData?._id || ""} />
@@ -778,78 +945,83 @@ function Profile() {
                   </div>
                 </TabPanel>
                 <TabPanel>
-                  <form
-                    className="mt-4"
-                    onSubmit={handleSubmit(handleUpdateUserInfo)}
-                  >
-                    <div className="mt-4">
-                      <h5 className="text-lg text-gray-700 mb-2 font-bold">
-                        My Account
-                      </h5>
-                      <div className="flex justify-center mb-4">
-                        <div>
-                          <div className="relative">
-                            <div className="border border-gray-300 bg-white rounded-full p-1">
-                              <WrapItem>
-                                <Avatar
-                                  size="2xl"
-                                  name={userData?.firstName}
-                                  src={
-                                    avatar
-                                      ? URL.createObjectURL(avatar)
-                                      : userData?.avatar
-                                  }
-                                />
-                              </WrapItem>
+                  {userInfoData?.data?.role === "company" ? (
+                    <form
+                      className="mt-4"
+                      onSubmit={handleSubmitCompany(handleUpdateCompanyInfo)}
+                    >
+                      <div className="mt-4">
+                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                          My Account
+                        </h5>
+                        <div className="flex justify-center mb-4">
+                          <div>
+                            <div className="relative">
+                              <div className="border border-gray-300 bg-white rounded-full p-1">
+                                <WrapItem>
+                                  <Avatar
+                                    size="2xl"
+                                    name={companyInfo?.companyName}
+                                    src={
+                                      logo
+                                        ? URL.createObjectURL(logo)
+                                        : companyInfo?.logo
+                                    }
+                                  />
+                                </WrapItem>
+                              </div>
+                              <div className="absolute cursor-pointer bg-white rounded-full right-1 z-10 bottom-4 flex items-center justify-center">
+                                <Button
+                                  variant="unstyled"
+                                  size="sm"
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <EditIcon />
+                                  <Input
+                                    type="file"
+                                    height="100%"
+                                    width="100%"
+                                    position="absolute"
+                                    top="0"
+                                    left="0"
+                                    opacity="0"
+                                    aria-hidden="true"
+                                    accept="image/*"
+                                    cursor="pointer"
+                                    onChange={handleChangeLogo}
+                                  />
+                                </Button>
+                              </div>
                             </div>
-                            <div className="absolute cursor-pointer bg-white rounded-full right-1 z-10 bottom-4 flex items-center justify-center">
-                              <Button
-                                variant="unstyled"
-                                size="sm"
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  cursor: "pointer",
-                                }}
-                              >
-                                <EditIcon />
-                                <Input
-                                  type="file"
-                                  height="100%"
-                                  width="100%"
-                                  position="absolute"
-                                  top="0"
-                                  left="0"
-                                  opacity="0"
-                                  aria-hidden="true"
-                                  accept="image/*"
-                                  cursor="pointer"
-                                  onChange={handleChangeAvatar}
-                                />
-                              </Button>
-                            </div>
+                            {errorAvatar && (
+                              <ErrorMessage message={errorAvatar} />
+                            )}
                           </div>
-                          {errorAvatar && (
-                            <ErrorMessage message={errorAvatar} />
-                          )}
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
+                      <div className="mt-4">
+                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                          Information
+                        </h5>
+                        <div className="mb-4">
                           <label
-                            htmlFor="firstName"
+                            htmlFor="info"
                             className="text-[15px] mb-2 inline-block"
                           >
-                            First Name
+                            Introduce Company
                           </label>
-                          <Input
-                            type="text"
-                            id="firstName"
-                            defaultValue={"firstName"}
-                            placeholder="Enter your first name"
+                          <Textarea
+                            id="info"
+                            placeholder="Say something..."
                             autoComplete="off"
+                            defaultValue={"info"}
                             sx={{
+                              minHeight: "125px",
                               backgroundColor: "#fff",
                               border: "1px solid #dbdfe2",
                               color: "#495057",
@@ -862,231 +1034,627 @@ function Profile() {
                                 boxShadow: "none",
                               },
                             }}
-                            {...register("firstName")}
+                            {...registerCompany("info")}
                           />
-                          {errors.firstName && (
-                            <ErrorMessage message={errors.firstName.message} />
-                          )}
                         </div>
-                        <div>
-                          <label
-                            htmlFor="lastName"
-                            className="text-[15px] mb-2 inline-block"
-                          >
-                            Last Name
-                          </label>
-                          <Input
-                            type="text"
-                            id="lastName"
-                            defaultValue={"lastName"}
-                            placeholder="Enter your last name"
-                            autoComplete="off"
-                            sx={{
-                              backgroundColor: "#fff",
-                              border: "1px solid #dbdfe2",
-                              color: "#495057",
-                              padding: "10px",
-                              fontSize: "14px",
-                              fontWeight: "500",
-                              "&:focus-visible": {
-                                outline: "0",
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label
+                              htmlFor="companyName"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              Company name
+                            </label>
+                            <Input
+                              type="text"
+                              id="companyName"
+                              defaultValue={"companyName"}
+                              placeholder="Enter your company name"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
                                 border: "1px solid #dbdfe2",
-                                boxShadow: "none",
-                              },
-                            }}
-                            {...register("lastName")}
-                          />
-                          {errors.lastName && (
-                            <ErrorMessage message={errors.lastName.message} />
-                          )}
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="email"
-                            className="text-[15px] mb-2 inline-block"
-                          >
-                            Email
-                          </label>
-                          <Input
-                            type="email"
-                            id="email"
-                            defaultValue={"email"}
-                            placeholder="Enter your email"
-                            autoComplete="off"
-                            sx={{
-                              backgroundColor: "#fff",
-                              border: "1px solid #dbdfe2",
-                              color: "#495057",
-                              padding: "10px",
-                              fontSize: "14px",
-                              fontWeight: "500",
-                              "&:focus-visible": {
-                                outline: "0",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...registerCompany("companyName")}
+                            />
+                            {errorsCompany.companyName && (
+                              <ErrorMessage
+                                message={errorsCompany.companyName.message}
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="size"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              Employees
+                            </label>
+                            <Input
+                              type="text"
+                              id="size"
+                              defaultValue={"size"}
+                              placeholder="Enter your employees"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
                                 border: "1px solid #dbdfe2",
-                                boxShadow: "none",
-                              },
-                            }}
-                            {...register("email")}
-                          />
-                          {errors.email && (
-                            <ErrorMessage message={errors.email.message} />
-                          )}
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="mobile"
-                            className="text-[15px] mb-2 inline-block"
-                          >
-                            Phone number
-                          </label>
-                          <Input
-                            type="number"
-                            id="mobile"
-                            defaultValue={"mobile"}
-                            placeholder="Enter your mobile"
-                            autoComplete="off"
-                            sx={{
-                              backgroundColor: "#fff",
-                              border: "1px solid #dbdfe2",
-                              color: "#495057",
-                              padding: "10px",
-                              fontSize: "14px",
-                              fontWeight: "500",
-                              "&:focus-visible": {
-                                outline: "0",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...registerCompany("size")}
+                            />
+                            {errorsCompany.size && (
+                              <ErrorMessage
+                                message={errorsCompany.size.message}
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="email"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              Email
+                            </label>
+                            <Input
+                              type="email"
+                              id="email"
+                              defaultValue={"email"}
+                              placeholder="Enter your email"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
                                 border: "1px solid #dbdfe2",
-                                boxShadow: "none",
-                              },
-                            }}
-                            {...register("mobile")}
-                          />
-                          {errors.mobile && (
-                            <ErrorMessage message={errors.mobile.message} />
-                          )}
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...registerCompany("email")}
+                            />
+                            {errorsCompany.email && (
+                              <ErrorMessage
+                                message={errorsCompany.email.message}
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="phone"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              Phone number
+                            </label>
+                            <Input
+                              type="number"
+                              id="phone"
+                              defaultValue={"phone"}
+                              placeholder="Enter your phone"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
+                                border: "1px solid #dbdfe2",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...registerCompany("phone")}
+                            />
+                            {errorsCompany.phone && (
+                              <ErrorMessage
+                                message={errorsCompany.phone.message}
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="website"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              Website
+                            </label>
+                            <Input
+                              type="url"
+                              id="website"
+                              defaultValue={"website"}
+                              placeholder="Enter your website"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
+                                border: "1px solid #dbdfe2",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...registerCompany("website")}
+                            />
+                            {errorsCompany.website && (
+                              <ErrorMessage
+                                message={errorsCompany.website.message}
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="industry"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              Industry
+                            </label>
+                            <Input
+                              type="text"
+                              id="industry"
+                              defaultValue={"industry"}
+                              placeholder="Enter your industry"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
+                                border: "1px solid #dbdfe2",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...registerCompany("industry")}
+                            />
+                            {errorsCompany.industry && (
+                              <ErrorMessage
+                                message={errorsCompany.industry.message}
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="address"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              Address
+                            </label>
+                            <Input
+                              type="text"
+                              id="address"
+                              defaultValue={"address"}
+                              placeholder="Enter your address"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
+                                border: "1px solid #dbdfe2",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...registerCompany("address")}
+                            />
+                            {errorsCompany.address && (
+                              <ErrorMessage
+                                message={errorsCompany.address.message}
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="city"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              City
+                            </label>
+                            <Input
+                              type="text"
+                              id="city"
+                              defaultValue={"city"}
+                              placeholder="Enter your city"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
+                                border: "1px solid #dbdfe2",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...registerCompany("city")}
+                            />
+                            {errorsCompany.city && (
+                              <ErrorMessage
+                                message={errorsCompany.city.message}
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="taxCode"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              Tax Code
+                            </label>
+                            <Input
+                              type="number"
+                              id="taxCode"
+                              defaultValue={"taxCode"}
+                              placeholder="Enter your taxCode"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
+                                border: "1px solid #dbdfe2",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...registerCompany("taxCode")}
+                            />
+                            {errorsCompany.taxCode && (
+                              <ErrorMessage
+                                message={errorsCompany.taxCode.message}
+                              />
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <div className="flex flex-col mt-4">
-                        <label
-                          htmlFor="mobile"
-                          className="text-[15px] mb-2 inline-block"
+                      <div className="flex justify-end mt-4">
+                        <Button
+                          type="submit"
+                          colorScheme={"green"}
+                          isLoading={isLoading}
                         >
-                          Attachments CV
-                        </label>
-                        <input
-                          type="file"
-                          onChange={(event: any) => {
-                            handleFileUpload(event);
-                          }}
-                        />
+                          Update
+                        </Button>
                       </div>
-                    </div>
-                    <div className="mt-4">
-                      <h5 className="text-lg text-gray-700 mb-2 font-bold">
-                        Profile
-                      </h5>
-                      <div className="mb-4">
-                        <label
-                          htmlFor="introduce"
-                          className="text-[15px] mb-2 inline-block"
+                    </form>
+                  ) : (
+                    <form
+                      className="mt-4"
+                      onSubmit={handleSubmit(handleUpdateUserInfo)}
+                    >
+                      <div className="mt-4">
+                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                          My Account
+                        </h5>
+                        <div className="flex justify-center mb-4">
+                          <div>
+                            <div className="relative">
+                              <div className="border border-gray-300 bg-white rounded-full p-1">
+                                <WrapItem>
+                                  <Avatar
+                                    size="2xl"
+                                    name={userData?.firstName}
+                                    src={
+                                      avatar
+                                        ? URL.createObjectURL(avatar)
+                                        : userData?.avatar
+                                    }
+                                  />
+                                </WrapItem>
+                              </div>
+                              <div className="absolute cursor-pointer bg-white rounded-full right-1 z-10 bottom-4 flex items-center justify-center">
+                                <Button
+                                  variant="unstyled"
+                                  size="sm"
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <EditIcon />
+                                  <Input
+                                    type="file"
+                                    height="100%"
+                                    width="100%"
+                                    position="absolute"
+                                    top="0"
+                                    left="0"
+                                    opacity="0"
+                                    aria-hidden="true"
+                                    accept="image/*"
+                                    cursor="pointer"
+                                    onChange={handleChangeAvatar}
+                                  />
+                                </Button>
+                              </div>
+                            </div>
+                            {errorAvatar && (
+                              <ErrorMessage message={errorAvatar} />
+                            )}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label
+                              htmlFor="firstName"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              First Name
+                            </label>
+                            <Input
+                              type="text"
+                              id="firstName"
+                              defaultValue={"firstName"}
+                              placeholder="Enter your first name"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
+                                border: "1px solid #dbdfe2",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...register("firstName")}
+                            />
+                            {errors.firstName && (
+                              <ErrorMessage
+                                message={errors.firstName.message}
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="lastName"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              Last Name
+                            </label>
+                            <Input
+                              type="text"
+                              id="lastName"
+                              defaultValue={"lastName"}
+                              placeholder="Enter your last name"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
+                                border: "1px solid #dbdfe2",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...register("lastName")}
+                            />
+                            {errors.lastName && (
+                              <ErrorMessage message={errors.lastName.message} />
+                            )}
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="email"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              Email
+                            </label>
+                            <Input
+                              type="email"
+                              id="email"
+                              defaultValue={"email"}
+                              placeholder="Enter your email"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
+                                border: "1px solid #dbdfe2",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...register("email")}
+                            />
+                            {errors.email && (
+                              <ErrorMessage message={errors.email.message} />
+                            )}
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="mobile"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              Phone number
+                            </label>
+                            <Input
+                              type="number"
+                              id="mobile"
+                              defaultValue={"mobile"}
+                              placeholder="Enter your mobile"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
+                                border: "1px solid #dbdfe2",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...register("mobile")}
+                            />
+                            {errors.mobile && (
+                              <ErrorMessage message={errors.mobile.message} />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                          Profile
+                        </h5>
+                        <div className="mb-4">
+                          <label
+                            htmlFor="introduce"
+                            className="text-[15px] mb-2 inline-block"
+                          >
+                            Introduce Yourself
+                          </label>
+                          <Textarea
+                            id="introduce"
+                            placeholder="Say something..."
+                            autoComplete="off"
+                            defaultValue={"introduce"}
+                            sx={{
+                              minHeight: "125px",
+                              backgroundColor: "#fff",
+                              border: "1px solid #dbdfe2",
+                              color: "#495057",
+                              padding: "10px",
+                              fontSize: "14px",
+                              fontWeight: "500",
+                              "&:focus-visible": {
+                                outline: "0",
+                                border: "1px solid #dbdfe2",
+                                boxShadow: "none",
+                              },
+                            }}
+                            {...register("introduce")}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label
+                              htmlFor="languages"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              Languages
+                            </label>
+                            <Input
+                              type="text"
+                              id="languages"
+                              defaultValue={"languages"}
+                              placeholder="Enter your languages"
+                              autoComplete="off"
+                              sx={{
+                                backgroundColor: "#fff",
+                                border: "1px solid #dbdfe2",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...register("languages")}
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="location"
+                              className="text-[15px] mb-2 inline-block"
+                            >
+                              Location
+                            </label>
+                            <Input
+                              type="text"
+                              id="location"
+                              placeholder="Enter your location"
+                              autoComplete="off"
+                              defaultValue={"location"}
+                              sx={{
+                                backgroundColor: "#fff",
+                                border: "1px solid #dbdfe2",
+                                color: "#495057",
+                                padding: "10px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                "&:focus-visible": {
+                                  outline: "0",
+                                  border: "1px solid #dbdfe2",
+                                  boxShadow: "none",
+                                },
+                              }}
+                              {...register("location")}
+                            />
+                            {errors.location && (
+                              <ErrorMessage message={errors.location.message} />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-end mt-4">
+                        <Button
+                          type="submit"
+                          colorScheme={"green"}
+                          isLoading={isLoading}
                         >
-                          Introduce Yourself
-                        </label>
-                        <Textarea
-                          id="introduce"
-                          placeholder="Say something..."
-                          autoComplete="off"
-                          defaultValue={"introduce"}
-                          sx={{
-                            minHeight: "125px",
-                            backgroundColor: "#fff",
-                            border: "1px solid #dbdfe2",
-                            color: "#495057",
-                            padding: "10px",
-                            fontSize: "14px",
-                            fontWeight: "500",
-                            "&:focus-visible": {
-                              outline: "0",
-                              border: "1px solid #dbdfe2",
-                              boxShadow: "none",
-                            },
-                          }}
-                          {...register("introduce")}
-                        />
+                          Update
+                        </Button>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label
-                            htmlFor="languages"
-                            className="text-[15px] mb-2 inline-block"
-                          >
-                            Languages
-                          </label>
-                          <Input
-                            type="text"
-                            id="languages"
-                            defaultValue={"languages"}
-                            placeholder="Enter your languages"
-                            autoComplete="off"
-                            sx={{
-                              backgroundColor: "#fff",
-                              border: "1px solid #dbdfe2",
-                              color: "#495057",
-                              padding: "10px",
-                              fontSize: "14px",
-                              fontWeight: "500",
-                              "&:focus-visible": {
-                                outline: "0",
-                                border: "1px solid #dbdfe2",
-                                boxShadow: "none",
-                              },
-                            }}
-                            {...register("languages")}
-                          />
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="location"
-                            className="text-[15px] mb-2 inline-block"
-                          >
-                            Location
-                          </label>
-                          <Input
-                            type="text"
-                            id="location"
-                            placeholder="Enter your location"
-                            autoComplete="off"
-                            defaultValue={"location"}
-                            sx={{
-                              backgroundColor: "#fff",
-                              border: "1px solid #dbdfe2",
-                              color: "#495057",
-                              padding: "10px",
-                              fontSize: "14px",
-                              fontWeight: "500",
-                              "&:focus-visible": {
-                                outline: "0",
-                                border: "1px solid #dbdfe2",
-                                boxShadow: "none",
-                              },
-                            }}
-                            {...register("location")}
-                          />
-                          {errors.location && (
-                            <ErrorMessage message={errors.location.message} />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex justify-end mt-4">
-                      <Button
-                        type="submit"
-                        colorScheme={"green"}
-                        isLoading={isLoading}
-                      >
-                        Update
-                      </Button>
-                    </div>
-                  </form>
+                    </form>
+                  )}
                 </TabPanel>
                 <TabPanel>
                   <form
