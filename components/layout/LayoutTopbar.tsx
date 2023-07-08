@@ -172,7 +172,8 @@ const Topbar = () => {
                 variant="ghost"
               />
               <span className="absolute -top-[2px] -right-[2px] bg-red-100 text-xs text-white w-6 h-6 flex items-center justify-center rounded-full border-[2px] border-white">
-                {notifies?.data?.length || 0}
+                {notifies?.data?.filter((notify: any) => !notify.isRead)
+                  ?.length || 0}
               </span>
             </div>
             <MenuList

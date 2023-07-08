@@ -17,6 +17,9 @@ import { toast } from "react-toastify";
 import { unSubmitted } from "@/redux/apis/submitCvAPI";
 import { useAppDispatch } from "@/redux/store";
 import { updateSubmittedAction } from "@/redux/reducers/submitReducers";
+import { removeNotifyAsync } from "@/redux/reducers/notifyReducers";
+import { useSelector } from "react-redux";
+import { selectSocket } from "@/redux/reducers/socketReducers";
 
 interface Props {
   data: any;
@@ -26,12 +29,23 @@ const SubmittedCard = ({ data }: Props) => {
   const { onOpen, isOpen, onClose } = useDisclosure();
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
+
+  const socket = useSelector(selectSocket);
   const handleDeleteSubmitted = async () => {
     setIsLoading(true);
 
     try {
       await unSubmitted(data?.jobInfo?._id);
       dispatch(updateSubmittedAction(data?.jobInfo?._id));
+
+      const msg = {
+        id: data?.jobInfo?._id,
+        text: "submitted resume.",
+        content: data?.jobInfo?.job_title,
+        recipients: data?.jobInfo?.company_info?.idCompany,
+        url: `/manageJob/listCV/${data?.jobInfo?._id}`,
+      };
+      dispatch(removeNotifyAsync({ msg, socket }));
       onClose();
     } catch (error: any) {
       toast.error(error.message);

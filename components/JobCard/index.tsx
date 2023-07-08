@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
+import { createNotify } from "@/redux/apis/notifyAPI";
 import { submitCV } from "@/redux/apis/submitCvAPI";
-import { selectIsLoggedIn } from "@/redux/reducers/authReducers";
+import { selectAuth, selectIsLoggedIn } from "@/redux/reducers/authReducers";
+import { selectSocket } from "@/redux/reducers/socketReducers";
 import { formatMoney } from "@/utils/number.util";
 import { filePdfUpload } from "@/utils/upload.util";
 import { ArrowRightIcon } from "@chakra-ui/icons";
@@ -57,6 +59,8 @@ function JobCard({ data, listResumes }: Props) {
   });
 
   const isAuthenticated = useSelector(selectIsLoggedIn);
+  const socket = useSelector(selectSocket);
+  const auth = useSelector(selectAuth);
 
   const handleSendResume = async (dataForm: FormData) => {
     let file: any = "";
@@ -78,7 +82,7 @@ function JobCard({ data, listResumes }: Props) {
     }
 
     try {
-      await submitCV({
+      const response = await submitCV({
         idJob: data._id,
         idCompany: data.company_info._id,
         resumeFile: file,
@@ -87,6 +91,27 @@ function JobCard({ data, listResumes }: Props) {
         email: dataForm.email || "",
         documentFile: documentFile,
       });
+      if (response.newSubmit && data.company_info.idCompany && data.job_title) {
+        const msg = {
+          id: response.newSubmit.idJob,
+          text: "submitted resume.",
+          content: data.job_title,
+          recipients: data.company_info.idCompany,
+          url: `/manageJob/listCV/${response.newSubmit.idJob}`,
+        };
+        const res = await createNotify(msg);
+        socket?.emit("createNotify", {
+          ...res.notify,
+          user: {
+            username: auth.data.user.username,
+            avatar: auth.data.user.avatar,
+            fullName:
+              auth.role !== "company"
+                ? auth.data.user.firstName + " " + auth.data.user.lastName
+                : auth.data.user.lastName,
+          },
+        });
+      }
 
       toast.success("Submit CV successfully!");
       onClose();
@@ -117,7 +142,7 @@ function JobCard({ data, listResumes }: Props) {
       documentFile = await filePdfUpload(document);
     }
     try {
-      await submitCV({
+      const response = await submitCV({
         idJob: data._id,
         idCompany: data.company_info._id,
         dataCV: resume,
@@ -125,7 +150,27 @@ function JobCard({ data, listResumes }: Props) {
         idCV: valueResume,
         documentFile: documentFile,
       });
-
+      if (response.newSubmit && data.company_info.idCompany && data.job_title) {
+        const msg = {
+          id: response.newSubmit.idJob,
+          text: "submitted resume.",
+          content: data.job_title,
+          recipients: data.company_info.idCompany,
+          url: `/manageJob/listCV/${response.newSubmit.idJob}`,
+        };
+        const res = await createNotify(msg);
+        socket?.emit("createNotify", {
+          ...res.notify,
+          user: {
+            username: auth.data.user.username,
+            avatar: auth.data.user.avatar,
+            fullName:
+              auth.role !== "company"
+                ? auth.data.user.firstName + " " + auth.data.user.lastName
+                : auth.data.user.lastName,
+          },
+        });
+      }
       toast.success("Submit CV successfully!");
       onClose();
       setIsLoadingCV(false);

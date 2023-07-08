@@ -24,8 +24,7 @@ const NotifyComponent = ({ notify }: Props) => {
   };
   return (
     <Link
-      // href={notify?.url ? notify?.url : ""}
-      href={""}
+      href={notify?.url ? notify?.url : ""}
       onClick={() => handleIsRead(notify)}
       className="bg-white flex flex-col gap-3 px-3 py-2 cursor-pointer hover:bg-gray-300"
     >
@@ -34,9 +33,11 @@ const NotifyComponent = ({ notify }: Props) => {
         <div className="flex flex-col">
           <p className="font-semibold text-gray-900">{`${
             notify?.user?.fullName ? notify?.user?.fullName : ""
-          } ${notify?.user?.lastName ? notify?.user?.lastName : ""} ${
-            notify?.text
-          }`}</p>
+          } ${
+            notify?.user?.firstName || notify?.user?.lastName
+              ? notify?.user?.firstName + " " + notify?.user?.lastName
+              : ""
+          } ${notify?.text}`}</p>
           {notify?.content && <small>{notify?.content.slice(0, 20)}...</small>}
         </div>
       </div>

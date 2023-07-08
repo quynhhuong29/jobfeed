@@ -16,6 +16,7 @@ import {
   UserIcon,
 } from "@/components/icons";
 import { LayoutMain } from "@/components/layout";
+import { createNotify } from "@/redux/apis/notifyAPI";
 import { getListResumes } from "@/redux/apis/resumeAPI";
 import { submitCV } from "@/redux/apis/submitCvAPI";
 import { selectAuth, selectIsLoggedIn } from "@/redux/reducers/authReducers";
@@ -28,6 +29,7 @@ import {
   getListResumesAsync,
   selectResumes,
 } from "@/redux/reducers/resumeReducers";
+import { selectSocket } from "@/redux/reducers/socketReducers";
 import { useAppDispatch } from "@/redux/store";
 import { formatMoney } from "@/utils/number.util";
 import { filePdfUpload } from "@/utils/upload.util";
@@ -83,6 +85,7 @@ function jobDetails() {
   const job = useSelector(selectJob);
   const auth = useSelector(selectAuth);
   const isAuthenticated = useSelector(selectIsLoggedIn);
+  const socket = useSelector(selectSocket);
 
   const { handleSubmit, register } = useForm<FormData>({
     mode: "onChange",
@@ -107,7 +110,7 @@ function jobDetails() {
     }
 
     try {
-      await submitCV({
+      const response = await submitCV({
         idJob: job.infoJob._id,
         idCompany: job.infoJob.company_info._id,
         resumeFile: file,
@@ -116,7 +119,31 @@ function jobDetails() {
         email: data.email || "",
         documentFile: documentFile,
       });
-
+      if (
+        response.newSubmit &&
+        job.infoJob.company_info.idCompany &&
+        job?.infoJob?.job_title
+      ) {
+        const msg = {
+          id: response.newSubmit.idJob,
+          text: "submitted resume.",
+          content: job?.infoJob?.job_title,
+          recipients: job.infoJob.company_info.idCompany,
+          url: `/manageJob/listCV/${response.newSubmit.idJob}`,
+        };
+        const res = await createNotify(msg);
+        socket?.emit("createNotify", {
+          ...res.notify,
+          user: {
+            username: auth.data.user.username,
+            avatar: auth.data.user.avatar,
+            fullName:
+              auth.role !== "company"
+                ? auth.data.user.firstName + " " + auth.data.user.lastName
+                : auth.data.user.lastName,
+          },
+        });
+      }
       toast.success("Submit CV successfully!");
       onClose();
       setIsLoading(false);
@@ -146,7 +173,7 @@ function jobDetails() {
     }
 
     try {
-      await submitCV({
+      const response = await submitCV({
         idJob: job.infoJob._id,
         idCompany: job.infoJob.company_info._id,
         dataCV: resume,
@@ -154,7 +181,31 @@ function jobDetails() {
         idCV: valueResume,
         documentFile: documentFile,
       });
-
+      if (
+        response.newSubmit &&
+        job?.infoJob?.company_info?.idCompany &&
+        job?.infoJob?.job_title
+      ) {
+        const msg = {
+          id: response.newSubmit.idJob,
+          text: "submitted resume.",
+          content: job?.infoJob?.job_title,
+          recipients: job.infoJob.company_info.idCompany,
+          url: `/manageJob/listCV/${response.newSubmit.idJob}`,
+        };
+        const res = await createNotify(msg);
+        socket?.emit("createNotify", {
+          ...res.notify,
+          user: {
+            username: auth.data.user.username,
+            avatar: auth.data.user.avatar,
+            fullName:
+              auth.role !== "company"
+                ? auth.data.user.firstName + " " + auth.data.user.lastName
+                : auth.data.user.lastName,
+          },
+        });
+      }
       toast.success("Submit CV successfully!");
       onClose();
       setIsLoadingCV(false);
