@@ -279,7 +279,7 @@ const PostCard = ({ post, userAuth }: Props) => {
           </MenuList>
         </Menu>
       </div>
-      <div className="px-6 mb-3 text-base text-gray-800">
+      <pre className="px-6 mb-3 text-base text-gray-800 whitespace-break-spaces">
         {expanded || post?.content.length <= MAX_CONTENT_LENGTH
           ? post?.content
           : post?.content.slice(0, MAX_CONTENT_LENGTH) + "..."}
@@ -288,7 +288,7 @@ const PostCard = ({ post, userAuth }: Props) => {
             {expanded ? "Hide" : "Read More"}
           </button>
         )}
-      </div>
+      </pre>
       <div className="mb-2">
         <Slider {...settings}>
           {post?.images?.map((image, index) => (
