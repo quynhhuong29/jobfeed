@@ -52,6 +52,8 @@ import Link from "next/link";
 import { STATUS } from "@/constants/CV";
 import { updateStatusCV } from "@/redux/apis/submitCvAPI";
 import { toast } from "react-toastify";
+import { createNotify } from "@/redux/apis/notifyAPI";
+import { selectSocket } from "@/redux/reducers/socketReducers";
 
 const manageJob = () => {
   const dispatch = useAppDispatch();
@@ -62,6 +64,7 @@ const manageJob = () => {
   const auth = useSelector(selectAuth);
   const job = useSelector(selectJob);
   const resumes = useSelector(selectResumes);
+  const socket = useSelector(selectSocket);
 
   const [userAuth, setUserAuth] = useState<User>();
   const [cvUpload, setCvUpload] = useState<any>();
@@ -82,6 +85,27 @@ const manageJob = () => {
         idJob: id!.toString(),
       });
 
+      // // Notify
+      const msg = {
+        id: id,
+        text: "updated status for your CV",
+        recipients: cvUpload?.idCandidate,
+        url: `/appliedJobs`,
+        content: cvUpload?.status,
+      };
+
+      const res = await createNotify(msg);
+      socket?.emit("createNotify", {
+        ...res.notify,
+        user: {
+          username: auth.data.user.username,
+          avatar: auth.data.user.avatar,
+          fullName:
+            auth.role !== "company"
+              ? auth.data.user.firstName + " " + auth.data.user.lastName
+              : auth.data.user.lastName,
+        },
+      });
       onClose();
       toast.success("Update status successfully");
       await dispatch(getListCVByJobAsync(id!.toString()));

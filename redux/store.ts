@@ -16,6 +16,7 @@ import peerReducers from "./reducers/peerReducers";
 import callReducers from "./reducers/callReducers";
 import onlineReducers from "./reducers/onlineReducers";
 import messageReducers from "./reducers/messageReducers";
+import adminReducers from "./reducers/adminReducers";
 
 const reducer = combineReducers({
   auth: authReducers,
@@ -34,6 +35,7 @@ const reducer = combineReducers({
   message: messageReducers,
   notify: notifyReducers,
   submit: submitReducers,
+  admin: adminReducers,
 });
 
 // Create a separate function to configure and return the store

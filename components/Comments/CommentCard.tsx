@@ -157,10 +157,10 @@ const CommentCard = ({
   };
 
   useEffect(() => {
-    if (comment.likes.find((like) => like._id === userAuth?._id)) {
+    if (comment?.likes?.find((like) => like._id === userAuth?._id)) {
       setIsLike(true);
     }
-    setNumberLikes(comment.likes.length);
+    setNumberLikes(comment.likes?.length);
   }, [comment.likes, userAuth?._id]);
 
   return (

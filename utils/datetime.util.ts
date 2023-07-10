@@ -7,4 +7,13 @@ const formatDate = (dateString: string): string => {
   return `${year}-${month}-${day}`;
 };
 
-export { formatDate };
+const formatDateGetMonthYear = (dateString: string): string => {
+  const date = new Date(dateString);
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "short",
+  };
+  return new Intl.DateTimeFormat("en-US", options).format(date);
+};
+
+export { formatDate, formatDateGetMonthYear };

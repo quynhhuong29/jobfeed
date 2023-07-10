@@ -58,7 +58,8 @@ const Login = ({}: ILogin) => {
         setLocalStorageContent("user", JSON.stringify(response.user));
 
         dispatch(setRole(response.user?.role || "candidate"));
-        router.push("/");
+        if (response.user?.role === "admin") router.push("/admin/users");
+        else router.push("/");
       }
     } catch (err: any) {
       setLocalStorageContent("isAuthenticated", "false");

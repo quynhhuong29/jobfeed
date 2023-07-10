@@ -40,3 +40,7 @@ export { default as MailIcon } from "./MailIcon";
 export { default as GlobalIcon } from "./GlobalIcon";
 export { default as BellAlarmIcon } from "./BellAlarmIcon";
 export { default as DotIcon } from "./DotIcon";
+
+// Admin
+export { default as DashboardIcon } from "./DashboardIcon";
+export { default as IconPerson } from "./IconPerson";

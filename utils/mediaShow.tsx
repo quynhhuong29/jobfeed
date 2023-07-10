@@ -1,14 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
 
 export const imageShow = (src: string) => {
-    return(
-        <img src={src} alt="images" className="img-thumbnail"
-        />
-    )
-}
+  return <img src={src} alt="images" className="img-thumbnail" />;
+};
 
 export const videoShow = (src: string) => {
-    return(
-        <video controls src={src} className="img-thumbnail"
-        />
-    )
-}
+  return <video controls src={src} className="img-thumbnail" />;
+};

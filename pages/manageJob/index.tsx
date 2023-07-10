@@ -495,8 +495,9 @@ const manageJob = () => {
                                     icon={<ViewIcon />}
                                     variant="ghost"
                                     onClick={() => {
-                                      setIdDelete(item._id);
-                                      onOpen();
+                                      router.push(
+                                        `/manageJob/listCV/${item._id}`
+                                      );
                                     }}
                                   />
                                 </Td>

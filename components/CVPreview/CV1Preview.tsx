@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { formatDateGetMonthYear } from "@/utils/datetime.util";
 
 function CV1Preview({
   dataResume,
@@ -139,12 +140,6 @@ function CV1Preview({
                     {dataResume?.linkedin && dataResume?.linkedin}
                   </p>
                 </div>
-                <div className="flex flex-col mb-2">
-                  <h3 className="text-sm text-[#1F130F] font-semibold">
-                    Portfolio
-                  </h3>
-                  <p className="text-sm text-[#1F130F]">arthurbates.com</p>
-                </div>
               </div>
               <div className="flex flex-col mt-2">
                 <div className="pb-2 border-b border-[rgb(226, 226, 226)] mb-3">
@@ -162,7 +157,8 @@ function CV1Preview({
                         &nbsp;
                       </div>
                       <p className="text-sm text-[#1F130F]">
-                        {ele.skill}: {ele.description}
+                        {ele.skill}
+                        {ele.description ? `: ${ele.description}` : ""}
                       </p>
                     </div>
                   ))}
@@ -205,51 +201,74 @@ function CV1Preview({
                   {dataResume?.overview && dataResume?.overview}
                 </p>
               </div>
-              <div className="flex flex-col mt-5">
-                <div className="pb-2 border-b border-[rgb(226, 226, 226)] mb-6">
-                  <h2 className="text-[#6faa8a] text-2xl font-semibold">
-                    Experience
-                  </h2>
-                </div>
-                {dataResume?.workExperience &&
-                  (Array.isArray(dataResume?.workExperience)
-                    ? dataResume?.workExperience
-                    : [dataResume?.workExperience]
-                  )?.map((ele: any, index: number) => (
-                    <div className="mb-3" key={index}>
-                      <div className="flex justify-between">
-                        <h3 className="text-sm text-[#1F130F] font-semibold">
-                          {ele?.position}
-                        </h3>
-                        <p className="text-[#6faa8a] font-medium text-sm">
-                          {new Date(ele?.startDate).toDateString()} -{" "}
-                          {ele?.endDate === "Present"
-                            ? "Present"
-                            : new Date(ele?.endDate).toDateString()}
-                        </p>
-                      </div>
-                      <p className="text-sm text-[#6faa8a] mb-2">
-                        {ele?.company}
-                      </p>
-                      <div className="flex items-center gap-2 mb-1 ml-2">
-                        <div className="w-1 min-w-1 h-1 rounded-full bg-[#1F130F]">
-                          &nbsp;
+              {dataResume?.workExperience && (
+                <div className="flex flex-col mt-5">
+                  <div className="pb-2 border-b border-[rgb(226, 226, 226)] mb-6">
+                    <h2 className="text-[#6faa8a] text-2xl font-semibold">
+                      Experience
+                    </h2>
+                  </div>
+                  {dataResume?.workExperience &&
+                    (Array.isArray(dataResume?.workExperience)
+                      ? dataResume?.workExperience
+                      : [dataResume?.workExperience]
+                    )?.map((ele: any, index: number) => (
+                      <div className="mb-3" key={index}>
+                        <div className="flex justify-between">
+                          <h3 className="text-sm text-[#1F130F] font-semibold">
+                            {ele?.position}
+                          </h3>
+                          <p className="text-[#6faa8a] font-medium text-sm">
+                            {formatDateGetMonthYear(
+                              new Date(ele?.startDate).toDateString()
+                            )}{" "}
+                            -{" "}
+                            {ele?.endDate === "Present"
+                              ? "Present"
+                              : formatDateGetMonthYear(
+                                  new Date(ele?.endDate).toDateString()
+                                )}
+                          </p>
                         </div>
-                        <p className="text-sm text-[#1F130F]">
-                          {ele?.description}
+                        <p className="text-sm text-[#6faa8a] mb-2">
+                          {ele?.company}
                         </p>
+                        {ele?.description?.split("\n").length > 1 ? (
+                          ele?.description
+                            ?.split("\n")
+                            ?.map((des: string, index: number) => (
+                              <div
+                                className="flex items-center gap-2 mb-1 ml-2"
+                                key={index}
+                              >
+                                <div className="w-1 min-w-1 h-1 rounded-full bg-[#1F130F]">
+                                  &nbsp;
+                                </div>
+                                <p className="text-sm text-[#1F130F]">{des}</p>
+                              </div>
+                            ))
+                        ) : (
+                          <div className="flex items-center gap-2 mb-1 ml-2">
+                            <div className="w-1 min-w-1 h-1 rounded-full bg-[#1F130F]">
+                              &nbsp;
+                            </div>
+                            <p className="text-sm text-[#1F130F]">
+                              {ele?.description}
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
-              </div>
-              <div className="flex flex-col mt-5">
-                <div className="pb-2 border-b border-[rgb(226, 226, 226)] mb-6">
-                  <h2 className="text-[#6faa8a] text-2xl font-semibold">
-                    Education
-                  </h2>
+                    ))}
                 </div>
-                {dataResume?.education &&
-                  (Array.isArray(dataResume?.education)
+              )}
+              {dataResume?.education && (
+                <div className="flex flex-col mt-5">
+                  <div className="pb-2 border-b border-[rgb(226, 226, 226)] mb-6">
+                    <h2 className="text-[#6faa8a] text-2xl font-semibold">
+                      Education
+                    </h2>
+                  </div>
+                  {(Array.isArray(dataResume?.education)
                     ? dataResume?.education
                     : [dataResume?.education]
                   )?.map((ele: any, index: number) => (
@@ -259,26 +278,36 @@ function CV1Preview({
                           {ele?.school}
                         </h3>
                         <p className="text-[#6faa8a] font-medium text-sm">
-                          {new Date(ele?.startDate).toDateString()} -{" "}
+                          {formatDateGetMonthYear(
+                            new Date(ele?.startDate).toDateString()
+                          )}{" "}
+                          -{" "}
                           {ele?.endDate === "Present"
                             ? "Present"
-                            : new Date(ele?.endDate).toDateString()}
+                            : formatDateGetMonthYear(
+                                new Date(ele?.endDate).toDateString()
+                              )}
                         </p>
                       </div>
-                      <p className="text-sm text-[#1F130F]">
+                      <pre className="text-sm text-[#1F130F] whitespace-pre-line">
                         {ele?.description}
-                      </p>
+                      </pre>
                     </div>
                   ))}
-              </div>
-              <div className="flex flex-col">
-                <div className="pb-2 border-b border-[rgb(226, 226, 226)] mb-3">
-                  <h2 className="text-[#6faa8a] text-2xl font-semibold">
-                    Hobbies
-                  </h2>
                 </div>
-                <p className="text-sm text-[#1F130F]">{dataResume?.hobbies}</p>
-              </div>
+              )}
+              {dataResume?.hobbies && (
+                <div className="flex flex-col">
+                  <div className="pb-2 border-b border-[rgb(226, 226, 226)] mb-3">
+                    <h2 className="text-[#6faa8a] text-2xl font-semibold">
+                      Hobbies
+                    </h2>
+                  </div>
+                  <p className="text-sm text-[#1F130F]">
+                    {dataResume?.hobbies}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
