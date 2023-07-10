@@ -19,13 +19,15 @@ import { selectSocket } from "@/redux/reducers/socketReducers";
 import { selectPeer } from "@/redux/reducers/peerReducers";
 import { setCall } from "@/redux/reducers/callReducers";
 import { toast } from "react-toastify";
+import { Spinner } from "@chakra-ui/react";
+import { createNotify } from "@/redux/apis/notifyAPI";
 
 const RightSide = () => {
-  // const { auth, message, theme, socket, peer } = useSelector(state => state)
   const auth = useSelector(selectAuth)?.data;
   const message = useSelector(selectMessage);
   const socket = useSelector(selectSocket);
   const peer = useSelector(selectPeer);
+  const role = useSelector(selectAuth)?.role;
 
   const dispatch = useAppDispatch();
 
@@ -84,8 +86,9 @@ const RightSide = () => {
       return newMedia.push(file);
     });
 
-    // if(err) dispatch({ type: GLOBALTYPES.ALERT, payload: {error: err} })
-    toast.error(err);
+    if (err) {
+      toast.error(err);
+    }
     setMedia([...media, ...newMedia]);
   };
 
@@ -115,6 +118,28 @@ const RightSide = () => {
 
     setLoadMedia(false);
     await dispatch(addMessageAsync({ msg, auth, socket }));
+
+    // Notify
+    const msgNotify = {
+      id: id,
+      text: "sended a message for you",
+      recipients: id,
+      url: `/message/${auth.user._id}`,
+      content: text,
+    };
+
+    const res = await createNotify(msgNotify);
+    socket?.emit("createNotify", {
+      ...res.notify,
+      user: {
+        username: auth.user.username,
+        avatar: auth.user.avatar,
+        fullName:
+          role !== "company"
+            ? auth.user.firstName + " " + auth.user.lastName
+            : auth.user.lastName,
+      },
+    });
     if (refDisplay.current) {
       refDisplay.current.scrollIntoView({ behavior: "smooth", block: "end" });
     }
@@ -270,7 +295,15 @@ const RightSide = () => {
 
           {loadMedia && (
             <div className="chat_row you_message">
-              <img src={""} alt="loading" />
+              <div className="flex items-center justify-center">
+                <Spinner
+                  thickness="4px"
+                  speed="0.65s"
+                  emptyColor="gray.200"
+                  color="green"
+                  size="xl"
+                />
+              </div>
             </div>
           )}
         </div>

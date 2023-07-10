@@ -90,7 +90,6 @@ const LeftSide = () => {
   // Check User Online - Offline
   useEffect(() => {
     if (message.firstLoad) {
-      // dispatch({type: MESS_TYPES.CHECK_ONLINE_OFFLINE, payload: online})
       dispatch(checkOnlineOffline(online));
     }
   }, [online, message.firstLoad, dispatch]);

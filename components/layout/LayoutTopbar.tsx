@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { deleteAllNotifies, isReadNotify } from "@/redux/apis/notifyAPI";
-import { selectIsLoggedIn } from "@/redux/reducers/authReducers";
+import { selectAuth, selectIsLoggedIn } from "@/redux/reducers/authReducers";
 import {
   deleteAllNotifiesAction,
   isReadNotifyAction,
@@ -104,6 +104,7 @@ const Topbar = () => {
 
   // const userAuth = JSON.parse(localStorage.getItem("user")!);
   const notifies = useSelector(selectNotify);
+  const auth = useSelector(selectAuth);
 
   let userLocal: string | null = "";
   if (typeof window !== "undefined") {
@@ -267,37 +268,43 @@ const Topbar = () => {
                       Profile
                     </Link>
                   </MenuItem>
-                  <MenuItem sx={{ padding: "10px 12px" }}>
-                    <Link
-                      href={`/savedJobs/${userAuth?._id}`}
-                      className="flex items-center gap-2 text-gray-700 text-base font-medium"
-                    >
-                      <HeartIcon width="20px" height="20px" fill="#323232" />
-                      Saved Jobs
-                    </Link>
-                  </MenuItem>
-                  <MenuItem sx={{ padding: "10px 12px" }}>
-                    <Link
-                      href="/appliedJobs"
-                      className="flex items-center gap-2 text-gray-700 text-base font-medium"
-                    >
-                      <BriefcaseIcon
-                        width="20px"
-                        height="20px"
-                        fill="#323232"
-                      />
-                      Applied Jobs
-                    </Link>
-                  </MenuItem>
-                  <MenuItem sx={{ padding: "10px 12px" }}>
-                    <Link
-                      href={`/manageCV`}
-                      className="flex items-center gap-2 text-gray-700 text-base font-medium"
-                    >
-                      <ManageIcon width="20px" height="20px" fill="#323232" />
-                      Manage CV
-                    </Link>
-                  </MenuItem>
+                  {userAuth?.role === "candidate" && (
+                    <MenuItem sx={{ padding: "10px 12px" }}>
+                      <Link
+                        href={`/savedJobs/${userAuth?._id}`}
+                        className="flex items-center gap-2 text-gray-700 text-base font-medium"
+                      >
+                        <HeartIcon width="20px" height="20px" fill="#323232" />
+                        Saved Jobs
+                      </Link>
+                    </MenuItem>
+                  )}
+                  {userAuth?.role === "candidate" && (
+                    <MenuItem sx={{ padding: "10px 12px" }}>
+                      <Link
+                        href="/appliedJobs"
+                        className="flex items-center gap-2 text-gray-700 text-base font-medium"
+                      >
+                        <BriefcaseIcon
+                          width="20px"
+                          height="20px"
+                          fill="#323232"
+                        />
+                        Applied Jobs
+                      </Link>
+                    </MenuItem>
+                  )}
+                  {userAuth?.role === "candidate" && (
+                    <MenuItem sx={{ padding: "10px 12px" }}>
+                      <Link
+                        href={`/manageCV`}
+                        className="flex items-center gap-2 text-gray-700 text-base font-medium"
+                      >
+                        <ManageIcon width="20px" height="20px" fill="#323232" />
+                        Manage CV
+                      </Link>
+                    </MenuItem>
+                  )}
                   <MenuItem
                     sx={{ padding: "10px 12px" }}
                     className="flex items-center gap-2 text-base font-medium"

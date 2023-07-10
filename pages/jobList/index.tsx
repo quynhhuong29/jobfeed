@@ -206,11 +206,12 @@ const jobList = () => {
                 setSelectedIndustry(event.target.value);
               }}
             >
-              {industry?.data?.map((ele: Industry) => (
-                <option key={ele._id} value={ele._id}>
-                  {ele.title}
-                </option>
-              ))}
+              {industry?.data &&
+                industry?.data?.map((ele: Industry) => (
+                  <option key={ele._id} value={ele._id}>
+                    {ele.title}
+                  </option>
+                ))}
             </Select>
             <Button
               leftIcon={<SearchIcon />}

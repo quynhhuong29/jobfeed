@@ -19,11 +19,17 @@ export const EMPLOYMENT_TYPE = [
 ];
 
 export const CAREER_LEVEL = [
-  "Student/Internship",
-  "Entry level",
-  "Experience",
-  "Team leader",
-  "Manager",
+  // "Student/Internship",
+  // "Entry level",
+  // "Experience",
+  // "Manager",
+  // "Team leader",
+
+  "Intern/Trainee",
+  "Entry-level/Junior",
+  "Mid-level/Experienced",
+  "Senior-level/Managerial",
+  "Executive/Leadership",
 ];
 
 export const PROVINCE_CITY = [

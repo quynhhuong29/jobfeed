@@ -39,6 +39,8 @@ import { useForm } from "react-hook-form";
 import { cloneDeep } from "lodash";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import * as yup from "yup";
+import ErrorMessage from "@/components/ErrorMessage";
 
 type FormValues = {
   profileTitle: string;
@@ -58,6 +60,26 @@ type FormValues = {
   hobbies: string;
   linkIn: string;
 };
+
+const schema = yup.object().shape({
+  profileTitle: yup.string().required("profileTitle is required"),
+  firstName: yup.string().required("firstName is required"),
+  lastName: yup.string(),
+  phone: yup.string(),
+  DOB: yup.string(),
+  country: yup.string(),
+  // languages: yup.array(),
+  email: yup.string().email("Email is invalid"),
+  city: yup.string(),
+  address: yup.string(),
+  overview: yup.string(),
+  // workExperience: yup.array(),
+  // skill: yup.array(),
+  // education: yup.array(),
+  hobbies: yup.string(),
+  linkIn: yup.string(),
+});
+type FormData = yup.InferType<typeof schema>;
 
 function CVBuilder() {
   const router = useRouter();
@@ -93,21 +115,25 @@ function CVBuilder() {
     },
   ]);
 
-  const { handleSubmit, register } = useForm<FormValues>({
-    defaultValues: {
-      profileTitle: "",
-      firstName: "",
-      lastName: "",
-      phone: "",
-      DOB: "",
-      country: "",
-      email: "",
-      city: "",
-      address: "",
-      overview: "",
-      hobbies: "",
-      linkIn: "",
-    },
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm<FormData>({
+    // defaultValues: {
+    //   profileTitle: "",
+    //   firstName: "",
+    //   lastName: "",
+    //   phone: "",
+    //   DOB: "",
+    //   country: "",
+    //   email: "",
+    //   city: "",
+    //   address: "",
+    //   overview: "",
+    //   hobbies: "",
+    //   linkIn: "",
+    // },
     mode: "onChange",
   });
 
@@ -234,7 +260,7 @@ function CVBuilder() {
     }
   };
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     let dataRequest;
     let img: any = [];
@@ -320,6 +346,9 @@ function CVBuilder() {
                     }}
                     {...register("profileTitle")}
                   />
+                  {errors.profileTitle && (
+                    <ErrorMessage message={errors.profileTitle.message} />
+                  )}
                 </AccordionPanel>
               </AccordionItem>
 
@@ -409,6 +438,11 @@ function CVBuilder() {
                                 }}
                                 {...register("firstName")}
                               />
+                              {errors.firstName && (
+                                <ErrorMessage
+                                  message={errors.firstName.message}
+                                />
+                              )}
                             </div>
                             <div className="flex flex-col">
                               <p className="text-gray-700">Last Name</p>

@@ -151,7 +151,6 @@ function Profile() {
   const [userAuth, setUserAuth] = useState<User>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [typeModalFollow, setTypeModalFollow] = useState("");
-  const [fileUpload, setFileUpload] = useState<any>();
 
   const isAuthenticated = useSelector(selectIsLoggedIn);
   const searchUserData = useSelector(selectSearchUser);
@@ -159,7 +158,7 @@ function Profile() {
   const loadingAuth = useSelector(selectAuth)?.isLoading;
   const savedPosts = useSelector(selectSavedPosts);
   const loadingSavedPosts = useSelector(selectLoadingPost);
-  const companyInfo = useSelector(selectCompany)?.infoCompany;
+  const companyInfo = useSelector(selectCompany);
   const industry = useSelector(selectIndustry);
 
   const modalRef = useRef<any>(null);
@@ -266,9 +265,9 @@ function Profile() {
 
   const handleUpdateCompanyInfo = async (data: any) => {
     setIsLoading(true);
-    if (!companyInfo) return;
+    if (!companyInfo?.infoCompany) return;
 
-    let dataRequest = companyInfo;
+    let dataRequest = companyInfo?.infoCompany;
     let img: any = [];
     if (logo) {
       img = await imageUpload([logo]);
@@ -276,13 +275,13 @@ function Profile() {
 
     if (data) {
       dataRequest = {
-        ...companyInfo,
+        ...companyInfo?.infoCompany,
         companyName: data.companyName,
         email: data.email,
         info: data.info,
         address: data.address,
         city: data.city,
-        logo: img[0]?.url || companyInfo.logo,
+        logo: img[0]?.url || companyInfo?.infoCompany.logo,
         phone: data.phone,
         website: data.website,
         taxCode: data.taxCode,
@@ -398,20 +397,20 @@ function Profile() {
   }, [dispatch, userInfoData?.data?.role, userInfoData?.data?._id]);
 
   useEffect(() => {
-    if (companyInfo) {
-      setValueCompany("companyName", companyInfo?.companyName);
-      setValueCompany("address", companyInfo?.address);
-      setValueCompany("city", companyInfo?.city);
-      setValueCompany("contactName", companyInfo?.contactName);
-      setValueCompany("industry", companyInfo?.industry);
-      setValueCompany("info", companyInfo?.info);
-      setValueCompany("website", companyInfo?.website);
-      setValueCompany("email", companyInfo?.email);
-      setValueCompany("phone", companyInfo?.phone);
-      setValueCompany("size", companyInfo?.size);
-      setValueCompany("taxCode", Number(companyInfo?.taxCode));
+    if (companyInfo?.infoCompany) {
+      setValueCompany("companyName", companyInfo?.infoCompany?.companyName);
+      setValueCompany("address", companyInfo?.infoCompany?.address);
+      setValueCompany("city", companyInfo?.infoCompany?.city);
+      setValueCompany("contactName", companyInfo?.infoCompany?.contactName);
+      setValueCompany("industry", companyInfo?.infoCompany?.industry);
+      setValueCompany("info", companyInfo?.infoCompany?.info);
+      setValueCompany("website", companyInfo?.infoCompany?.website);
+      setValueCompany("email", companyInfo?.infoCompany?.email);
+      setValueCompany("phone", companyInfo?.infoCompany?.phone);
+      setValueCompany("size", companyInfo?.infoCompany?.size);
+      setValueCompany("taxCode", Number(companyInfo?.infoCompany?.taxCode));
     }
-  }, [companyInfo, setValueCompany]);
+  }, [companyInfo?.infoCompany, setValueCompany]);
 
   return (
     <LayoutMain>
@@ -513,7 +512,7 @@ function Profile() {
                     src={
                       userInfoData?.data?.role !== "company"
                         ? userInfoData?.data?.avatar
-                        : companyInfo?.logo
+                        : companyInfo?.infoCompany?.logo
                     }
                   />
                 </WrapItem>
@@ -603,7 +602,7 @@ function Profile() {
                 </p>
                 <span className="break-words text-gray-600 text-[15px]">
                   {userInfoData?.data?.role === "company"
-                    ? companyInfo?.phone
+                    ? companyInfo?.infoCompany?.phone
                     : userInfoData?.data?.mobile}
                 </span>
               </div>
@@ -613,7 +612,7 @@ function Profile() {
                 </p>
                 <span className="break-words text-gray-600 text-[15px]">
                   {userInfoData?.data?.role === "company"
-                    ? companyInfo?.city
+                    ? companyInfo?.infoCompany?.city
                     : userInfoData?.data?.address}
                 </span>
               </div>
@@ -640,277 +639,292 @@ function Profile() {
               />
               <TabPanels>
                 <TabPanel paddingTop="24px" paddingBottom="24px">
-                  <h5 className="text-lg text-gray-700 mb-2 font-bold">
-                    About
-                  </h5>
-                  <p className="mt-6 mb-4 text-gray-600 text-base">
-                    {userInfoData?.data?.role === "company"
-                      ? companyInfo?.info
-                      : userInfoData?.data?.introduction}
-                  </p>
-
-                  {userInfoData?.data?.role !== "company" ? (
-                    <>
-                      <div className="mt-4">
-                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
-                          Education
-                        </h5>
-                        <div className="candidate-content relative mt-4 flex gap-7">
-                          <WrapItem>
-                            <Avatar
-                              name="B"
-                              src=""
-                              size="sm"
-                              backgroundColor="rgba(2,175,116,.15)"
-                              color="#02af74"
-                            />
-                          </WrapItem>
-                          <div>
-                            <h6 className="text-base text-gray-700 mb-1 font-semibold">
-                              BCA - Bachelor of Computer Applications
-                            </h6>
-                            <p className="text-[15px] text-gray-600 mb-2">
-                              International University - (2004 - 2010)
-                            </p>
-                            <p className="text-[15px] text-gray-600 mb-4">
-                              There are many variations of passages of
-                              available, but the majority alteration in some
-                              form. As a highly skilled and successfull product
-                              development and design specialist with more than 4
-                              Years of My experience.
-                            </p>
-                          </div>
-                        </div>
-                        <div className="candidate-content relative mt-4 flex gap-7">
-                          <WrapItem>
-                            <Avatar
-                              name="B"
-                              src=""
-                              size="sm"
-                              backgroundColor="rgba(2,175,116,.15)"
-                              color="#02af74"
-                            />
-                          </WrapItem>
-                          <div>
-                            <h6 className="text-base text-gray-700 mb-1 font-semibold">
-                              BCA - Bachelor of Computer Applications
-                            </h6>
-                            <p className="text-[15px] text-gray-600 mb-2">
-                              International University - (2004 - 2010)
-                            </p>
-                            <p className="text-[15px] text-gray-600 mb-4">
-                              There are many variations of passages of
-                              available, but the majority alteration in some
-                              form. As a highly skilled and successfull product
-                              development and design specialist with more than 4
-                              Years of My experience.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
-                          Experiences
-                        </h5>
-                        <div className="candidate-content relative mt-4 flex gap-7">
-                          <WrapItem>
-                            <Avatar
-                              name="B"
-                              src=""
-                              size="sm"
-                              backgroundColor="rgba(2,175,116,.15)"
-                              color="#02af74"
-                            />
-                          </WrapItem>
-                          <div>
-                            <h6 className="text-base text-gray-700 mb-1 font-semibold">
-                              BCA - Bachelor of Computer Applications
-                            </h6>
-                            <p className="text-[15px] text-gray-600 mb-2">
-                              International University - (2004 - 2010)
-                            </p>
-                            <p className="text-[15px] text-gray-600 mb-4">
-                              There are many variations of passages of
-                              available, but the majority alteration in some
-                              form. As a highly skilled and successfull product
-                              development and design specialist with more than 4
-                              Years of My experience.
-                            </p>
-                          </div>
-                        </div>
-                        <div className="candidate-content relative mt-4 flex gap-7">
-                          <WrapItem>
-                            <Avatar
-                              name="B"
-                              src=""
-                              size="sm"
-                              backgroundColor="rgba(2,175,116,.15)"
-                              color="#02af74"
-                            />
-                          </WrapItem>
-                          <div>
-                            <h6 className="text-base text-gray-700 mb-1 font-semibold">
-                              BCA - Bachelor of Computer Applications
-                            </h6>
-                            <p className="text-[15px] text-gray-600 mb-2">
-                              International University - (2004 - 2010)
-                            </p>
-                            <p className="text-[15px] text-gray-600 mb-4">
-                              There are many variations of passages of
-                              available, but the majority alteration in some
-                              form. As a highly skilled and successfull product
-                              development and design specialist with more than 4
-                              Years of My experience.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
-                          Skill
-                        </h5>
-                        <div className="flex items-center gap-1">
-                          <CustomBadge
-                            bgColor="rgba(31,134,239,.15)"
-                            color="#1f86ef"
-                            className="mt-2"
-                          >
-                            Cloud Management
-                          </CustomBadge>
-                          <CustomBadge
-                            bgColor="rgba(31,134,239,.15)"
-                            color="#1f86ef"
-                            className="mt-2"
-                          >
-                            Responsive Design
-                          </CustomBadge>
-                          <CustomBadge
-                            bgColor="rgba(31,134,239,.15)"
-                            color="#1f86ef"
-                            className="mt-2"
-                          >
-                            Network Architecture
-                          </CustomBadge>
-                          <CustomBadge
-                            bgColor="rgba(31,134,239,.15)"
-                            color="#1f86ef"
-                            className="mt-2"
-                          >
-                            PHP
-                          </CustomBadge>
-                          <CustomBadge
-                            bgColor="rgba(31,134,239,.15)"
-                            color="#1f86ef"
-                            className="mt-2"
-                          >
-                            Bootstrap
-                          </CustomBadge>
-                          <CustomBadge
-                            bgColor="rgba(31,134,239,.15)"
-                            color="#1f86ef"
-                            className="mt-2"
-                          >
-                            UI & UX Designer
-                          </CustomBadge>
-                        </div>
-                      </div>
-                      <div className="mt-4">
-                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
-                          Spoken languages
-                        </h5>
-                        <div className="flex items-center gap-1">
-                          <CustomBadge
-                            bgColor="rgba(4,133,101,.15)"
-                            color="#048565"
-                            className="mt-2"
-                          >
-                            English
-                          </CustomBadge>
-                          <CustomBadge
-                            bgColor="rgba(4,133,101,.15)"
-                            color="#048565"
-                            className="mt-2"
-                          >
-                            German
-                          </CustomBadge>
-                          <CustomBadge
-                            bgColor="rgba(4,133,101,.15)"
-                            color="#048565"
-                            className="mt-2"
-                          >
-                            French
-                          </CustomBadge>
-                        </div>
-                      </div>
-                    </>
+                  {userInfoData?.isLoading || companyInfo?.isLoading ? (
+                    <div className="flex items-center justify-center">
+                      <Spinner
+                        thickness="4px"
+                        speed="0.65s"
+                        emptyColor="gray.200"
+                        color="green"
+                        size="xl"
+                      />
+                    </div>
                   ) : (
                     <>
-                      <div className="mt-4">
-                        <h5 className="text-lg text-gray-700 mb-2 font-bold">
-                          Information
-                        </h5>
-                        <div className="grid grid-cols-2">
-                          {companyInfo?.companyName && (
-                            <div className="flex items-center py-2 gap-1">
-                              <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
-                                Company name:
-                              </p>
-                              <span className="break-words text-gray-600 text-base overflow-hidden">
-                                {companyInfo?.companyName}
-                              </span>
+                      <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                        About
+                      </h5>
+                      <p className="mt-6 mb-4 text-gray-600 text-base">
+                        {userInfoData?.data?.role === "company"
+                          ? companyInfo?.infoCompany?.info
+                          : userInfoData?.data?.introduction}
+                      </p>
+
+                      {userInfoData?.data?.role !== "company" ? (
+                        <>
+                          <div className="mt-4">
+                            <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                              Education
+                            </h5>
+                            <div className="candidate-content relative mt-4 flex gap-7">
+                              <WrapItem>
+                                <Avatar
+                                  name="B"
+                                  src=""
+                                  size="sm"
+                                  backgroundColor="rgba(2,175,116,.15)"
+                                  color="#02af74"
+                                />
+                              </WrapItem>
+                              <div>
+                                <h6 className="text-base text-gray-700 mb-1 font-semibold">
+                                  BCA - Bachelor of Computer Applications
+                                </h6>
+                                <p className="text-[15px] text-gray-600 mb-2">
+                                  International University - (2004 - 2010)
+                                </p>
+                                <p className="text-[15px] text-gray-600 mb-4">
+                                  There are many variations of passages of
+                                  available, but the majority alteration in some
+                                  form. As a highly skilled and successfull
+                                  product development and design specialist with
+                                  more than 4 Years of My experience.
+                                </p>
+                              </div>
                             </div>
-                          )}
-                          {companyInfo?.size && (
-                            <div className="flex items-center py-2 gap-1">
-                              <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
-                                Employees:
-                              </p>
-                              <span className="break-words text-gray-600 text-base overflow-hidden">
-                                {companyInfo?.size}
-                              </span>
+                            <div className="candidate-content relative mt-4 flex gap-7">
+                              <WrapItem>
+                                <Avatar
+                                  name="B"
+                                  src=""
+                                  size="sm"
+                                  backgroundColor="rgba(2,175,116,.15)"
+                                  color="#02af74"
+                                />
+                              </WrapItem>
+                              <div>
+                                <h6 className="text-base text-gray-700 mb-1 font-semibold">
+                                  BCA - Bachelor of Computer Applications
+                                </h6>
+                                <p className="text-[15px] text-gray-600 mb-2">
+                                  International University - (2004 - 2010)
+                                </p>
+                                <p className="text-[15px] text-gray-600 mb-4">
+                                  There are many variations of passages of
+                                  available, but the majority alteration in some
+                                  form. As a highly skilled and successfull
+                                  product development and design specialist with
+                                  more than 4 Years of My experience.
+                                </p>
+                              </div>
                             </div>
-                          )}
-                          {companyInfo?.address && (
-                            <div className="flex items-center py-2 gap-1">
-                              <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
-                                Address:
-                              </p>
-                              <span className="break-words text-gray-600 text-base overflow-hidden">
-                                {companyInfo?.address}
-                              </span>
+                          </div>
+
+                          <div className="mt-4">
+                            <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                              Experiences
+                            </h5>
+                            <div className="candidate-content relative mt-4 flex gap-7">
+                              <WrapItem>
+                                <Avatar
+                                  name="B"
+                                  src=""
+                                  size="sm"
+                                  backgroundColor="rgba(2,175,116,.15)"
+                                  color="#02af74"
+                                />
+                              </WrapItem>
+                              <div>
+                                <h6 className="text-base text-gray-700 mb-1 font-semibold">
+                                  BCA - Bachelor of Computer Applications
+                                </h6>
+                                <p className="text-[15px] text-gray-600 mb-2">
+                                  International University - (2004 - 2010)
+                                </p>
+                                <p className="text-[15px] text-gray-600 mb-4">
+                                  There are many variations of passages of
+                                  available, but the majority alteration in some
+                                  form. As a highly skilled and successfull
+                                  product development and design specialist with
+                                  more than 4 Years of My experience.
+                                </p>
+                              </div>
                             </div>
-                          )}
-                          {companyInfo?.city && (
-                            <div className="flex items-center py-2 gap-1">
-                              <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
-                                City:
-                              </p>
-                              <span className="break-words text-gray-600 text-base overflow-hidden">
-                                {companyInfo?.city}
-                              </span>
+                            <div className="candidate-content relative mt-4 flex gap-7">
+                              <WrapItem>
+                                <Avatar
+                                  name="B"
+                                  src=""
+                                  size="sm"
+                                  backgroundColor="rgba(2,175,116,.15)"
+                                  color="#02af74"
+                                />
+                              </WrapItem>
+                              <div>
+                                <h6 className="text-base text-gray-700 mb-1 font-semibold">
+                                  BCA - Bachelor of Computer Applications
+                                </h6>
+                                <p className="text-[15px] text-gray-600 mb-2">
+                                  International University - (2004 - 2010)
+                                </p>
+                                <p className="text-[15px] text-gray-600 mb-4">
+                                  There are many variations of passages of
+                                  available, but the majority alteration in some
+                                  form. As a highly skilled and successfull
+                                  product development and design specialist with
+                                  more than 4 Years of My experience.
+                                </p>
+                              </div>
                             </div>
-                          )}
-                          {companyInfo?.website && (
-                            <div className="flex items-center py-2 gap-1">
-                              <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
-                                Website:
-                              </p>
-                              <a
-                                href={companyInfo?.website}
-                                target="_blank"
-                                className="break-words text-gray-600 text-base overflow-hidden"
+                          </div>
+
+                          <div className="mt-4">
+                            <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                              Skill
+                            </h5>
+                            <div className="flex items-center gap-1">
+                              <CustomBadge
+                                bgColor="rgba(31,134,239,.15)"
+                                color="#1f86ef"
+                                className="mt-2"
                               >
-                                {companyInfo?.website}
-                              </a>
+                                Cloud Management
+                              </CustomBadge>
+                              <CustomBadge
+                                bgColor="rgba(31,134,239,.15)"
+                                color="#1f86ef"
+                                className="mt-2"
+                              >
+                                Responsive Design
+                              </CustomBadge>
+                              <CustomBadge
+                                bgColor="rgba(31,134,239,.15)"
+                                color="#1f86ef"
+                                className="mt-2"
+                              >
+                                Network Architecture
+                              </CustomBadge>
+                              <CustomBadge
+                                bgColor="rgba(31,134,239,.15)"
+                                color="#1f86ef"
+                                className="mt-2"
+                              >
+                                PHP
+                              </CustomBadge>
+                              <CustomBadge
+                                bgColor="rgba(31,134,239,.15)"
+                                color="#1f86ef"
+                                className="mt-2"
+                              >
+                                Bootstrap
+                              </CustomBadge>
+                              <CustomBadge
+                                bgColor="rgba(31,134,239,.15)"
+                                color="#1f86ef"
+                                className="mt-2"
+                              >
+                                UI & UX Designer
+                              </CustomBadge>
                             </div>
-                          )}
-                        </div>
-                      </div>
+                          </div>
+                          <div className="mt-4">
+                            <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                              Spoken languages
+                            </h5>
+                            <div className="flex items-center gap-1">
+                              <CustomBadge
+                                bgColor="rgba(4,133,101,.15)"
+                                color="#048565"
+                                className="mt-2"
+                              >
+                                English
+                              </CustomBadge>
+                              <CustomBadge
+                                bgColor="rgba(4,133,101,.15)"
+                                color="#048565"
+                                className="mt-2"
+                              >
+                                German
+                              </CustomBadge>
+                              <CustomBadge
+                                bgColor="rgba(4,133,101,.15)"
+                                color="#048565"
+                                className="mt-2"
+                              >
+                                French
+                              </CustomBadge>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="mt-4">
+                            <h5 className="text-lg text-gray-700 mb-2 font-bold">
+                              Information
+                            </h5>
+                            <div className="grid grid-cols-2">
+                              {companyInfo?.infoCompany?.companyName && (
+                                <div className="flex items-center py-2 gap-1">
+                                  <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
+                                    Company name:
+                                  </p>
+                                  <span className="break-words text-gray-600 text-base overflow-hidden">
+                                    {companyInfo?.infoCompany?.companyName}
+                                  </span>
+                                </div>
+                              )}
+                              {companyInfo?.infoCompany?.size && (
+                                <div className="flex items-center py-2 gap-1">
+                                  <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
+                                    Employees:
+                                  </p>
+                                  <span className="break-words text-gray-600 text-base overflow-hidden">
+                                    {companyInfo?.infoCompany?.size}
+                                  </span>
+                                </div>
+                              )}
+                              {companyInfo?.infoCompany?.address && (
+                                <div className="flex items-center py-2 gap-1">
+                                  <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
+                                    Address:
+                                  </p>
+                                  <span className="break-words text-gray-600 text-base overflow-hidden">
+                                    {companyInfo?.infoCompany?.address}
+                                  </span>
+                                </div>
+                              )}
+                              {companyInfo?.infoCompany?.city && (
+                                <div className="flex items-center py-2 gap-1">
+                                  <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
+                                    City:
+                                  </p>
+                                  <span className="break-words text-gray-600 text-base overflow-hidden">
+                                    {companyInfo?.infoCompany?.city}
+                                  </span>
+                                </div>
+                              )}
+                              {companyInfo?.infoCompany?.website && (
+                                <div className="flex items-center py-2 gap-1">
+                                  <p className="min-w-[120px] text-gray-700 text-base font-medium capitalize">
+                                    Website:
+                                  </p>
+                                  <a
+                                    href={companyInfo?.infoCompany?.website}
+                                    target="_blank"
+                                    className="break-words text-gray-600 text-base overflow-hidden"
+                                  >
+                                    {companyInfo?.infoCompany?.website}
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </>
                   )}
                 </TabPanel>
+
                 <TabPanel>
                   <NewsFeed isPostDetails userId={userData?._id || ""} />
                 </TabPanel>
@@ -961,11 +975,11 @@ function Profile() {
                                 <WrapItem>
                                   <Avatar
                                     size="2xl"
-                                    name={companyInfo?.companyName}
+                                    name={companyInfo?.infoCompany?.companyName}
                                     src={
                                       logo
                                         ? URL.createObjectURL(logo)
-                                        : companyInfo?.logo
+                                        : companyInfo?.infoCompany?.logo
                                     }
                                   />
                                 </WrapItem>
